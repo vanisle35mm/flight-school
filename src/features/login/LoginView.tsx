@@ -1,5 +1,6 @@
 import { LogIn, Plane, UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type KeyboardEvent } from 'react';
+import { isAdminPasswordConfigured, verifyAdminPassword } from '../../lib/adminAuth';
 import { activateUserData, addGroundSchoolUser, renameGroundSchoolUser, syncActiveUserData } from '../../lib/storage';
 import type { GroundSchoolData } from '../../types';
 
@@ -8,8 +9,10 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
   const users = Object.values(synced.users);
   const [studentName, setStudentName] = useState('');
   const [adminName, setAdminName] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [newFirstName, setNewFirstName] = useState('');
   const [message, setMessage] = useState('');
+  const [checkingAdmin, setCheckingAdmin] = useState(false);
 
   const loginAs = (userId: string) => {
     onDataChange(activateUserData(synced, userId));
@@ -30,7 +33,31 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
     loginAs(user.id);
   };
 
-  const loginAdmin = () => {
+  const loginAdmin = async () => {
+    if (!isAdminPasswordConfigured()) {
+      setMessage('Admin password is not configured yet.');
+      return;
+    }
+
+    if (!adminName.trim()) {
+      setMessage('Enter the admin first name.');
+      return;
+    }
+
+    if (!adminPassword) {
+      setMessage('Enter the admin password.');
+      return;
+    }
+
+    setCheckingAdmin(true);
+    const passwordOk = await verifyAdminPassword(adminPassword);
+    setCheckingAdmin(false);
+
+    if (!passwordOk) {
+      setMessage('Admin password is incorrect.');
+      return;
+    }
+
     const user = findUserByName(adminName, 'admin');
     if (user) {
       loginAs(user.id);
@@ -50,6 +77,10 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
       setMessage('Admin profile not found.');
       return;
     }
+  };
+
+  const adminLoginOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') void loginAdmin();
   };
 
   const createStudent = () => {
@@ -74,8 +105,11 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
         </div>
         <div className="login-user-card static">
           <div><strong>Admin login</strong><span>Admin users can open the full user console.</span></div>
-          <input value={adminName} onChange={(event) => { setAdminName(event.target.value); setMessage(''); }} placeholder="Admin first name" />
-          <button onClick={loginAdmin}><LogIn size={17} />Admin</button>
+          <div className="login-field-stack">
+            <input value={adminName} onChange={(event) => { setAdminName(event.target.value); setMessage(''); }} onKeyDown={adminLoginOnEnter} placeholder="Admin first name" />
+            <input value={adminPassword} onChange={(event) => { setAdminPassword(event.target.value); setMessage(''); }} onKeyDown={adminLoginOnEnter} placeholder="Admin password" type="password" autoComplete="current-password" />
+          </div>
+          <button onClick={() => void loginAdmin()} disabled={checkingAdmin}><LogIn size={17} />{checkingAdmin ? 'Checking' : 'Admin'}</button>
         </div>
       </div>
 

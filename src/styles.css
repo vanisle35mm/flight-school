@@ -1089,6 +1089,11 @@ label {
   align-items: end;
 }
 
+.login-field-stack {
+  display: grid;
+  gap: 8px;
+}
+
 .login-user-card.static button {
   display: inline-flex;
   align-items: center;

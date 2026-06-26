@@ -22,6 +22,7 @@ Create `.env.local` from `.env.example`:
 ```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+VITE_ADMIN_PASSWORD_HASH=
 ```
 
 Run `supabase/schema.sql` in the Supabase SQL Editor before using cloud sync.
@@ -35,3 +36,4 @@ Vercel settings:
 - Environment variables:
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_ANON_KEY`
+  - `VITE_ADMIN_PASSWORD_HASH`

@@ -29,6 +29,7 @@ This creates `.env.local`:
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_ADMIN_PASSWORD_HASH=your-admin-password-sha256-hash
 ```
 
 5. Restart the app.
@@ -54,6 +55,7 @@ Environment variables to add in the hosting dashboard:
 ```text
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
+VITE_ADMIN_PASSWORD_HASH
 ```
 
 ## Important Security Upgrade
