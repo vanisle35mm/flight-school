@@ -1,5 +1,10 @@
 const configuredAdminPasswordHash = (import.meta.env.VITE_ADMIN_PASSWORD_HASH ?? '').trim().toLowerCase();
 
+type AdminPasswordResult = {
+  ok: boolean;
+  configured: boolean;
+};
+
 const hashPassword = async (password: string) => {
   const bytes = new TextEncoder().encode(password);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -8,9 +13,26 @@ const hashPassword = async (password: string) => {
     .join('');
 };
 
-export const isAdminPasswordConfigured = () => configuredAdminPasswordHash.length > 0;
+export const isAdminPasswordConfigured = () => true;
 
-export const verifyAdminPassword = async (password: string) => {
-  if (!isAdminPasswordConfigured() || !password || !crypto?.subtle) return false;
-  return hashPassword(password) === configuredAdminPasswordHash;
+export const verifyAdminPassword = async (password: string): Promise<AdminPasswordResult> => {
+  if (!password) return { ok: false, configured: true };
+
+  try {
+    const response = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+
+    const result = await response.json() as Partial<AdminPasswordResult>;
+    if (typeof result.ok === 'boolean' && typeof result.configured === 'boolean') {
+      return { ok: result.ok, configured: result.configured };
+    }
+  } catch {
+    // Local Vite dev does not run Vercel functions. Fall back to the older local hash path.
+  }
+
+  if (!configuredAdminPasswordHash || !crypto?.subtle) return { ok: false, configured: false };
+  return { ok: await hashPassword(password) === configuredAdminPasswordHash, configured: true };
 };

@@ -50,10 +50,15 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
     }
 
     setCheckingAdmin(true);
-    const passwordOk = await verifyAdminPassword(adminPassword);
+    const passwordResult = await verifyAdminPassword(adminPassword);
     setCheckingAdmin(false);
 
-    if (!passwordOk) {
+    if (!passwordResult.configured) {
+      setMessage('Admin password is not configured yet.');
+      return;
+    }
+
+    if (!passwordResult.ok) {
       setMessage('Admin password is incorrect.');
       return;
     }
