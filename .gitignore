@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.local
+*.log
+*.tsbuildinfo
+tools
+PUBLIC-TEST-URL.txt
+outputs
+work
+restored-groundschool-v496.json
+Restore-FlightSchool.html
+cloudflared-tunnel.log
+vite-dev*.log
