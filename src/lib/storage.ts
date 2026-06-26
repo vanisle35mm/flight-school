@@ -36,10 +36,11 @@ const normalizeTodos = (value: unknown): Todo[] => Array.isArray(value) ? value.
   return { text: typeof item.text === 'string' ? item.text : '', done: typeof item.done === 'boolean' ? item.done : false, dueDate: typeof item.dueDate === 'string' ? item.dueDate : '' };
 }) : [];
 
-export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot', role: GroundSchoolUser['role'] = 'student'): GroundSchoolUser => ({
+export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot', role: GroundSchoolUser['role'] = 'student', passwordHash?: string): GroundSchoolUser => ({
   id,
   firstName,
   role,
+  ...(passwordHash ? { passwordHash } : {}),
   classes: [],
   todos: [],
   flashcardProgress: {}
@@ -101,12 +102,25 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
   };
 };
 
-export const addGroundSchoolUser = (data: GroundSchoolData, firstName: string, role: GroundSchoolUser['role'] = 'student', makeActive = true): GroundSchoolData => {
+export const addGroundSchoolUser = (data: GroundSchoolData, firstName: string, role: GroundSchoolUser['role'] = 'student', makeActive = true, passwordHash?: string): GroundSchoolData => {
   const synced = syncActiveUserData(data);
   const id = `user_${Date.now()}`;
-  const nextUser = createGroundSchoolUser(id, firstName.trim() || 'Pilot', role);
+  const nextUser = createGroundSchoolUser(id, firstName.trim() || 'Pilot', role, passwordHash);
   const nextData = { ...synced, users: { ...synced.users, [id]: nextUser } };
   return makeActive ? activateUserData(nextData, id) : nextData;
+};
+
+export const setGroundSchoolUserPasswordHash = (data: GroundSchoolData, userId: string, passwordHash: string): GroundSchoolData => {
+  const synced = syncActiveUserData(data);
+  const user = synced.users[userId];
+  if (!user || user.role !== 'student') return synced;
+  return {
+    ...synced,
+    users: {
+      ...synced.users,
+      [userId]: { ...user, passwordHash }
+    }
+  };
 };
 
 export const renameGroundSchoolUser = (data: GroundSchoolData, userId: string, firstName: string): GroundSchoolData => {
@@ -171,6 +185,7 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       id: safeId,
       firstName: typeof item.firstName === 'string' && item.firstName.trim() ? item.firstName : 'Pilot',
       role: item.role === 'admin' || item.role === 'student' ? item.role : fallbackRole,
+      ...(typeof item.passwordHash === 'string' && item.passwordHash ? { passwordHash: item.passwordHash } : {}),
       classes: normalizeClasses(item.classes),
       todos: normalizeTodos(item.todos),
       flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress)

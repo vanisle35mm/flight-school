@@ -6,6 +6,7 @@ export type GroundSchoolUser = {
   id: string;
   firstName: string;
   role: 'admin' | 'student';
+  passwordHash?: string;
   classes: ClassSession[];
   todos: Todo[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
