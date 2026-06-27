@@ -1,11 +1,12 @@
 import { LogIn, Plane } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { isAdminPasswordConfigured, verifyAdminPassword } from '../../lib/adminAuth';
+import { signInSecurely } from '../../lib/secureAuth';
 import { verifyStudentPassword } from '../../lib/studentAuth';
 import { activateUserData, renameGroundSchoolUser, syncActiveUserData } from '../../lib/storage';
 import type { GroundSchoolData } from '../../types';
 
-export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onLogin: () => void }) => {
+export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onLogin: () => void; onSecureLogin: () => Promise<boolean> }) => {
   const synced = syncActiveUserData(data);
   const users = Object.values(synced.users);
   const [studentName, setStudentName] = useState('');
@@ -27,21 +28,38 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
   };
 
   const loginStudent = async () => {
-    const user = findUserByName(studentName, 'student');
-    if (!user) {
-      setMessage('Student profile not found. Check the name or ask the admin to create your login.');
-      return;
-    }
+    if (!studentName.trim()) return setMessage('Enter your first name.');
     if (!studentPassword) {
       setMessage('Enter your student password.');
       return;
     }
+
+    setCheckingStudent(true);
+    const secureResult = await signInSecurely(studentName, studentPassword, 'student');
+    if (secureResult.mode === 'secure') {
+      const loaded = secureResult.ok ? await onSecureLogin() : false;
+      setCheckingStudent(false);
+      if (secureResult.ok && loaded) return;
+      setMessage(secureResult.reason === 'password-reset-required'
+        ? 'Your admin needs to set your new secure password in the User Console.'
+        : secureResult.reason === 'unavailable' || (secureResult.ok && !loaded)
+          ? 'Secure student login is temporarily unavailable. Please try again.'
+          : 'Student name or password is incorrect.');
+      return;
+    }
+
+    const user = findUserByName(studentName, 'student');
+    if (!user) {
+      setCheckingStudent(false);
+      setMessage('Student profile not found. Check the name or ask the admin to create your login.');
+      return;
+    }
     if (!user.passwordHash) {
+      setCheckingStudent(false);
       setMessage('This student needs a password. Ask the admin to set one in the User Console.');
       return;
     }
 
-    setCheckingStudent(true);
     const result = await verifyStudentPassword(studentName, studentPassword, user);
     setCheckingStudent(false);
 
@@ -62,11 +80,6 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
   };
 
   const loginAdmin = async () => {
-    if (!isAdminPasswordConfigured()) {
-      setMessage('Admin password is not configured yet.');
-      return;
-    }
-
     if (!adminName.trim()) {
       setMessage('Enter the admin first name.');
       return;
@@ -78,6 +91,23 @@ export const LoginView = ({ data, onDataChange, onLogin }: { data: GroundSchoolD
     }
 
     setCheckingAdmin(true);
+    const secureResult = await signInSecurely(adminName, adminPassword, 'admin');
+    if (secureResult.mode === 'secure') {
+      const loaded = secureResult.ok ? await onSecureLogin() : false;
+      setCheckingAdmin(false);
+      if (secureResult.ok && loaded) return;
+      setMessage(secureResult.reason === 'unavailable' || (secureResult.ok && !loaded)
+        ? 'Secure admin login is temporarily unavailable. Please try again.'
+        : 'Admin name or password is incorrect.');
+      return;
+    }
+
+    if (!isAdminPasswordConfigured()) {
+      setCheckingAdmin(false);
+      setMessage('Admin password is not configured yet.');
+      return;
+    }
+
     const passwordResult = await verifyAdminPassword(adminPassword);
     setCheckingAdmin(false);
 

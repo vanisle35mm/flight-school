@@ -223,6 +223,7 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       firstName: typeof item.firstName === 'string' && item.firstName.trim() ? item.firstName : 'Pilot',
       role: item.role === 'admin' || item.role === 'student' ? item.role : fallbackRole,
       ...(typeof item.passwordHash === 'string' && item.passwordHash ? { passwordHash: item.passwordHash } : {}),
+      ...(typeof item.requiresPasswordReset === 'boolean' ? { requiresPasswordReset: item.requiresPasswordReset } : {}),
       classes: normalizeClasses(item.classes),
       todos: normalizeTodos(item.todos),
       flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress),

@@ -1,10 +1,11 @@
 import { Eye, KeyRound, Plus, Trash2, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 import { hashPassword } from '../../lib/passwordHash';
+import { runSecureAdminAction } from '../../lib/secureAuth';
 import { addGroundSchoolUser, deleteGroundSchoolUser, renameGroundSchoolUser, setGroundSchoolUserPasswordHash, syncActiveUserData } from '../../lib/storage';
 import type { GroundSchoolData } from '../../types';
 
-export const AdminConsoleView = ({ data, onDataChange, onViewAsUser }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onViewAsUser: (userId: string) => void }) => {
+export const AdminConsoleView = ({ data, onDataChange, onViewAsUser, secureMode, onSecureReload }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onViewAsUser: (userId: string) => void; secureMode: boolean; onSecureReload: () => Promise<void> }) => {
   const synced = syncActiveUserData(data);
   const users = Object.values(synced.users);
   const adminCount = users.filter((user) => user.role === 'admin').length;
@@ -28,14 +29,20 @@ export const AdminConsoleView = ({ data, onDataChange, onViewAsUser }: { data: G
       return;
     }
 
-    const passwordHash = await hashPassword(newPassword);
-    onDataChange(addGroundSchoolUser(synced, newName, 'student', false, passwordHash));
+    if (secureMode) {
+      const result = await runSecureAdminAction({ action: 'create', firstName: newName.trim(), password: newPassword });
+      if (!result.ok) return setMessage(result.reason ?? 'Student login could not be created.');
+      await onSecureReload();
+    } else {
+      const passwordHash = await hashPassword(newPassword);
+      onDataChange(addGroundSchoolUser(synced, newName, 'student', false, passwordHash));
+    }
     setMessage(`${newName.trim()}'s login was created.`);
     setNewName('');
     setNewPassword('');
   };
 
-  const renameUser = (userId: string) => {
+  const renameUser = async (userId: string) => {
     const nextName = (draftNames[userId] ?? '').trim();
     if (!nextName) {
       setMessage('First name cannot be blank.');
@@ -45,15 +52,28 @@ export const AdminConsoleView = ({ data, onDataChange, onViewAsUser }: { data: G
       setMessage('That first name is already in use. Login names must be unique.');
       return;
     }
-    onDataChange(renameGroundSchoolUser(synced, userId, nextName));
+    if (secureMode) {
+      const result = await runSecureAdminAction({ action: 'rename', userId, firstName: nextName });
+      if (!result.ok) return setMessage(result.reason ?? 'Name could not be updated.');
+      await onSecureReload();
+    } else {
+      onDataChange(renameGroundSchoolUser(synced, userId, nextName));
+    }
     setMessage(`${nextName}'s name was updated.`);
   };
 
-  const deleteUser = (userId: string) => {
+  const deleteUser = async (userId: string) => {
     const user = synced.users[userId];
     if (!user) return;
     const confirmed = window.confirm(`Delete ${user.firstName}'s profile? Their lessons, notes, cards, and tasks will be removed.`);
-    if (confirmed) onDataChange(deleteGroundSchoolUser(synced, userId));
+    if (!confirmed) return;
+    if (secureMode) {
+      const result = await runSecureAdminAction({ action: 'delete', userId });
+      if (!result.ok) return setMessage(result.reason ?? 'Student could not be deleted.');
+      await onSecureReload();
+    } else {
+      onDataChange(deleteGroundSchoolUser(synced, userId));
+    }
   };
 
   const resetPassword = async (userId: string) => {
@@ -65,8 +85,14 @@ export const AdminConsoleView = ({ data, onDataChange, onViewAsUser }: { data: G
       return;
     }
 
-    const passwordHash = await hashPassword(password);
-    onDataChange(setGroundSchoolUserPasswordHash(synced, userId, passwordHash));
+    if (secureMode) {
+      const result = await runSecureAdminAction({ action: 'reset-password', userId, password });
+      if (!result.ok) return setMessage(result.reason ?? 'Password could not be updated.');
+      await onSecureReload();
+    } else {
+      const passwordHash = await hashPassword(password);
+      onDataChange(setGroundSchoolUserPasswordHash(synced, userId, passwordHash));
+    }
     setResetPasswords({ ...resetPasswords, [userId]: '' });
     setMessage(`${user.firstName}'s password was updated.`);
   };
@@ -114,7 +140,7 @@ export const AdminConsoleView = ({ data, onDataChange, onViewAsUser }: { data: G
           </div>
           {user.role === 'student' && <div className="admin-password-reset">
             <label>
-              {user.passwordHash ? 'Reset password' : 'Set first password'}
+              {(secureMode ? !user.requiresPasswordReset : Boolean(user.passwordHash)) ? 'Reset password' : 'Set first password'}
               <input
                 value={resetPasswords[user.id] ?? ''}
                 onChange={(event) => { setResetPasswords({ ...resetPasswords, [user.id]: event.target.value }); setMessage(''); }}
@@ -123,12 +149,12 @@ export const AdminConsoleView = ({ data, onDataChange, onViewAsUser }: { data: G
                 autoComplete="new-password"
               />
             </label>
-            <button onClick={() => void resetPassword(user.id)}><KeyRound size={16} />{user.passwordHash ? 'Reset' : 'Set Password'}</button>
+            <button onClick={() => void resetPassword(user.id)}><KeyRound size={16} />{(secureMode ? !user.requiresPasswordReset : Boolean(user.passwordHash)) ? 'Reset' : 'Set Password'}</button>
           </div>}
           <div className="button-row">
-            <button onClick={() => renameUser(user.id)}>Save Name</button>
+            <button onClick={() => void renameUser(user.id)}>Save Name</button>
             {user.role === 'student' && <button onClick={() => onViewAsUser(user.id)}><Eye size={16} />View as User</button>}
-            <button className="danger-button" disabled={deleteBlocked} title={deleteBlocked ? 'Keep at least one user and one admin.' : undefined} onClick={() => deleteUser(user.id)}><Trash2 size={16} />Delete</button>
+            <button className="danger-button" disabled={deleteBlocked} title={deleteBlocked ? 'Keep at least one user and one admin.' : undefined} onClick={() => void deleteUser(user.id)}><Trash2 size={16} />Delete</button>
           </div>
         </article>;
       })}

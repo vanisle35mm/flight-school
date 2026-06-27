@@ -22,11 +22,12 @@ Create `.env.local` from `.env.example`:
 ```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+SUPABASE_SECRET_KEY=
 VITE_ADMIN_PASSWORD_HASH=
 ADMIN_PASSWORD=
 ```
 
-Run `supabase/schema.sql` in the Supabase SQL Editor before using cloud sync.
+Run `supabase/secure-auth-migration.sql` in the Supabase SQL Editor to enable Supabase Auth, per-user storage, and Row Level Security. See `SECURE_SETUP.md` for the activation steps.
 
 ## Deploy
 
@@ -37,4 +38,5 @@ Vercel settings:
 - Environment variables:
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_ANON_KEY`
+  - `SUPABASE_SECRET_KEY`
   - `ADMIN_PASSWORD`

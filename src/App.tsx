@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Shell } from './components/Shell';
+import { AccountView } from './features/account/AccountView';
 import { AdminConsoleView } from './features/admin/AdminConsoleView';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { DashboardEditView } from './features/dashboard/DashboardEditView';
@@ -10,8 +11,9 @@ import { TasksView } from './features/tasks/TasksView';
 import { LegacyImportView } from './features/import/LegacyImportView';
 import { LoginView } from './features/login/LoginView';
 import { WeatherPanel } from './features/weather/WeatherPanel';
-import { isCloudStorageConfigured, loadCloudGroundSchoolData, saveCloudGroundSchoolData, type CloudSyncStatus } from './lib/cloudStorage';
-import { activateUserData, loadGroundSchoolData, saveGroundSchoolData } from './lib/storage';
+import { isCloudStorageConfigured, loadCloudGroundSchoolData, loadSecureGroundSchoolData, saveCloudGroundSchoolData, saveSecureGroundSchoolData, type CloudSyncStatus } from './lib/cloudStorage';
+import { signOutSecurely } from './lib/secureAuth';
+import { activateUserData, createEmptyGroundSchoolData, loadGroundSchoolData, saveGroundSchoolData, STORAGE_KEY } from './lib/storage';
 import type { GroundSchoolData, ViewId } from './types';
 
 const getDataWeight = (data: GroundSchoolData) => {
@@ -32,6 +34,8 @@ export const App = () => {
   const initialLocalData = useRef(data);
   const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>(() => isCloudStorageConfigured() ? 'loading' : 'local');
   const [cloudReady, setCloudReady] = useState(() => !isCloudStorageConfigured());
+  const [storageMode, setStorageMode] = useState<'detecting' | 'legacy' | 'secure'>(() => isCloudStorageConfigured() ? 'detecting' : 'legacy');
+  const [secureAuthUserId, setSecureAuthUserId] = useState('');
   const lastSavedCloudPayload = useRef('');
 
   useEffect(() => {
@@ -43,37 +47,54 @@ export const App = () => {
     }
 
     setCloudStatus('loading');
-    loadCloudGroundSchoolData()
-      .then((cloudData) => {
-        if (cancelled) return;
-        if (cloudData && getDataWeight(cloudData) >= getDataWeight(initialLocalData.current)) {
-          setData(cloudData);
-        }
-        setCloudStatus('online');
-        setCloudReady(true);
-      })
-      .catch((error) => {
-        console.error('Flight School cloud load failed.', error);
-        if (!cancelled) {
-          setCloudStatus('error');
+    const initializeCloud = async () => {
+      try {
+        const secureData = await loadSecureGroundSchoolData();
+        if (secureData) {
+          if (cancelled) return;
+          setData(secureData);
+          setStorageMode('secure');
+          setSecureAuthUserId(secureData.activeUserId);
+          setIsLoggedIn(true);
+          setCloudStatus('online');
           setCloudReady(true);
+          return;
         }
-      });
+      } catch (error) {
+        console.warn('Secure Flight School session could not be restored.', error);
+      }
+
+      try {
+        const cloudData = await loadCloudGroundSchoolData();
+        if (cancelled) return;
+        if (cloudData && getDataWeight(cloudData) >= getDataWeight(initialLocalData.current)) setData(cloudData);
+        setCloudStatus('online');
+      } catch (error) {
+        console.warn('Legacy Flight School cloud load is unavailable.', error);
+        if (!cancelled) setCloudStatus('error');
+      }
+      if (!cancelled) {
+        setStorageMode('legacy');
+        setCloudReady(true);
+      }
+    };
+    void initializeCloud();
 
     return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
-    saveGroundSchoolData(data);
+    if (storageMode === 'legacy') saveGroundSchoolData(data);
 
-    if (!cloudReady || !isCloudStorageConfigured()) return;
-    const payload = JSON.stringify(data);
+    if (!cloudReady || storageMode === 'detecting' || !isCloudStorageConfigured()) return;
+    const payload = `${storageMode}:${JSON.stringify(data)}`;
     if (payload === lastSavedCloudPayload.current) return;
     lastSavedCloudPayload.current = payload;
     setCloudStatus('syncing');
 
     const timeoutId = window.setTimeout(() => {
-      saveCloudGroundSchoolData(data)
+      const saveOperation = storageMode === 'secure' ? saveSecureGroundSchoolData(data) : saveCloudGroundSchoolData(data);
+      saveOperation
         .then(() => setCloudStatus('online'))
         .catch((error) => {
           console.error('Flight School cloud save failed.', error);
@@ -82,23 +103,64 @@ export const App = () => {
     }, 700);
 
     return () => window.clearTimeout(timeoutId);
-  }, [cloudReady, data]);
+  }, [cloudReady, data, storageMode]);
+
+  const finishSecureLogin = async () => {
+    try {
+      setCloudStatus('loading');
+      const secureData = await loadSecureGroundSchoolData();
+      if (!secureData) return false;
+      setData(secureData);
+      setStorageMode('secure');
+      setSecureAuthUserId(secureData.activeUserId);
+      setCloudReady(true);
+      setCloudStatus('online');
+      setIsLoggedIn(true);
+      window.localStorage.removeItem(STORAGE_KEY);
+      return true;
+    } catch (error) {
+      console.error('Secure Flight School data load failed.', error);
+      setCloudStatus('error');
+      return false;
+    }
+  };
+
+  const reloadSecureData = async () => {
+    const secureData = await loadSecureGroundSchoolData();
+    if (secureData) setData(secureData);
+  };
+
+  const logout = () => {
+    if (storageMode === 'secure') {
+      void signOutSecurely();
+      setData(createEmptyGroundSchoolData());
+      window.localStorage.removeItem(STORAGE_KEY);
+      setStorageMode('detecting');
+      setSecureAuthUserId('');
+      setCloudReady(false);
+      setCloudStatus('loading');
+    }
+    setIsLoggedIn(false);
+    setActiveView('dashboard');
+  };
 
   const activeUser = data.users[data.activeUserId];
   const isAdmin = activeUser?.role === 'admin';
+  const canManageAccount = storageMode === 'secure' && activeUser?.id === secureAuthUserId;
   const adminViews: ViewId[] = ['users', 'import', 'dashboardEdit'];
   const changeView = (view: ViewId) => setActiveView(adminViews.includes(view) && !isAdmin ? 'dashboard' : view);
-  if (!isLoggedIn) return <LoginView data={data} onDataChange={setData} onLogin={() => setIsLoggedIn(true)} />;
-  return <Shell activeView={activeView} onViewChange={changeView} search={search} onSearchChange={setSearch} activeUserName={activeUser?.firstName ?? 'Pilot'} canAdmin={isAdmin} cloudStatus={cloudStatus} onLogout={() => { setIsLoggedIn(false); setActiveView('dashboard'); }}>
+  if (!isLoggedIn) return <LoginView data={data} onDataChange={setData} onLogin={() => setIsLoggedIn(true)} onSecureLogin={finishSecureLogin} />;
+  return <Shell activeView={activeView} onViewChange={changeView} search={search} onSearchChange={setSearch} activeUserName={activeUser?.firstName ?? 'Pilot'} canAdmin={isAdmin} canManageAccount={canManageAccount} cloudStatus={cloudStatus} onLogout={logout}>
     {activeView === 'dashboard' && <Dashboard data={data} onDataChange={setData} onViewChange={setActiveView} />}
     {activeView === 'notes' && <NotesView data={data} onDataChange={setData} search={search} />}
     {activeView === 'flashcards' && <FlashcardsView data={data} onDataChange={setData} search={search} />}
     {activeView === 'tasks' && <TasksView data={data} onDataChange={setData} />}
     {activeView === 'pstar' && <PstarView data={data} onDataChange={setData} />}
     {activeView === 'weather' && <WeatherPanel />}
+    {activeView === 'account' && canManageAccount && <AccountView firstName={activeUser?.firstName ?? 'Pilot'} />}
     {activeView === 'import' && isAdmin && <LegacyImportView data={data} onDataChange={setData} onViewChange={setActiveView} />}
     {activeView === 'dashboardEdit' && isAdmin && <DashboardEditView data={data} onDataChange={setData} />}
-    {activeView === 'users' && isAdmin && <AdminConsoleView data={data} onDataChange={setData} onViewAsUser={(userId) => {
+    {activeView === 'users' && isAdmin && <AdminConsoleView data={data} onDataChange={setData} secureMode={storageMode === 'secure'} onSecureReload={reloadSecureData} onViewAsUser={(userId) => {
       setData(activateUserData(data, userId));
       setActiveView('dashboard');
     }} />}

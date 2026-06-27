@@ -7,6 +7,7 @@ export type GroundSchoolUser = {
   firstName: string;
   role: 'admin' | 'student';
   passwordHash?: string;
+  requiresPasswordReset?: boolean;
   classes: ClassSession[];
   todos: Todo[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
@@ -36,5 +37,5 @@ export type GroundSchoolData = {
   dashboardHiddenTiles: string[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
 };
-export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'weather' | 'import' | 'dashboardEdit' | 'users';
+export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'weather' | 'import' | 'dashboardEdit' | 'users' | 'account';
 export type PstarQuestion = { id: string; section: string; q: string; options: string[]; correct: string };
