@@ -1599,8 +1599,8 @@ body {
 }
 
 .cockpit-shell {
-  grid-template-columns: 112px minmax(0, 920px);
-  max-width: 1068px;
+  grid-template-columns: 148px minmax(0, 920px);
+  max-width: 1104px;
   margin: 0 auto;
   padding: 18px;
   gap: 0;
@@ -1611,12 +1611,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 36px);
-  padding: 16px 9px;
+  padding: 16px 10px;
   border-radius: 8px 0 0 8px;
   background:
     linear-gradient(180deg, rgba(14, 35, 54, 0.95), rgba(4, 14, 24, 0.98)),
     #071421;
   box-shadow: none;
+  overflow: visible;
   z-index: 2;
 }
 
@@ -1656,16 +1657,16 @@ body {
 }
 
 .cockpit-sidebar .nav-item {
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  min-height: 66px;
-  padding: 8px 5px;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 50px;
+  padding: 9px 12px;
   border-radius: 7px;
   color: #b9c5d3;
   font-size: 12px;
   font-weight: 800;
-  text-align: center;
+  text-align: left;
 }
 
 .cockpit-sidebar .nav-item svg {
@@ -1686,6 +1687,49 @@ body {
   gap: 7px;
   margin-top: auto;
   padding-top: 16px;
+  border-top: 1px solid rgba(61, 91, 119, 0.5);
+}
+
+.admin-nav-group {
+  position: relative;
+  display: grid;
+  gap: 5px;
+}
+
+.cockpit-sidebar .admin-nav-toggle .menu-chevron {
+  margin-left: auto;
+  transition: transform 0.16s ease;
+}
+
+.cockpit-sidebar .admin-nav-toggle .menu-chevron.open {
+  transform: rotate(180deg);
+}
+
+.admin-submenu {
+  position: absolute;
+  bottom: 0;
+  left: calc(100% + 8px);
+  z-index: 8;
+  display: grid;
+  gap: 4px;
+  width: 190px;
+  padding: 7px;
+  border: 1px solid rgba(72, 103, 134, 0.75);
+  border-radius: 7px;
+  background: #071522;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.44);
+}
+
+.cockpit-sidebar .admin-submenu .nav-item {
+  min-height: 38px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  color: #9fadc0;
+  font-size: 10px;
+}
+
+.cockpit-sidebar .admin-submenu .nav-item svg {
+  flex: 0 0 auto;
 }
 
 .cockpit-main {
@@ -3010,8 +3054,18 @@ body {
   }
 
   .sidebar-footer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-top: 10px;
-    padding-top: 0;
+    padding-top: 10px;
+  }
+
+  .admin-submenu {
+    top: calc(100% + 5px);
+    right: 0;
+    bottom: auto;
+    left: 0;
+    min-width: 170px;
+    width: auto;
   }
 
   .cockpit-main {
@@ -3278,6 +3332,15 @@ body {
 
   .cockpit-sidebar .nav-item {
     min-height: 58px;
+  }
+
+  .sidebar-footer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cockpit-sidebar .sidebar-footer .nav-item {
+    justify-content: center;
+    padding: 7px;
   }
 
   .cockpit-dashboard .weather-grid div,
