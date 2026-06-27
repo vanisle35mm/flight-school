@@ -18,18 +18,23 @@ const normalizeFlashcardProgress = (value: unknown): Record<string, FlashcardRev
   return progress;
 };
 
-const normalizeClasses = (value: unknown): ClassSession[] => Array.isArray(value) ? value.map((session) => {
-  const item = session && typeof session === 'object' ? session as Record<string, unknown> : {};
-  return {
-    date: typeof item.date === 'string' ? item.date : '',
-    topics: typeof item.topics === 'string' ? item.topics : '',
-    notes: typeof item.notes === 'string' ? item.notes : '',
-    flashcards: Array.isArray(item.flashcards) ? item.flashcards.map((card) => {
-      const parsed = card && typeof card === 'object' ? card as Record<string, unknown> : {};
-      return { question: typeof parsed.question === 'string' ? parsed.question : '', answer: typeof parsed.answer === 'string' ? parsed.answer : '' };
-    }) : []
-  };
-}) : [];
+const normalizeClasses = (value: unknown): ClassSession[] => Array.isArray(value) ? value
+  .map((session) => {
+    const item = session && typeof session === 'object' ? session as Record<string, unknown> : {};
+    const flashcards = Array.isArray(item.flashcards) ? item.flashcards
+      .map((card) => {
+        const parsed = card && typeof card === 'object' ? card as Record<string, unknown> : {};
+        return { question: typeof parsed.question === 'string' ? parsed.question : '', answer: typeof parsed.answer === 'string' ? parsed.answer : '' };
+      })
+      .filter((card) => card.question.trim() || card.answer.trim()) : [];
+    return {
+      date: typeof item.date === 'string' ? item.date : '',
+      topics: typeof item.topics === 'string' ? item.topics : '',
+      notes: typeof item.notes === 'string' ? item.notes : '',
+      flashcards
+    };
+  })
+  .filter((session) => session.date.trim() || session.topics.trim() || session.notes.trim() || session.flashcards.length) : [];
 
 const normalizeTodos = (value: unknown): Todo[] => Array.isArray(value) ? value.map((todo) => {
   const item = todo && typeof todo === 'object' ? todo as Record<string, unknown> : {};
