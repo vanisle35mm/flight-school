@@ -19,8 +19,9 @@ const getDataWeight = (data: GroundSchoolData) => {
   const classCount = users.reduce((sum, user) => sum + user.classes.length, 0);
   const cardCount = users.reduce((sum, user) => sum + user.classes.reduce((cardSum, session) => cardSum + session.flashcards.length, 0), 0);
   const taskCount = users.reduce((sum, user) => sum + user.todos.length, 0);
+  const pstarAttemptCount = users.reduce((sum, user) => sum + user.tcHistory.length + user.tcMissedIds.length, 0);
   const namedUserCount = users.filter((user) => user.firstName !== 'Pilot' || user.id !== 'user_default').length;
-  return users.length + namedUserCount + classCount * 5 + cardCount + taskCount + data.tcHistory.length + data.tcMissedIds.length;
+  return users.length + namedUserCount + classCount * 5 + cardCount + taskCount + pstarAttemptCount;
 };
 
 export const App = () => {

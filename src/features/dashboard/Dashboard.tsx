@@ -7,7 +7,7 @@ import type { GroundSchoolData, ViewId } from '../../types';
 import { WeatherPanel } from '../weather/WeatherPanel';
 
 type StatId = 'classes' | 'cards' | 'accuracy' | 'tasks';
-type TileId = StatId | 'weather' | 'progress' | 'quickActions';
+type TileId = StatId | 'taskList' | 'weather' | 'progress' | 'quickActions';
 
 const statTargets: Record<StatId, ViewId> = {
   classes: 'notes',
@@ -21,6 +21,7 @@ const tileLabels: Record<TileId, string> = {
   cards: 'Flashcards',
   accuracy: 'PSTAR Score',
   tasks: 'Tasks',
+  taskList: 'Task List',
   weather: 'Weather',
   progress: 'Study Progress',
   quickActions: 'Quick Actions'
@@ -48,6 +49,14 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const maxNotes = Math.max(60, noteCount);
   const maxCards = Math.max(400, stats.cards);
   const maxPractice = Math.max(10, practiceCount);
+  const openTasks = data.todos
+    .map((todo, index) => ({ todo, index }))
+    .filter(({ todo }) => !todo.done)
+    .sort((left, right) => {
+      if (!left.todo.dueDate) return 1;
+      if (!right.todo.dueDate) return -1;
+      return left.todo.dueDate.localeCompare(right.todo.dueDate);
+    });
   const statCards = [
     { id: 'classes' as StatId, label: 'Lessons', value: stats.classes, note: 'Total', icon: <NotebookTabs size={20} /> },
     { id: 'cards' as StatId, label: 'Flashcards', value: stats.cards, note: 'Total', icon: <Layers size={20} /> },
@@ -91,6 +100,20 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   const renderTileContent = (tileId: TileId): ReactNode => {
     if (tileId === 'classes' || tileId === 'cards' || tileId === 'accuracy' || tileId === 'tasks') return renderStatTile(tileId);
+    if (tileId === 'taskList') return <section className="panel cockpit-panel task-list-panel">
+      <div className="panel-heading"><div><span className="eyebrow">Tasks</span><h2>Upcoming</h2></div><strong className="task-list-count">{openTasks.length} open</strong></div>
+      <div className="task-tile-list">
+        {openTasks.length ? openTasks.slice(0, 4).map(({ todo, index }) => <div className="task-tile-row" key={`${todo.text}-${index}`}>
+          <CheckSquare size={17} />
+          <span>{todo.text}</span>
+          <small>{todo.dueDate ? new Date(`${todo.dueDate}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'No date'}</small>
+        </div>) : <p className="empty-state">No open tasks. Clear skies.</p>}
+      </div>
+      <div className="task-list-footer">
+        <span>{openTasks.length > 4 ? `+${openTasks.length - 4} more` : 'Keep your training on track.'}</span>
+        <button onClick={() => onViewChange('tasks')}><ClipboardCheck size={16} />Manage Tasks</button>
+      </div>
+    </section>;
     if (tileId === 'weather') return <WeatherPanel />;
     if (tileId === 'progress') return <section className="panel cockpit-panel progress-panel">
       <div className="panel-heading"><div><span className="eyebrow">Study Progress</span><h2>This Week</h2></div></div>

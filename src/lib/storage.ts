@@ -1,4 +1,4 @@
-import type { ClassSession, FlashcardReviewStatus, GroundSchoolData, GroundSchoolUser, Todo } from '../types';
+import type { ClassSession, FlashcardReviewStatus, GroundSchoolData, GroundSchoolUser, TcHistoryEntry, Todo } from '../types';
 
 export const STORAGE_KEY = 'groundschool_v496';
 export const LEGACY_STORAGE_KEY = 'groundschool_v47';
@@ -6,7 +6,7 @@ export const THEME_KEY = 'flightschool_theme';
 export const RESTORE_KEY = 'groundschool_restore_payload';
 export const DEFAULT_USER_ID = 'user_default';
 export const DEFAULT_DASHBOARD_STAT_ORDER = ['classes', 'cards', 'accuracy', 'tasks'];
-export const DEFAULT_DASHBOARD_TILE_ORDER = ['classes', 'cards', 'accuracy', 'tasks', 'weather', 'progress', 'quickActions'];
+export const DEFAULT_DASHBOARD_TILE_ORDER = ['classes', 'cards', 'accuracy', 'tasks', 'taskList', 'weather', 'progress', 'quickActions'];
 
 const normalizeFlashcardProgress = (value: unknown): Record<string, FlashcardReviewStatus> => {
   const progress: Record<string, FlashcardReviewStatus> = {};
@@ -36,6 +36,24 @@ const normalizeTodos = (value: unknown): Todo[] => Array.isArray(value) ? value.
   return { text: typeof item.text === 'string' ? item.text : '', done: typeof item.done === 'boolean' ? item.done : false, dueDate: typeof item.dueDate === 'string' ? item.dueDate : '' };
 }) : [];
 
+const normalizeTcHistory = (value: unknown): TcHistoryEntry[] => Array.isArray(value) ? value.map((entry) => {
+  const item = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
+  return {
+    title: typeof item.title === 'string' ? item.title : 'TC PSTAR Practice',
+    source: typeof item.source === 'string' ? item.source : undefined,
+    score: typeof item.score === 'number' ? item.score : undefined,
+    total: typeof item.total === 'number' ? item.total : undefined,
+    percent: typeof item.percent === 'number' ? item.percent : 0,
+    date: typeof item.date === 'string' ? item.date : undefined,
+    completedAt: typeof item.completedAt === 'string' ? item.completedAt : undefined,
+    missed: Array.isArray(item.missed) ? item.missed.filter((id): id is string => typeof id === 'string') : undefined
+  };
+}) : [];
+
+const normalizeTcMissedIds = (value: unknown): string[] => Array.isArray(value)
+  ? value.filter((id): id is string => typeof id === 'string')
+  : [];
+
 export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot', role: GroundSchoolUser['role'] = 'student', passwordHash?: string): GroundSchoolUser => ({
   id,
   firstName,
@@ -43,7 +61,9 @@ export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot'
   ...(passwordHash ? { passwordHash } : {}),
   classes: [],
   todos: [],
-  flashcardProgress: {}
+  flashcardProgress: {},
+  tcHistory: [],
+  tcMissedIds: []
 });
 
 export const createEmptyGroundSchoolData = (): GroundSchoolData => {
@@ -83,7 +103,9 @@ export const syncActiveUserData = (data: GroundSchoolData): GroundSchoolData => 
         ...currentUser,
         classes: data.classes,
         todos: data.todos,
-        flashcardProgress: data.flashcardProgress
+        flashcardProgress: data.flashcardProgress,
+        tcHistory: data.tcHistory,
+        tcMissedIds: data.tcMissedIds
       }
     }
   };
@@ -98,7 +120,9 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
     users: { ...synced.users, [nextUser.id]: nextUser },
     classes: nextUser.classes,
     todos: nextUser.todos,
-    flashcardProgress: nextUser.flashcardProgress
+    flashcardProgress: nextUser.flashcardProgress,
+    tcHistory: nextUser.tcHistory,
+    tcMissedIds: nextUser.tcMissedIds
   };
 };
 
@@ -158,7 +182,9 @@ export const deleteGroundSchoolUser = (data: GroundSchoolData, userId: string): 
     users,
     classes: nextActiveUser.classes,
     todos: nextActiveUser.todos,
-    flashcardProgress: nextActiveUser.flashcardProgress
+    flashcardProgress: nextActiveUser.flashcardProgress,
+    tcHistory: nextActiveUser.tcHistory,
+    tcMissedIds: nextActiveUser.tcMissedIds
   };
 };
 
@@ -176,6 +202,12 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   const data = createEmptyGroundSchoolData();
   const sourceUsers = source.users && typeof source.users === 'object' ? source.users as Record<string, unknown> : {};
   const users: Record<string, GroundSchoolUser> = {};
+  const legacyTcHistory = normalizeTcHistory(source.tcHistory);
+  const legacyTcMissedIds = normalizeTcMissedIds(source.tcMissedIds);
+  const hasPerUserPstarData = Object.values(sourceUsers).some((value) => {
+    const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+    return 'tcHistory' in item || 'tcMissedIds' in item;
+  });
 
   Object.entries(sourceUsers).forEach(([id, value]) => {
     const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
@@ -188,7 +220,9 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       ...(typeof item.passwordHash === 'string' && item.passwordHash ? { passwordHash: item.passwordHash } : {}),
       classes: normalizeClasses(item.classes),
       todos: normalizeTodos(item.todos),
-      flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress)
+      flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress),
+      tcHistory: normalizeTcHistory(item.tcHistory),
+      tcMissedIds: normalizeTcMissedIds(item.tcMissedIds)
     };
   });
 
@@ -199,35 +233,25 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       role: 'admin',
       classes: normalizeClasses(source.classes),
       todos: normalizeTodos(source.todos),
-      flashcardProgress: normalizeFlashcardProgress(source.flashcardProgress)
+      flashcardProgress: normalizeFlashcardProgress(source.flashcardProgress),
+      tcHistory: [],
+      tcMissedIds: []
     };
   }
 
   const requestedUserId = typeof source.activeUserId === 'string' && users[source.activeUserId] ? source.activeUserId : Object.keys(users)[0];
+  if (!hasPerUserPstarData) {
+    const legacyOwner = Object.values(users).find((user) => user.role === 'admin') ?? users[requestedUserId];
+    users[legacyOwner.id] = { ...legacyOwner, tcHistory: legacyTcHistory, tcMissedIds: legacyTcMissedIds };
+  }
   const activeUser = users[requestedUserId];
   data.activeUserId = requestedUserId;
   data.users = users;
   data.classes = activeUser.classes;
   data.todos = activeUser.todos;
   data.flashcardProgress = activeUser.flashcardProgress;
-
-  if (Array.isArray(source.tcHistory)) {
-    data.tcHistory = source.tcHistory.map((entry) => {
-      const item = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
-      return {
-        title: typeof item.title === 'string' ? item.title : 'TC PSTAR Practice',
-        source: typeof item.source === 'string' ? item.source : undefined,
-        score: typeof item.score === 'number' ? item.score : undefined,
-        total: typeof item.total === 'number' ? item.total : undefined,
-        percent: typeof item.percent === 'number' ? item.percent : 0,
-        date: typeof item.date === 'string' ? item.date : undefined,
-        completedAt: typeof item.completedAt === 'string' ? item.completedAt : undefined,
-        missed: Array.isArray(item.missed) ? item.missed.filter((id): id is string => typeof id === 'string') : undefined
-      };
-    });
-  }
-
-  if (Array.isArray(source.tcMissedIds)) data.tcMissedIds = source.tcMissedIds.filter((id): id is string => typeof id === 'string');
+  data.tcHistory = activeUser.tcHistory;
+  data.tcMissedIds = activeUser.tcMissedIds;
   data.tcFlashcardSection = typeof source.tcFlashcardSection === 'string' ? source.tcFlashcardSection : 'all';
   data.dashboardStatOrder = Array.isArray(source.dashboardStatOrder) ? source.dashboardStatOrder.filter((id): id is string => DEFAULT_DASHBOARD_STAT_ORDER.includes(String(id))) : [...DEFAULT_DASHBOARD_STAT_ORDER];
   DEFAULT_DASHBOARD_STAT_ORDER.forEach((id) => { if (!data.dashboardStatOrder.includes(id)) data.dashboardStatOrder.push(id); });

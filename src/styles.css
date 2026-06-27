@@ -1665,6 +1665,7 @@ body {
 }
 
 .dashboard-tile-weather,
+.dashboard-tile-taskList,
 .dashboard-tile-progress,
 .dashboard-tile-quickActions {
   grid-column: 1 / -1;
@@ -1945,6 +1946,67 @@ body {
   min-height: 36px;
   border-radius: 8px;
   color: #06111c;
+}
+
+.task-list-panel {
+  min-height: 210px;
+}
+
+.task-list-count {
+  margin-right: 34px;
+  color: #a9b8c8;
+  font-size: 12px;
+}
+
+.task-tile-list {
+  display: grid;
+  border: 1px solid rgba(64, 95, 125, 0.54);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.task-tile-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 39px;
+  padding: 8px 11px;
+  border-bottom: 1px solid rgba(64, 95, 125, 0.42);
+  background: rgba(7, 20, 34, 0.46);
+}
+
+.task-tile-row:last-child {
+  border-bottom: 0;
+}
+
+.task-tile-row svg {
+  color: var(--amber);
+}
+
+.task-tile-row span {
+  min-width: 0;
+  overflow: hidden;
+  color: #dce5ef;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-tile-row small,
+.task-list-footer span {
+  color: #93a4b6;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.task-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .progress-content {

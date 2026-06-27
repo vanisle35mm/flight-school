@@ -7,6 +7,7 @@ const tileLabels: Record<string, string> = {
   cards: 'Flashcards',
   accuracy: 'PSTAR Score',
   tasks: 'Tasks',
+  taskList: 'Task List',
   weather: 'Weather',
   progress: 'Study Progress',
   quickActions: 'Quick Actions'

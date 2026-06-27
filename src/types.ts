@@ -10,6 +10,8 @@ export type GroundSchoolUser = {
   classes: ClassSession[];
   todos: Todo[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
+  tcHistory: TcHistoryEntry[];
+  tcMissedIds: string[];
 };
 export type TcHistoryEntry = {
   title?: string;
