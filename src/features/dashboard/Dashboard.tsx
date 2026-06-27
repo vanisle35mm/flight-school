@@ -101,7 +101,13 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const renderTileContent = (tileId: TileId): ReactNode => {
     if (tileId === 'classes' || tileId === 'cards' || tileId === 'accuracy' || tileId === 'tasks') return renderStatTile(tileId);
     if (tileId === 'taskList') return <section className="panel cockpit-panel task-list-panel">
-      <div className="panel-heading"><div><span className="eyebrow">Tasks</span><h2>Upcoming</h2></div><strong className="task-list-count">{openTasks.length} open</strong></div>
+      <div className="panel-heading">
+        <div><span className="eyebrow">Tasks</span><h2>Upcoming</h2></div>
+        <div className="task-list-summary">
+          <div className="task-completion-dial" style={{ '--pct': stats.taskPct } as CSSProperties} aria-label={`${stats.taskPct}% of tasks complete`}><span>{stats.taskPct}%</span></div>
+          <strong className="task-list-count">{openTasks.length} open</strong>
+        </div>
+      </div>
       <div className="task-tile-list">
         {openTasks.length ? openTasks.slice(0, 4).map(({ todo, index }) => <div className="task-tile-row" key={`${todo.text}-${index}`}>
           <CheckSquare size={17} />

@@ -1952,10 +1952,44 @@ body {
   min-height: 210px;
 }
 
-.task-list-count {
+.task-list-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-right: 34px;
+}
+
+.task-list-count {
   color: #a9b8c8;
   font-size: 12px;
+}
+
+.task-completion-dial {
+  --pct: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 50%;
+  background: conic-gradient(var(--amber) calc(var(--pct) * 1%), rgba(68, 99, 128, 0.48) 0);
+}
+
+.task-completion-dial::before {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #0b2034;
+  content: '';
+}
+
+.task-completion-dial span {
+  position: relative;
+  z-index: 1;
+  color: #f4f8fb;
+  font-size: 10px;
+  font-weight: 900;
 }
 
 .task-tile-list {

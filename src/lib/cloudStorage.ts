@@ -1,5 +1,5 @@
 import type { GroundSchoolData } from '../types';
-import { normalizeGroundSchoolData, syncActiveUserData } from './storage';
+import { normalizeGroundSchoolData, prepareGroundSchoolDataForSave } from './storage';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 const CLOUD_STATE_ID = 'primary';
@@ -31,7 +31,7 @@ export const loadCloudGroundSchoolData = async (): Promise<GroundSchoolData | nu
 export const saveCloudGroundSchoolData = async (data: GroundSchoolData): Promise<void> => {
   if (!supabase) return;
 
-  const cloudData = syncActiveUserData(normalizeGroundSchoolData(data));
+  const cloudData = prepareGroundSchoolDataForSave(data);
   const { error } = await supabase
     .from(CLOUD_TABLE)
     .upsert({ id: CLOUD_STATE_ID, data: cloudData }, { onConflict: 'id' });

@@ -278,6 +278,9 @@ export const loadGroundSchoolData = (): GroundSchoolData => {
   return data;
 };
 
+export const prepareGroundSchoolDataForSave = (data: GroundSchoolData): GroundSchoolData =>
+  normalizeGroundSchoolData(syncActiveUserData(data));
+
 export const saveGroundSchoolData = (data: GroundSchoolData) => {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(syncActiveUserData(normalizeGroundSchoolData(data))));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(prepareGroundSchoolDataForSave(data)));
 };
