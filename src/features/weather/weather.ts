@@ -27,6 +27,8 @@ export type WeatherSnapshot = {
   dewpoint: string;
   wind: string;
   windDirection: number | null;
+  windSpeedKt: number | null;
+  windGustKt: number | null;
   windSpeed: string;
   gusts: string;
   visibility: string;
@@ -129,6 +131,8 @@ const normalizeAviationWeather = (payload: UnknownRecord): WeatherSnapshot => {
     dewpoint: formatTemperature(dewpoint),
     wind: `${formatDirection(direction)} at ${formatSpeed(speed)}${gusts === null ? '' : `, gusting ${Math.round(gusts)} kt`}`,
     windDirection: direction,
+    windSpeedKt: speed,
+    windGustKt: gusts,
     windSpeed: formatSpeed(speed),
     gusts: formatSpeed(gusts),
     visibility: formatVisibility(metar.visib),
@@ -176,6 +180,8 @@ const getOpenMeteoFallback = async (): Promise<WeatherSnapshot> => {
     dewpoint: formatTemperature(dewpoint),
     wind: `${formatDirection(direction)} at ${formatSpeed(speed)}${gusts === null ? '' : `, gusting ${Math.round(gusts)} kt`}`,
     windDirection: direction,
+    windSpeedKt: speed,
+    windGustKt: gusts,
     windSpeed: formatSpeed(speed),
     gusts: formatSpeed(gusts),
     visibility: visibilityMetres === null ? 'Unavailable' : `${(visibilityMetres / 1609.344).toFixed(1)} SM`,

@@ -1,5 +1,6 @@
-import { CloudSun, Compass, Droplets, ExternalLink, Eye, Gauge, Layers3, Maximize2, Navigation, RefreshCw, Wind } from 'lucide-react';
+import { CloudSun, Compass, Droplets, ExternalLink, Eye, Gauge, Layers3, Maximize2, Navigation, PlaneLanding, RefreshCw, Wind } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
+import { getCyyjRunwayWinds } from './runways';
 import { getDashboardWeatherSnapshot, METAR_REFERENCE_URL, WEATHER_STATION, type WeatherSnapshot } from './weather';
 
 type WeatherPanelProps = {
@@ -35,6 +36,10 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
   </section>;
 
   const windStyle = { '--wind-angle': `${snapshot.windDirection ?? 0}deg` } as CSSProperties;
+  const runwayWinds = getCyyjRunwayWinds(snapshot.windDirection, snapshot.windSpeedKt);
+  const bestRunway = runwayWinds
+    .filter((runway) => runway.alignment !== null)
+    .sort((left, right) => (left.alignment ?? 180) - (right.alignment ?? 180) || Number(Boolean(right.primary)) - Number(Boolean(left.primary)))[0];
 
   if (compact) return <section className="panel weather-panel weather-panel-compact">
     <div className="panel-heading">
@@ -91,6 +96,34 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
     <section className="aviation-report-band">
       <div className="weather-section-heading"><div><Compass size={20} /><h3>Latest METAR</h3></div><span>{snapshot.isOfficial ? 'Aviation Weather Center' : 'Fallback conditions'}</span></div>
       <p className="raw-weather-report">{snapshot.metar}</p>
+    </section>
+
+    <section className="runway-weather-section">
+      <div className="weather-section-heading">
+        <div><PlaneLanding size={20} /><h3>Runway wind check</h3></div>
+        <span>{snapshot.windDirection === null ? 'Variable wind' : `${String(Math.round(snapshot.windDirection)).padStart(3, '0')} deg at ${snapshot.windSpeed}`}</span>
+      </div>
+      <div className="runway-list">
+        {runwayWinds.map((runway) => {
+          const isBest = bestRunway?.id === runway.id;
+          return <div className={isBest ? 'runway-row best-runway' : 'runway-row'} key={runway.id}>
+            <div className="runway-identity">
+              <strong>Runway {runway.id}</strong>
+              <span>{runway.lengthFt.toLocaleString()} x {runway.widthFt} ft / {runway.surface}</span>
+            </div>
+            <div className="runway-strip" aria-label={runway.preferredEnd ? `Runway ${runway.preferredEnd} is wind-favoured for this runway pair` : `Runway ${runway.id}`}>
+              {runway.ends.map((end) => <span className={runway.preferredEnd === end.id ? 'runway-end favoured' : 'runway-end'} key={end.id}>{runway.preferredEnd === end.id && <PlaneLanding size={14} />}{end.id}</span>)}
+            </div>
+            <div className="runway-components">
+              <div><span>Wind-favoured</span><strong>{runway.preferredEnd ? `RWY ${runway.preferredEnd}` : 'Not available'}</strong></div>
+              <div><span>Headwind</span><strong>{runway.headwindKt === null ? '--' : `${runway.headwindKt} kt`}</strong></div>
+              <div><span>Crosswind</span><strong>{runway.crosswindKt === null ? '--' : `${runway.crosswindKt} kt`}</strong></div>
+            </div>
+            {isBest && <span className="best-runway-label"><PlaneLanding size={14} />Best wind alignment</span>}
+          </div>;
+        })}
+      </div>
+      <p className="runway-advisory">Wind-favoured estimate only. Confirm the assigned runway with current ATIS or ATC.</p>
     </section>
 
     <div className="weather-detail-grid">
