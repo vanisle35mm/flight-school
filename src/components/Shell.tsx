@@ -33,27 +33,24 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
     window.addEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
     return () => window.removeEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
   }, []);
-  useEffect(() => {
-    if (isAdminView) setAdminMenuOpen(true);
-  }, [isAdminView]);
-  const openAdminView = (view: ViewId) => {
+  const changeView = (view: ViewId) => {
     onViewChange(view);
-    setAdminMenuOpen(true);
+    setAdminMenuOpen(false);
   };
   return <div className="app-shell cockpit-shell">
   <aside className="sidebar cockpit-sidebar">
     <div className="brand cockpit-brand"><span className="brand-mark"><Plane size={21} /></span><strong>Flight School</strong></div>
-    <nav className="nav-list" aria-label="Primary">{navItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => onViewChange(item.id)}>{item.icon}<span>{item.label}</span></button>)}</nav>
+    <nav className="nav-list" aria-label="Primary">{navItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</nav>
     <div className="sidebar-footer">
       {canAdmin && <div className="admin-nav-group">
         <button className={isAdminView ? 'nav-item admin-nav-toggle active' : 'nav-item admin-nav-toggle'} onClick={() => setAdminMenuOpen((open) => !open)} aria-expanded={adminMenuOpen} aria-controls="admin-navigation"><ShieldCheck size={19} /><span>Admin</span><ChevronDown className={adminMenuOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
         {adminMenuOpen && <div className="admin-submenu" id="admin-navigation">
-          <button className={activeView === 'users' ? 'nav-item active' : 'nav-item'} onClick={() => openAdminView('users')}><ShieldCheck size={16} /><span>Users</span></button>
-          <button className={activeView === 'import' ? 'nav-item active' : 'nav-item'} onClick={() => openAdminView('import')}><Settings size={16} /><span>Import / Export</span></button>
-          <button className={activeView === 'dashboardEdit' ? 'nav-item active' : 'nav-item'} onClick={() => openAdminView('dashboardEdit')}><SlidersHorizontal size={16} /><span>Edit Dashboard</span></button>
+          <button className={activeView === 'users' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('users')}><ShieldCheck size={16} /><span>Users</span></button>
+          <button className={activeView === 'import' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('import')}><Settings size={16} /><span>Import / Export</span></button>
+          <button className={activeView === 'dashboardEdit' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('dashboardEdit')}><SlidersHorizontal size={16} /><span>Edit Dashboard</span></button>
         </div>}
       </div>}
-      {canManageAccount && <button className={activeView === 'account' ? 'nav-item active' : 'nav-item'} onClick={() => onViewChange('account')} aria-label="Account settings"><KeyRound size={19} /><span>Account</span></button>}
+      {canManageAccount && <button className={activeView === 'account' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('account')} aria-label="Account settings"><KeyRound size={19} /><span>Account</span></button>}
       <button className="nav-item" onClick={onLogout} aria-label="Log out"><LogOut size={19} /><span>Logout</span></button>
     </div>
   </aside>
