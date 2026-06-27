@@ -120,7 +120,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         <button onClick={() => onViewChange('tasks')}><ClipboardCheck size={16} />Manage Tasks</button>
       </div>
     </section>;
-    if (tileId === 'weather') return <WeatherPanel />;
+    if (tileId === 'weather') return <WeatherPanel compact onOpenWeather={() => onViewChange('weather')} />;
     if (tileId === 'progress') return <section className="panel cockpit-panel progress-panel">
       <div className="panel-heading"><div><span className="eyebrow">Study Progress</span><h2>This Week</h2></div></div>
       <div className="progress-content">
