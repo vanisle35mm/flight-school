@@ -1,7 +1,7 @@
-import { CloudSun, Compass, Droplets, ExternalLink, Eye, Gauge, Layers3, Maximize2, Navigation, PlaneLanding, RefreshCw, Wind } from 'lucide-react';
+import { CloudSun, Compass, Droplets, ExternalLink, Eye, Gauge, Layers3, MapPin, Maximize2, Navigation, PlaneLanding, RefreshCw, Search, Wind } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
-import { getCyyjRunwayWinds } from './runways';
-import { getDashboardWeatherSnapshot, METAR_REFERENCE_URL, WEATHER_STATION, type WeatherSnapshot } from './weather';
+import { getRunwayWind } from './runways';
+import { getDashboardWeatherSnapshot, getStoredWeatherSummary, saveWeatherSummary, WEATHER_STATION, type WeatherSnapshot } from './weather';
 
 type WeatherPanelProps = {
   compact?: boolean;
@@ -11,32 +11,60 @@ type WeatherPanelProps = {
 const getCategoryClass = (category: string) => `flight-category flight-category-${category.toLowerCase().replace(/[^a-z]/g, '') || 'na'}`;
 
 export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelProps) => {
+  const initialStation = getStoredWeatherSummary().station;
+  const [station, setStation] = useState(initialStation);
+  const [stationInput, setStationInput] = useState(initialStation);
   const [snapshot, setSnapshot] = useState<WeatherSnapshot | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const refresh = async () => {
+  const [statusMessage, setStatusMessage] = useState('');
+  const loadWeather = async (nextStation: string) => {
     setStatus('loading');
+    setStatusMessage('');
     try {
-      setSnapshot(await getDashboardWeatherSnapshot());
+      const nextSnapshot = await getDashboardWeatherSnapshot(nextStation);
+      setSnapshot(nextSnapshot);
+      setStation(nextSnapshot.station);
+      setStationInput(nextSnapshot.station);
+      saveWeatherSummary({ station: nextSnapshot.station, temperature: nextSnapshot.temperature });
       setStatus('idle');
-    } catch {
+    } catch (error) {
       setStatus('error');
+      setStatusMessage(error instanceof Error ? error.message : `No current aviation weather was found for ${nextStation}.`);
     }
   };
-  useEffect(() => { void refresh(); }, []);
+  const refresh = () => void loadWeather(station);
+  const changeAirport = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextStation = stationInput.trim().toUpperCase();
+    setStationInput(nextStation);
+    if (!/^[A-Z]{4}$/.test(nextStation)) {
+      setStatus('error');
+      setStatusMessage('Enter a four-letter ICAO code, such as CYYJ or CYVR.');
+      return;
+    }
+    void loadWeather(nextStation);
+  };
+  useEffect(() => { void loadWeather(initialStation); }, []);
 
   const controls = <div className="button-row weather-actions">
+    {!compact && <form className="airport-picker" onSubmit={changeAirport}>
+      <MapPin size={16} />
+      <input aria-label="Airport ICAO code" list="weather-airports" maxLength={4} value={stationInput} onChange={(event) => setStationInput(event.target.value.toUpperCase())} placeholder="ICAO" />
+      <datalist id="weather-airports"><option value="CYYJ">Victoria</option><option value="CYVR">Vancouver</option><option value="CYCD">Nanaimo</option><option value="CYQQ">Comox</option><option value="CYLW">Kelowna</option><option value="CYYZ">Toronto</option><option value="KSEA">Seattle</option></datalist>
+      <button className="icon-button" type="submit" aria-label="Load airport" title="Load airport"><Search size={16} /></button>
+    </form>}
     {compact && onOpenWeather && <button className="icon-button" onClick={onOpenWeather} aria-label="Open full weather page" title="Open full weather page"><Maximize2 size={17} /></button>}
     <button className={status === 'loading' ? 'icon-button refreshing' : 'icon-button'} onClick={refresh} aria-label="Refresh weather" title="Refresh weather"><RefreshCw size={17} /></button>
-    {!compact && <a className="icon-button" href={METAR_REFERENCE_URL} target="_blank" rel="noreferrer" aria-label="Open CYYJ on METAR-TAF.com" title="Open CYYJ on METAR-TAF.com"><ExternalLink size={17} /></a>}
+    {!compact && <a className="icon-button" href={`https://metar-taf.com/metar/${station}`} target="_blank" rel="noreferrer" aria-label={`Open ${station} on METAR-TAF.com`} title={`Open ${station} on METAR-TAF.com`}><ExternalLink size={17} /></a>}
   </div>;
 
   if (!snapshot) return <section className={compact ? 'panel weather-panel weather-panel-compact' : 'panel weather-panel weather-panel-full'}>
     <div className="panel-heading"><div><span className="eyebrow">{WEATHER_STATION}</span><h2>{compact ? 'Victoria Weather' : 'Victoria International'}</h2></div>{controls}</div>
-    <p className={status === 'error' ? 'status warning' : 'status'}>{status === 'error' ? 'CYYJ weather is temporarily unavailable.' : 'Loading CYYJ weather...'}</p>
+    <p className={status === 'error' ? 'status warning' : 'status'}>{status === 'error' ? statusMessage || `${stationInput} weather is temporarily unavailable.` : `Loading ${stationInput} weather...`}</p>
   </section>;
 
   const windStyle = { '--wind-angle': `${snapshot.windDirection ?? 0}deg` } as CSSProperties;
-  const runwayWinds = getCyyjRunwayWinds(snapshot.windDirection, snapshot.windSpeedKt);
+  const runwayWinds = snapshot.runways.map((runway) => getRunwayWind(runway, snapshot.windDirection, snapshot.windSpeedKt));
   const bestRunway = runwayWinds
     .filter((runway) => runway.alignment !== null)
     .sort((left, right) => (left.alignment ?? 180) - (right.alignment ?? 180) || Number(Boolean(right.primary)) - Number(Boolean(left.primary)))[0];
@@ -46,6 +74,7 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
       <div><span className="eyebrow">{snapshot.station} Weather</span><h2>{snapshot.airportName}</h2></div>
       {controls}
     </div>
+    {status === 'error' && <p className="status warning">{statusMessage}</p>}
     <div className="compact-weather-layout">
       <div className="compact-weather-primary">
         <span className={getCategoryClass(snapshot.flightCategory)}>{snapshot.flightCategory}</span>
@@ -70,6 +99,7 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
       <div><span className="eyebrow">Current Airport Conditions</span><h2>{snapshot.station} / {snapshot.airportName}</h2><p>Observed {snapshot.observed}</p></div>
       {controls}
     </div>
+    {status === 'error' && <p className="status warning weather-station-error">{statusMessage}</p>}
 
     <div className="weather-overview">
       <div className="weather-condition-block">
@@ -98,7 +128,7 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
       <p className="raw-weather-report">{snapshot.metar}</p>
     </section>
 
-    <section className="runway-weather-section">
+    {runwayWinds.length > 0 && <section className="runway-weather-section">
       <div className="weather-section-heading">
         <div><PlaneLanding size={20} /><h3>Runway wind check</h3></div>
         <span>{snapshot.windDirection === null ? 'Variable wind' : `${String(Math.round(snapshot.windDirection)).padStart(3, '0')} deg at ${snapshot.windSpeed}`}</span>
@@ -124,7 +154,7 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
         })}
       </div>
       <p className="runway-advisory">Wind-favoured estimate only. Confirm the assigned runway with current ATIS or ATC.</p>
-    </section>
+    </section>}
 
     <div className="weather-detail-grid">
       <section className="weather-detail-section">

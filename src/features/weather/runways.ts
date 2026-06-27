@@ -17,10 +17,50 @@ export type RunwayWind = Runway & {
 
 // Dimensions from the Victoria Airport Authority 2023-2042 Master Plan.
 export const CYYJ_RUNWAYS: Runway[] = [
-  { id: '09/27', ends: [{ id: '09', heading: 90 }, { id: '27', heading: 270 }], lengthFt: 6998, widthFt: 200, surface: 'Grooved asphalt', primary: true },
-  { id: '03/21', ends: [{ id: '03', heading: 30 }, { id: '21', heading: 210 }], lengthFt: 5027, widthFt: 200, surface: 'Asphalt' },
-  { id: '14/32', ends: [{ id: '14', heading: 140 }, { id: '32', heading: 320 }], lengthFt: 5001, widthFt: 200, surface: 'Grooved asphalt' }
+  { id: '09/27', ends: [{ id: '09', heading: 106 }, { id: '27', heading: 286 }], lengthFt: 6998, widthFt: 200, surface: 'Grooved asphalt', primary: true },
+  { id: '03/21', ends: [{ id: '03', heading: 44 }, { id: '21', heading: 224 }], lengthFt: 5027, widthFt: 200, surface: 'Asphalt' },
+  { id: '14/32', ends: [{ id: '14', heading: 152 }, { id: '32', heading: 332 }], lengthFt: 5001, widthFt: 200, surface: 'Grooved asphalt' }
 ];
+
+const SURFACE_LABELS: Record<string, string> = {
+  A: 'Asphalt',
+  C: 'Concrete',
+  G: 'Grass',
+  GVL: 'Gravel',
+  W: 'Water'
+};
+
+const magneticVariation = (value: unknown) => {
+  if (typeof value !== 'string') return 0;
+  const match = value.trim().match(/^(\d+(?:\.\d+)?)([EW])$/i);
+  if (!match) return 0;
+  const degrees = Number.parseFloat(match[1]);
+  return match[2].toUpperCase() === 'E' ? degrees : -degrees;
+};
+
+export const normalizeAirportRunways = (value: unknown, station: string, magneticDeclination?: unknown, source?: unknown): Runway[] => {
+  if (!Array.isArray(value)) return station === 'CYYJ' ? CYYJ_RUNWAYS : [];
+  const variation = source === 'Intl' ? magneticVariation(magneticDeclination) : 0;
+  const runways = value.map((item): Runway | null => {
+    if (!item || typeof item !== 'object') return null;
+    const source = item as Record<string, unknown>;
+    const id = typeof source.id === 'string' ? source.id.replace('-', '/') : '';
+    const ends = id.split('/');
+    const dimension = typeof source.dimension === 'string' ? source.dimension.match(/(\d+)\s*x\s*(\d+)/i) : null;
+    const alignment = typeof source.alignment === 'number' && Number.isFinite(source.alignment) ? source.alignment : Number.parseFloat(String(source.alignment));
+    if (ends.length !== 2 || !dimension || !Number.isFinite(alignment)) return null;
+    const firstHeading = (Math.round(alignment + variation) + 360) % 360;
+    return {
+      id: `${ends[0]}/${ends[1]}`,
+      ends: [{ id: ends[0], heading: firstHeading }, { id: ends[1], heading: (firstHeading + 180) % 360 }],
+      lengthFt: Number.parseInt(dimension[1], 10),
+      widthFt: Number.parseInt(dimension[2], 10),
+      surface: SURFACE_LABELS[String(source.surface)] ?? 'Paved'
+    };
+  }).filter((runway): runway is Runway => runway !== null);
+  const longest = Math.max(...runways.map((runway) => runway.lengthFt));
+  return runways.map((runway) => ({ ...runway, primary: runway.lengthFt === longest }));
+};
 
 const angleDifference = (left: number, right: number) => Math.abs(((left - right + 540) % 360) - 180);
 

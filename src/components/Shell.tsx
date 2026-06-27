@@ -1,5 +1,6 @@
 import { Bell, BookOpen, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
 import type { ViewId } from '../types';
 
@@ -22,7 +23,14 @@ const cloudStatusLabel: Record<CloudSyncStatus, string> = {
   error: 'Cloud error'
 };
 
-export const Shell = ({ children, activeView, onViewChange, search, onSearchChange, activeUserName, canAdmin, canManageAccount, cloudStatus, onLogout }: { children: ReactNode; activeView: ViewId; onViewChange: (view: ViewId) => void; search: string; onSearchChange: (value: string) => void; activeUserName: string; canAdmin: boolean; canManageAccount: boolean; cloudStatus: CloudSyncStatus; onLogout: () => void }) => <div className="app-shell cockpit-shell">
+export const Shell = ({ children, activeView, onViewChange, search, onSearchChange, activeUserName, canAdmin, canManageAccount, cloudStatus, onLogout }: { children: ReactNode; activeView: ViewId; onViewChange: (view: ViewId) => void; search: string; onSearchChange: (value: string) => void; activeUserName: string; canAdmin: boolean; canManageAccount: boolean; cloudStatus: CloudSyncStatus; onLogout: () => void }) => {
+  const [weatherSummary, setWeatherSummary] = useState(getStoredWeatherSummary);
+  useEffect(() => {
+    const handleWeatherSummary = (event: Event) => setWeatherSummary((event as CustomEvent<WeatherSummary>).detail);
+    window.addEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
+    return () => window.removeEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
+  }, []);
+  return <div className="app-shell cockpit-shell">
   <aside className="sidebar cockpit-sidebar">
     <div className="brand cockpit-brand"><span className="brand-mark"><Plane size={21} /></span><strong>Flight School</strong></div>
     <nav className="nav-list" aria-label="Primary">{navItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => onViewChange(item.id)}>{item.icon}<span>{item.label}</span></button>)}</nav>
@@ -32,8 +40,9 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
     <header className="topbar cockpit-topbar">
       <div className="topbar-title"><span className="eyebrow">Cockpit Dashboard</span><h1>{titleForView(activeView)}</h1></div>
       {activeView !== 'dashboard' && <label className="search-box cockpit-search"><Search size={17} /><input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search notes, cards, topics" /></label>}
-      <div className="status-cluster" aria-label="Flight status"><button className="user-pill" onClick={() => canAdmin ? onViewChange('users') : canManageAccount ? onViewChange('account') : onLogout()}><UserRound size={16} />Captain {activeUserName}</button><span className={`cloud-sync-pill ${cloudStatus}`}><CloudSun size={17} />{cloudStatusLabel[cloudStatus]}</span><span className="station-pill">CYYJ <ChevronDown size={14} /></span><span className="weather-pill"><CloudSun size={17} />17 C</span><button className="bell-button" aria-label="Notifications"><Bell size={18} /></button></div>
+      <div className="status-cluster" aria-label="Flight status"><button className="user-pill" onClick={() => canAdmin ? onViewChange('users') : canManageAccount ? onViewChange('account') : onLogout()}><UserRound size={16} />Captain {activeUserName}</button><span className={`cloud-sync-pill ${cloudStatus}`}><CloudSun size={17} />{cloudStatusLabel[cloudStatus]}</span><span className="station-pill">{weatherSummary.station} <ChevronDown size={14} /></span><span className="weather-pill"><CloudSun size={17} />{weatherSummary.temperature}</span><button className="bell-button" aria-label="Notifications"><Bell size={18} /></button></div>
     </header>
     {children}
   </main>
 </div>;
+};

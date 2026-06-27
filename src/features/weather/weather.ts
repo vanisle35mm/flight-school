@@ -1,5 +1,9 @@
+import { CYYJ_RUNWAYS, normalizeAirportRunways, type Runway } from './runways';
+
 export const WEATHER_STATION = 'CYYJ';
 export const METAR_REFERENCE_URL = `https://metar-taf.com/metar/${WEATHER_STATION}`;
+export const WEATHER_SUMMARY_EVENT = 'flightschool-weather-summary';
+export const WEATHER_SUMMARY_KEY = 'flightschool_weather_summary';
 export const DASHBOARD_WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=48.6469&longitude=-123.4258&current=temperature_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code,cloud_cover,visibility&wind_speed_unit=kn&timezone=America%2FVancouver&forecast_days=1';
 
 export type CloudLayer = {
@@ -41,7 +45,29 @@ export type WeatherSnapshot = {
   tafValidity: string;
   clouds: CloudLayer[];
   forecast: TafPeriod[];
+  runways: Runway[];
   isOfficial: boolean;
+};
+
+export type WeatherSummary = { station: string; temperature: string };
+
+export const getStoredWeatherSummary = (): WeatherSummary => {
+  if (typeof window === 'undefined') return { station: WEATHER_STATION, temperature: '--' };
+  try {
+    const value = JSON.parse(window.localStorage.getItem(WEATHER_SUMMARY_KEY) ?? '{}') as Partial<WeatherSummary>;
+    return {
+      station: typeof value.station === 'string' && /^[A-Z]{4}$/.test(value.station) ? value.station : WEATHER_STATION,
+      temperature: typeof value.temperature === 'string' && value.temperature ? value.temperature : '--'
+    };
+  } catch {
+    return { station: WEATHER_STATION, temperature: '--' };
+  }
+};
+
+export const saveWeatherSummary = (summary: WeatherSummary) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(WEATHER_SUMMARY_KEY, JSON.stringify(summary));
+  window.dispatchEvent(new CustomEvent<WeatherSummary>(WEATHER_SUMMARY_EVENT, { detail: summary }));
 };
 
 type UnknownRecord = Record<string, unknown>;
@@ -113,6 +139,7 @@ const normalizeForecast = (value: unknown): TafPeriod[] => Array.isArray(value) 
 const normalizeAviationWeather = (payload: UnknownRecord): WeatherSnapshot => {
   const metar = recordOrEmpty(payload.metar);
   const taf = recordOrEmpty(payload.taf);
+  const airport = recordOrEmpty(payload.airport);
   const temperature = numberOrNull(metar.temp);
   const dewpoint = numberOrNull(metar.dewp);
   const direction = numberOrNull(metar.wdir);
@@ -124,7 +151,7 @@ const normalizeAviationWeather = (payload: UnknownRecord): WeatherSnapshot => {
   const weather = typeof metar.wxString === 'string' && metar.wxString ? metar.wxString : CLOUD_LABELS[cover ?? ''] ?? 'No significant weather';
   return {
     station: typeof metar.icaoId === 'string' ? metar.icaoId : WEATHER_STATION,
-    airportName: typeof metar.name === 'string' ? metar.name.replace(', BC, CA', '') : 'Victoria International Airport',
+    airportName: typeof metar.name === 'string' ? metar.name.replace(/,\s*[A-Z]{2},\s*[A-Z]{2}$/, '') : typeof airport.name === 'string' ? airport.name.trim() : 'Airport weather',
     flightCategory: typeof metar.fltCat === 'string' ? metar.fltCat : 'N/A',
     temperature: formatTemperature(temperature),
     temperatureC: temperature,
@@ -145,6 +172,7 @@ const normalizeAviationWeather = (payload: UnknownRecord): WeatherSnapshot => {
     tafValidity: taf.validTimeFrom && taf.validTimeTo ? `${formatForecastTime(taf.validTimeFrom)} to ${formatForecastTime(taf.validTimeTo)}` : '',
     clouds,
     forecast: normalizeForecast(taf.fcsts),
+    runways: normalizeAirportRunways(airport.runways, typeof metar.icaoId === 'string' ? metar.icaoId : WEATHER_STATION, airport.magdec, airport.source),
     isOfficial: true
   };
 };
@@ -194,16 +222,20 @@ const getOpenMeteoFallback = async (): Promise<WeatherSnapshot> => {
     tafValidity: '',
     clouds: [],
     forecast: [],
+    runways: CYYJ_RUNWAYS,
     isOfficial: false
   };
 };
 
-export const getDashboardWeatherSnapshot = async (): Promise<WeatherSnapshot> => {
+export const getDashboardWeatherSnapshot = async (station = WEATHER_STATION): Promise<WeatherSnapshot> => {
+  const safeStation = station.trim().toUpperCase();
+  if (!/^[A-Z]{4}$/.test(safeStation)) throw new Error('Enter a valid four-letter ICAO airport code.');
   try {
-    const response = await fetch('/api/weather', { cache: 'no-store', headers: { Accept: 'application/json' } });
+    const response = await fetch(`/api/weather?station=${encodeURIComponent(safeStation)}`, { cache: 'no-store', headers: { Accept: 'application/json' } });
     if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) throw new Error('Aviation weather proxy unavailable.');
     return normalizeAviationWeather(await response.json());
   } catch {
-    return getOpenMeteoFallback();
+    if (safeStation === WEATHER_STATION) return getOpenMeteoFallback();
+    throw new Error(`No current aviation weather was found for ${safeStation}.`);
   }
 };

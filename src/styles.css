@@ -2044,7 +2044,55 @@ body {
 }
 
 .weather-actions {
+  align-items: center;
   flex-wrap: nowrap;
+}
+
+.airport-picker {
+  display: grid;
+  grid-template-columns: auto 74px 34px;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 2px 2px 2px 10px;
+  border: 1px solid rgba(72, 103, 134, 0.7);
+  border-radius: 7px;
+  background: #0b151f;
+}
+
+.airport-picker > svg {
+  color: #83b0cf;
+}
+
+.airport-picker input {
+  width: 74px;
+  min-height: 32px;
+  padding: 0 5px;
+  border: 0;
+  color: #edf3f8;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.airport-picker input:focus {
+  outline: 0;
+}
+
+.airport-picker .icon-button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid rgba(72, 103, 134, 0.6);
+  border-radius: 0 5px 5px 0;
+  background: #142433;
+}
+
+.weather-station-error {
+  margin: 14px 0 0;
 }
 
 .refreshing svg {
@@ -3098,6 +3146,20 @@ body {
 
   .weather-panel-full {
     padding: 17px;
+  }
+
+  .weather-page-heading .weather-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 42px 42px;
+    width: 100%;
+  }
+
+  .airport-picker {
+    grid-template-columns: auto minmax(0, 1fr) 34px;
+  }
+
+  .airport-picker input {
+    width: 100%;
   }
 
   .weather-condition-block {
