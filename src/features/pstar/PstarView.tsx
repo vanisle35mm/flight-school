@@ -1,4 +1,4 @@
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Trash2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PSTAR_QUESTIONS } from '../../data/pstarQuestions';
 import type { GroundSchoolData, PstarQuestion } from '../../types';
@@ -23,8 +23,15 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
   const [selected, setSelected] = useState('');
   const [review, setReview] = useState<PracticeReview[]>([]);
   const [mode, setMode] = useState<'setup' | 'practice' | 'exam' | 'complete'>('setup');
+  const [confirmClearScores, setConfirmClearScores] = useState(false);
   const sections = useMemo(() => [...new Set(PSTAR_QUESTIONS.map((item) => item.section))].sort(), []);
   const question = questions[index];
+  const activeUserName = data.users[data.activeUserId]?.firstName || 'this user';
+
+  const clearScores = () => {
+    onDataChange({ ...data, tcHistory: [] });
+    setConfirmClearScores(false);
+  };
 
   const startPractice = (nextMode: 'practice' | 'exam', missedOnly = false) => {
     const pool = missedOnly
@@ -116,7 +123,17 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
           </div>
         </div>
         <div className="result-box">
-          <h3>Recent TC Scores</h3>
+          <div className="pstar-history-heading">
+            <h3>Recent TC Scores</h3>
+            {data.tcHistory.length > 0 && !confirmClearScores && <button className="pstar-clear-button" onClick={() => setConfirmClearScores(true)}><Trash2 size={15} />Clear scores</button>}
+          </div>
+          {confirmClearScores && <div className="pstar-clear-confirm" role="alert">
+            <div><strong>Clear {activeUserName}'s scores?</strong><span>This removes saved PSTAR attempts. The missed-question list stays available.</span></div>
+            <div className="button-row">
+              <button onClick={() => setConfirmClearScores(false)}><X size={15} />Cancel</button>
+              <button className="danger-button" onClick={clearScores}><Trash2 size={15} />Clear scores</button>
+            </div>
+          </div>}
           {data.tcHistory.length ? data.tcHistory.slice(0, 6).map((entry, entryIndex) => (
             <div className="history-row" key={`${entry.date}-${entryIndex}`}>
               <span>{entry.title || 'TC PSTAR Practice'}</span>
