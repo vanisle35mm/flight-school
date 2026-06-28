@@ -224,6 +224,8 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       role: item.role === 'admin' || item.role === 'student' ? item.role : fallbackRole,
       ...(typeof item.passwordHash === 'string' && item.passwordHash ? { passwordHash: item.passwordHash } : {}),
       ...(typeof item.requiresPasswordReset === 'boolean' ? { requiresPasswordReset: item.requiresPasswordReset } : {}),
+      ...(typeof item.homeAirport === 'string' && /^[A-Z]{4}$/.test(item.homeAirport.trim().toUpperCase()) ? { homeAirport: item.homeAirport.trim().toUpperCase() } : {}),
+      ...(item.airportSetupRequired === true ? { airportSetupRequired: true } : {}),
       classes: normalizeClasses(item.classes),
       todos: normalizeTodos(item.todos),
       flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress),

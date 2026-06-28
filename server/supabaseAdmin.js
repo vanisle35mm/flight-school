@@ -32,6 +32,8 @@ export const verifyConfiguredAdminPassword = (password) => {
 };
 
 export const emptyUserPayload = () => ({
+  homeAirport: '',
+  airportSetupRequired: true,
   classes: [],
   todos: [],
   flashcardProgress: {},

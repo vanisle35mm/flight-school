@@ -1307,6 +1307,112 @@ label {
   font-weight: 800;
 }
 
+.airport-setup-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.airport-setup-panel {
+  display: grid;
+  gap: 22px;
+  width: min(560px, 100%);
+  padding: 32px;
+  border: 1px solid rgba(61, 91, 119, 0.72);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(14, 32, 49, 0.96), rgba(4, 13, 23, 0.99));
+  box-shadow: var(--shadow);
+}
+
+.airport-setup-heading h1 {
+  margin: 6px 0 0;
+  color: #f7fbff;
+  font-size: 30px;
+  line-height: 1.14;
+}
+
+.airport-setup-heading p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.airport-setup-field {
+  display: grid;
+  gap: 8px;
+  color: #dce8f1;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.airport-setup-input {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 0 16px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  color: var(--blue2);
+  background: #09131e;
+}
+
+.airport-setup-input:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(131, 176, 207, 0.14);
+}
+
+.airport-setup-input input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: #f7fbff;
+  background: transparent;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.airport-setup-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  color: #071019;
+  background: linear-gradient(180deg, var(--blue2), var(--blue));
+  font-weight: 900;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 520px) {
+  .airport-setup-screen {
+    padding: 14px;
+  }
+
+  .airport-setup-panel {
+    gap: 18px;
+    padding: 24px 20px;
+  }
+
+  .airport-setup-heading h1 {
+    font-size: 26px;
+  }
+}
+
 .login-create {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) auto;

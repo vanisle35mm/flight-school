@@ -10,7 +10,9 @@ import { PstarView } from './features/pstar/PstarView';
 import { TasksView } from './features/tasks/TasksView';
 import { LegacyImportView } from './features/import/LegacyImportView';
 import { LoginView } from './features/login/LoginView';
+import { AirportOnboarding } from './features/onboarding/AirportOnboarding';
 import { WeatherPanel } from './features/weather/WeatherPanel';
+import { getStoredWeatherSummary, saveWeatherSummary } from './features/weather/weather';
 import { isCloudStorageConfigured, loadCloudGroundSchoolData, loadSecureGroundSchoolData, saveCloudGroundSchoolData, saveSecureGroundSchoolData, type CloudSyncStatus } from './lib/cloudStorage';
 import { signOutSecurely } from './lib/secureAuth';
 import { activateUserData, createEmptyGroundSchoolData, loadGroundSchoolData, saveGroundSchoolData, STORAGE_KEY } from './lib/storage';
@@ -37,6 +39,7 @@ export const App = () => {
   const [storageMode, setStorageMode] = useState<'detecting' | 'legacy' | 'secure'>(() => isCloudStorageConfigured() ? 'detecting' : 'legacy');
   const [secureAuthUserId, setSecureAuthUserId] = useState('');
   const lastSavedCloudPayload = useRef('');
+  const authenticatedHomeAirport = secureAuthUserId ? data.users[secureAuthUserId]?.homeAirport : undefined;
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +108,14 @@ export const App = () => {
     return () => window.clearTimeout(timeoutId);
   }, [cloudReady, data, storageMode]);
 
+  useEffect(() => {
+    if (!isLoggedIn || storageMode !== 'secure' || !authenticatedHomeAirport) return;
+    const currentWeather = getStoredWeatherSummary();
+    if (currentWeather.station !== authenticatedHomeAirport) {
+      saveWeatherSummary({ station: authenticatedHomeAirport, temperature: '--' });
+    }
+  }, [authenticatedHomeAirport, isLoggedIn, storageMode]);
+
   const finishSecureLogin = async () => {
     try {
       setCloudStatus('loading');
@@ -147,9 +158,25 @@ export const App = () => {
   const activeUser = data.users[data.activeUserId];
   const isAdmin = activeUser?.role === 'admin';
   const canManageAccount = storageMode === 'secure' && activeUser?.id === secureAuthUserId;
+  const needsAirportSetup = storageMode === 'secure'
+    && activeUser?.id === secureAuthUserId
+    && activeUser?.role === 'student'
+    && activeUser.airportSetupRequired === true;
   const adminViews: ViewId[] = ['users', 'import', 'dashboardEdit'];
   const changeView = (view: ViewId) => setActiveView(adminViews.includes(view) && !isAdmin ? 'dashboard' : view);
   if (!isLoggedIn) return <LoginView data={data} onDataChange={setData} onLogin={() => setIsLoggedIn(true)} onSecureLogin={finishSecureLogin} />;
+  if (needsAirportSetup) return <AirportOnboarding user={activeUser} onComplete={(homeAirport) => {
+    const currentWeather = getStoredWeatherSummary();
+    if (currentWeather.station !== homeAirport) saveWeatherSummary({ station: homeAirport, temperature: '--' });
+    setData({
+      ...data,
+      users: {
+        ...data.users,
+        [activeUser.id]: { ...activeUser, homeAirport, airportSetupRequired: false }
+      }
+    });
+    setActiveView('dashboard');
+  }} />;
   return <Shell activeView={activeView} onViewChange={changeView} search={search} onSearchChange={setSearch} activeUserName={activeUser?.firstName ?? 'Pilot'} canAdmin={isAdmin} canManageAccount={canManageAccount} cloudStatus={cloudStatus} onLogout={logout}>
     {activeView === 'dashboard' && <Dashboard data={data} onDataChange={setData} onViewChange={setActiveView} />}
     {activeView === 'notes' && <NotesView data={data} onDataChange={setData} search={search} />}

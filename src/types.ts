@@ -8,6 +8,8 @@ export type GroundSchoolUser = {
   role: 'admin' | 'student';
   passwordHash?: string;
   requiresPasswordReset?: boolean;
+  homeAirport?: string;
+  airportSetupRequired?: boolean;
   classes: ClassSession[];
   todos: Todo[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
