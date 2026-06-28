@@ -10,6 +10,9 @@ export type GroundSchoolUser = {
   requiresPasswordReset?: boolean;
   homeAirport?: string;
   airportSetupRequired?: boolean;
+  dashboardStatOrder?: string[];
+  dashboardTileOrder?: string[];
+  dashboardHiddenTiles?: string[];
   classes: ClassSession[];
   todos: Todo[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;

@@ -98,7 +98,16 @@ const secureUserFromRows = (profile: SecureProfileRow, row?: SecureUserDataRow):
     dashboardTileOrder: payload.dashboardTileOrder,
     dashboardHiddenTiles: payload.dashboardHiddenTiles
   });
-  return { user: { ...normalized.users[profile.id], requiresPasswordReset: profile.requires_password_reset }, payload };
+  return {
+    user: {
+      ...normalized.users[profile.id],
+      requiresPasswordReset: profile.requires_password_reset,
+      dashboardStatOrder: normalized.dashboardStatOrder,
+      dashboardTileOrder: normalized.dashboardTileOrder,
+      dashboardHiddenTiles: normalized.dashboardHiddenTiles
+    },
+    payload
+  };
 };
 
 export const loadSecureGroundSchoolData = async (): Promise<GroundSchoolData | null> => {

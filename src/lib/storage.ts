@@ -110,7 +110,10 @@ export const syncActiveUserData = (data: GroundSchoolData): GroundSchoolData => 
         todos: data.todos,
         flashcardProgress: data.flashcardProgress,
         tcHistory: data.tcHistory,
-        tcMissedIds: data.tcMissedIds
+        tcMissedIds: data.tcMissedIds,
+        dashboardStatOrder: [...data.dashboardStatOrder],
+        dashboardTileOrder: [...data.dashboardTileOrder],
+        dashboardHiddenTiles: [...data.dashboardHiddenTiles]
       }
     }
   };
@@ -127,7 +130,10 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
     todos: nextUser.todos,
     flashcardProgress: nextUser.flashcardProgress,
     tcHistory: nextUser.tcHistory,
-    tcMissedIds: nextUser.tcMissedIds
+    tcMissedIds: nextUser.tcMissedIds,
+    dashboardStatOrder: nextUser.dashboardStatOrder?.length ? [...nextUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
+    dashboardTileOrder: nextUser.dashboardTileOrder?.length ? [...nextUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
+    dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : []
   };
 };
 
@@ -189,7 +195,10 @@ export const deleteGroundSchoolUser = (data: GroundSchoolData, userId: string): 
     todos: nextActiveUser.todos,
     flashcardProgress: nextActiveUser.flashcardProgress,
     tcHistory: nextActiveUser.tcHistory,
-    tcMissedIds: nextActiveUser.tcMissedIds
+    tcMissedIds: nextActiveUser.tcMissedIds,
+    dashboardStatOrder: nextActiveUser.dashboardStatOrder?.length ? [...nextActiveUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
+    dashboardTileOrder: nextActiveUser.dashboardTileOrder?.length ? [...nextActiveUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
+    dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : []
   };
 };
 
@@ -226,6 +235,9 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       ...(typeof item.requiresPasswordReset === 'boolean' ? { requiresPasswordReset: item.requiresPasswordReset } : {}),
       ...(typeof item.homeAirport === 'string' && /^[A-Z]{4}$/.test(item.homeAirport.trim().toUpperCase()) ? { homeAirport: item.homeAirport.trim().toUpperCase() } : {}),
       ...(item.airportSetupRequired === true ? { airportSetupRequired: true } : {}),
+      ...(Array.isArray(item.dashboardStatOrder) ? { dashboardStatOrder: item.dashboardStatOrder.filter((tileId): tileId is string => typeof tileId === 'string' && DEFAULT_DASHBOARD_STAT_ORDER.includes(tileId)) } : {}),
+      ...(Array.isArray(item.dashboardTileOrder) ? { dashboardTileOrder: item.dashboardTileOrder.filter((tileId): tileId is string => typeof tileId === 'string' && DEFAULT_DASHBOARD_TILE_ORDER.includes(tileId)) } : {}),
+      ...(Array.isArray(item.dashboardHiddenTiles) ? { dashboardHiddenTiles: item.dashboardHiddenTiles.filter((tileId): tileId is string => typeof tileId === 'string' && DEFAULT_DASHBOARD_TILE_ORDER.includes(tileId)) } : {}),
       classes: normalizeClasses(item.classes),
       todos: normalizeTodos(item.todos),
       flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress),

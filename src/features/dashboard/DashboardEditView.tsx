@@ -1,4 +1,4 @@
-import { RotateCcw, Undo2 } from 'lucide-react';
+import { EyeOff, RotateCcw, Undo2 } from 'lucide-react';
 import { DEFAULT_DASHBOARD_TILE_ORDER } from '../../lib/storage';
 import type { GroundSchoolData } from '../../types';
 
@@ -21,6 +21,11 @@ export const DashboardEditView = ({ data, onDataChange }: { data: GroundSchoolDa
     onDataChange({ ...data, dashboardHiddenTiles: data.dashboardHiddenTiles.filter((id) => id !== tileId) });
   };
 
+  const hideTile = (tileId: string) => {
+    if (data.dashboardHiddenTiles.includes(tileId)) return;
+    onDataChange({ ...data, dashboardHiddenTiles: [...data.dashboardHiddenTiles, tileId] });
+  };
+
   const resetLayout = () => {
     onDataChange({ ...data, dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER], dashboardHiddenTiles: [] });
   };
@@ -32,8 +37,8 @@ export const DashboardEditView = ({ data, onDataChange }: { data: GroundSchoolDa
       <div className="field-card"><span>Hidden tiles</span><strong>{hiddenTiles.length}</strong><p className="empty-state">{hiddenTiles.length ? 'Use Add to return a tile to the dashboard.' : 'Nothing is hidden right now.'}</p></div>
     </div>
     <div className="tile-restore-list">
+      {visibleTiles.map((tileId) => <div className="tile-restore-row" key={tileId}><span>{tileLabels[tileId]}</span><button onClick={() => hideTile(tileId)}><EyeOff size={16} />Remove</button></div>)}
       {hiddenTiles.map((tileId) => <div className="tile-restore-row" key={tileId}><span>{tileLabels[tileId]}</span><button onClick={() => showTile(tileId)}><Undo2 size={16} />Add</button></div>)}
-      {!hiddenTiles.length && <p className="empty-state">Remove a dashboard tile and it will show up here.</p>}
     </div>
   </section>;
 };

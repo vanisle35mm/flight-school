@@ -1474,6 +1474,11 @@ label {
   font-weight: 800;
 }
 
+.tile-restore-row button {
+  min-width: 104px;
+  border-radius: 8px;
+}
+
 .admin-console-panel {
   max-width: 100%;
 }

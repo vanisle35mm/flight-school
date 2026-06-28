@@ -162,7 +162,7 @@ export const App = () => {
     && activeUser?.id === secureAuthUserId
     && activeUser?.role === 'student'
     && activeUser.airportSetupRequired === true;
-  const adminViews: ViewId[] = ['users', 'import', 'dashboardEdit'];
+  const adminViews: ViewId[] = ['users', 'import'];
   const changeView = (view: ViewId) => setActiveView(adminViews.includes(view) && !isAdmin ? 'dashboard' : view);
   if (!isLoggedIn) return <LoginView data={data} onDataChange={setData} onLogin={() => setIsLoggedIn(true)} onSecureLogin={finishSecureLogin} />;
   if (needsAirportSetup) return <AirportOnboarding user={activeUser} onComplete={(homeAirport) => {
@@ -186,7 +186,7 @@ export const App = () => {
     {activeView === 'weather' && <WeatherPanel />}
     {activeView === 'account' && canManageAccount && <AccountView firstName={activeUser?.firstName ?? 'Pilot'} />}
     {activeView === 'import' && isAdmin && <LegacyImportView data={data} onDataChange={setData} onViewChange={setActiveView} />}
-    {activeView === 'dashboardEdit' && isAdmin && <DashboardEditView data={data} onDataChange={setData} />}
+    {activeView === 'dashboardEdit' && <DashboardEditView data={data} onDataChange={setData} />}
     {activeView === 'users' && isAdmin && <AdminConsoleView data={data} onDataChange={setData} secureMode={storageMode === 'secure'} onSecureReload={reloadSecureData} onViewAsUser={(userId) => {
       setData(activateUserData(data, userId));
       setActiveView('dashboard');

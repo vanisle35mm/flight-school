@@ -25,7 +25,7 @@ const cloudStatusLabel: Record<CloudSyncStatus, string> = {
 
 export const Shell = ({ children, activeView, onViewChange, search, onSearchChange, activeUserName, canAdmin, canManageAccount, cloudStatus, onLogout }: { children: ReactNode; activeView: ViewId; onViewChange: (view: ViewId) => void; search: string; onSearchChange: (value: string) => void; activeUserName: string; canAdmin: boolean; canManageAccount: boolean; cloudStatus: CloudSyncStatus; onLogout: () => void }) => {
   const [weatherSummary, setWeatherSummary] = useState(getStoredWeatherSummary);
-  const adminViews: ViewId[] = ['users', 'import', 'dashboardEdit'];
+  const adminViews: ViewId[] = ['users', 'import'];
   const isAdminView = adminViews.includes(activeView);
   const [adminMenuOpen, setAdminMenuOpen] = useState(isAdminView);
   useEffect(() => {
@@ -47,9 +47,9 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
         {adminMenuOpen && <div className="admin-submenu" id="admin-navigation">
           <button className={activeView === 'users' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('users')}><ShieldCheck size={16} /><span>Users</span></button>
           <button className={activeView === 'import' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('import')}><Settings size={16} /><span>Import / Export</span></button>
-          <button className={activeView === 'dashboardEdit' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('dashboardEdit')}><SlidersHorizontal size={16} /><span>Edit Dashboard</span></button>
         </div>}
       </div>}
+      <button className={activeView === 'dashboardEdit' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('dashboardEdit')}><SlidersHorizontal size={19} /><span>Edit Dashboard</span></button>
       {canManageAccount && <button className={activeView === 'account' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('account')} aria-label="Account settings"><KeyRound size={19} /><span>Account</span></button>}
       <button className="nav-item" onClick={onLogout} aria-label="Log out"><LogOut size={19} /><span>Logout</span></button>
     </div>
