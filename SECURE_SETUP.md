@@ -1,5 +1,7 @@
 # Turn On Secure Student Accounts
 
+This document covers the original secure-account migration. For the current invite-only email login and password recovery flow, continue with `STANDARD_LOGIN_SETUP.md` after these steps.
+
 Do these steps once. Existing lessons, notes, cards, tasks, and PSTAR history are migrated automatically.
 
 ## 1. Run The Secure Database Setup
@@ -37,8 +39,8 @@ Environments: Production and Preview
 2. Log in as admin with the same admin name and `ADMIN_PASSWORD` you already use.
 3. The first secure login creates the Supabase admin account and migrates every existing user automatically.
 4. Open **User Console**.
-5. Use **Set Password** once for each migrated student.
+5. Follow `STANDARD_LOGIN_SETUP.md` to attach real email addresses and send account-setup links.
 
-After this, students use their first name and new password. Students can access only their own data; the admin can access all student records.
+The first-name login remains available during the transition. Students can access only their own data; the admin can access all student records.
 
-Students can later change their own password from **Account** in the app sidebar.
+After email setup, students sign in with email and can change their own password from **Account** in the app sidebar.

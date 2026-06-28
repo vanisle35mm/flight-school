@@ -10,11 +10,13 @@ import { PstarView } from './features/pstar/PstarView';
 import { TasksView } from './features/tasks/TasksView';
 import { LegacyImportView } from './features/import/LegacyImportView';
 import { LoginView } from './features/login/LoginView';
+import { PasswordSetupView } from './features/login/PasswordSetupView';
 import { AirportOnboarding } from './features/onboarding/AirportOnboarding';
 import { WeatherPanel } from './features/weather/WeatherPanel';
 import { getStoredWeatherSummary, saveWeatherSummary } from './features/weather/weather';
 import { isCloudStorageConfigured, loadCloudGroundSchoolData, loadSecureGroundSchoolData, saveCloudGroundSchoolData, saveSecureGroundSchoolData, type CloudSyncStatus } from './lib/cloudStorage';
 import { signOutSecurely } from './lib/secureAuth';
+import { supabase } from './lib/supabaseClient';
 import { activateUserData, createEmptyGroundSchoolData, loadGroundSchoolData, saveGroundSchoolData, STORAGE_KEY } from './lib/storage';
 import type { GroundSchoolData, ViewId } from './types';
 
@@ -38,8 +40,22 @@ export const App = () => {
   const [cloudReady, setCloudReady] = useState(() => !isCloudStorageConfigured());
   const [storageMode, setStorageMode] = useState<'detecting' | 'legacy' | 'secure'>(() => isCloudStorageConfigured() ? 'detecting' : 'legacy');
   const [secureAuthUserId, setSecureAuthUserId] = useState('');
+  const [passwordRecoveryMode, setPasswordRecoveryMode] = useState(false);
   const lastSavedCloudPayload = useRef('');
   const authenticatedHomeAirport = secureAuthUserId ? data.users[secureAuthUserId]?.homeAirport : undefined;
+
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecoveryMode(true);
+        window.setTimeout(() => void finishSecureLogin(), 0);
+      }
+      if (event === 'SIGNED_IN' && session) window.setTimeout(() => void finishSecureLogin(), 0);
+      if (event === 'SIGNED_OUT') setPasswordRecoveryMode(false);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,7 +132,7 @@ export const App = () => {
     }
   }, [authenticatedHomeAirport, isLoggedIn, storageMode]);
 
-  const finishSecureLogin = async () => {
+  async function finishSecureLogin() {
     try {
       setCloudStatus('loading');
       const secureData = await loadSecureGroundSchoolData();
@@ -134,7 +150,7 @@ export const App = () => {
       setCloudStatus('error');
       return false;
     }
-  };
+  }
 
   const reloadSecureData = async () => {
     const secureData = await loadSecureGroundSchoolData();
@@ -148,6 +164,7 @@ export const App = () => {
       window.localStorage.removeItem(STORAGE_KEY);
       setStorageMode('detecting');
       setSecureAuthUserId('');
+      setPasswordRecoveryMode(false);
       setCloudReady(false);
       setCloudStatus('loading');
     }
@@ -162,9 +179,23 @@ export const App = () => {
     && activeUser?.id === secureAuthUserId
     && activeUser?.role === 'student'
     && activeUser.airportSetupRequired === true;
+  const needsPasswordSetup = storageMode === 'secure'
+    && activeUser?.id === secureAuthUserId
+    && (activeUser?.requiresPasswordReset === true || passwordRecoveryMode);
   const adminViews: ViewId[] = ['users', 'import'];
   const changeView = (view: ViewId) => setActiveView(adminViews.includes(view) && !isAdmin ? 'dashboard' : view);
   if (!isLoggedIn) return <LoginView data={data} onDataChange={setData} onLogin={() => setIsLoggedIn(true)} onSecureLogin={finishSecureLogin} />;
+  if (needsPasswordSetup) return <PasswordSetupView firstName={activeUser?.firstName ?? 'Pilot'} recoveryMode={passwordRecoveryMode} onLogout={logout} onComplete={() => {
+    setPasswordRecoveryMode(false);
+    if (!activeUser) return;
+    setData({
+      ...data,
+      users: {
+        ...data.users,
+        [activeUser.id]: { ...activeUser, requiresPasswordReset: false }
+      }
+    });
+  }} />;
   if (needsAirportSetup) return <AirportOnboarding user={activeUser} onComplete={(homeAirport) => {
     const currentWeather = getStoredWeatherSummary();
     if (currentWeather.station !== homeAirport) saveWeatherSummary({ station: homeAirport, temperature: '--' });

@@ -1307,6 +1307,144 @@ label {
   font-weight: 800;
 }
 
+.standard-login-panel,
+.password-setup-panel {
+  width: min(520px, 100%);
+  border-radius: 8px;
+}
+
+.standard-login-form,
+.legacy-login-panel {
+  display: grid;
+  gap: 13px;
+}
+
+.standard-login-form label,
+.legacy-login-panel label {
+  display: grid;
+  gap: 7px;
+  color: #dce8f1;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-input-with-icon {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  color: var(--muted);
+  background: #09131e;
+}
+
+.login-input-with-icon:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(131, 176, 207, 0.14);
+}
+
+.login-input-with-icon input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: #f7fbff;
+  background: transparent;
+}
+
+.legacy-login-panel > label > input {
+  width: 100%;
+  min-height: 46px;
+}
+
+.standard-login-submit,
+.legacy-login-toggle,
+.login-text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 900;
+}
+
+.standard-login-submit {
+  border: 1px solid rgba(16, 42, 67, 0.15);
+  color: #071019;
+  background: linear-gradient(180deg, var(--blue2), var(--blue));
+}
+
+.legacy-login-toggle,
+.login-text-button {
+  border: 1px solid var(--line);
+  color: #dce8f1;
+  background: transparent;
+}
+
+.login-text-button {
+  min-height: 36px;
+  border-color: transparent;
+  color: var(--blue2);
+}
+
+.legacy-login-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.legacy-login-divider::before,
+.legacy-login-divider::after {
+  height: 1px;
+  background: var(--line);
+  content: '';
+}
+
+.legacy-login-panel {
+  padding-top: 4px;
+}
+
+.legacy-login-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.login-role-control {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #09131e;
+}
+
+.login-role-control button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 800;
+}
+
+.login-role-control button.active {
+  color: #071019;
+  background: var(--blue);
+}
+
 .airport-setup-screen {
   display: grid;
   place-items: center;
@@ -1477,6 +1615,18 @@ label {
 .tile-restore-row button {
   min-width: 104px;
   border-radius: 8px;
+}
+
+.admin-email-management {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.admin-email-management label {
+  display: grid;
+  gap: 7px;
 }
 
 .admin-console-panel {
@@ -3297,6 +3447,7 @@ body {
   }
 
   .admin-add-user,
+  .admin-email-management,
   .admin-password-reset,
   .account-form,
   .login-create,

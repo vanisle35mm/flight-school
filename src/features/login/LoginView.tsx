@@ -1,180 +1,151 @@
-import { LogIn, Plane } from 'lucide-react';
+import { KeyRound, LoaderCircle, LogIn, Mail, Plane, UserRound } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { isAdminPasswordConfigured, verifyAdminPassword } from '../../lib/adminAuth';
-import { signInSecurely } from '../../lib/secureAuth';
+import { requestSecurePasswordReset, signInSecurely, signInWithEmail } from '../../lib/secureAuth';
+import { isSupabaseConfigured } from '../../lib/supabaseClient';
 import { verifyStudentPassword } from '../../lib/studentAuth';
 import { activateUserData, renameGroundSchoolUser, syncActiveUserData } from '../../lib/storage';
 import type { GroundSchoolData } from '../../types';
 
+type LegacyRole = 'student' | 'admin';
+
 export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onLogin: () => void; onSecureLogin: () => Promise<boolean> }) => {
   const synced = syncActiveUserData(data);
   const users = Object.values(synced.users);
-  const [studentName, setStudentName] = useState('');
-  const [studentPassword, setStudentPassword] = useState('');
-  const [adminName, setAdminName] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+  const [showLegacy, setShowLegacy] = useState(!isSupabaseConfigured);
+  const [legacyRole, setLegacyRole] = useState<LegacyRole>('student');
+  const [legacyName, setLegacyName] = useState('');
+  const [legacyPassword, setLegacyPassword] = useState('');
+  const [checkingLegacy, setCheckingLegacy] = useState(false);
   const [message, setMessage] = useState('');
-  const [checkingStudent, setCheckingStudent] = useState(false);
-  const [checkingAdmin, setCheckingAdmin] = useState(false);
 
   const loginAs = (userId: string) => {
     onDataChange(activateUserData(synced, userId));
     onLogin();
   };
 
-  const findUserByName = (name: string, role: 'admin' | 'student') => {
+  const findUserByName = (name: string, role: LegacyRole) => {
     const searchName = name.trim().toLowerCase();
     return users.find((user) => user.role === role && user.firstName.trim().toLowerCase() === searchName);
   };
 
-  const loginStudent = async () => {
-    if (!studentName.trim()) return setMessage('Enter your first name.');
-    if (!studentPassword) {
-      setMessage('Enter your student password.');
-      return;
-    }
+  const loginEmail = async () => {
+    if (!email.trim() || !email.includes('@')) return setMessage('Enter your email address.');
+    if (!password) return setMessage('Enter your password.');
+    setCheckingEmail(true);
+    setMessage('');
+    const result = await signInWithEmail(email, password);
+    const loaded = result.ok ? await onSecureLogin() : false;
+    setCheckingEmail(false);
+    if (result.ok && loaded) return;
+    setMessage(result.ok ? 'Your account data could not be loaded. Please try again.' : result.reason ?? 'Email or password is incorrect.');
+  };
 
-    setCheckingStudent(true);
-    const secureResult = await signInSecurely(studentName, studentPassword, 'student');
-    if (secureResult.mode === 'secure') {
-      const loaded = secureResult.ok ? await onSecureLogin() : false;
-      setCheckingStudent(false);
-      if (secureResult.ok && loaded) return;
-      setMessage(secureResult.reason === 'password-reset-required'
-        ? 'Your admin needs to set your new secure password in the User Console.'
-        : secureResult.reason === 'unavailable' || (secureResult.ok && !loaded)
-          ? 'Secure student login is temporarily unavailable. Please try again.'
-          : 'Student name or password is incorrect.');
-      return;
-    }
+  const sendPasswordReset = async () => {
+    if (!email.trim() || !email.includes('@')) return setMessage('Enter your email address first.');
+    setSendingReset(true);
+    setMessage('');
+    const result = await requestSecurePasswordReset(email);
+    setSendingReset(false);
+    setMessage(result.ok ? 'Check your email for a password reset link.' : result.reason ?? 'The reset email could not be sent.');
+  };
 
-    const user = findUserByName(studentName, 'student');
-    if (!user) {
-      setCheckingStudent(false);
-      setMessage('Student profile not found. Check the name or ask the admin to create your login.');
-      return;
-    }
-    if (!user.passwordHash) {
-      setCheckingStudent(false);
-      setMessage('This student needs a password. Ask the admin to set one in the User Console.');
-      return;
-    }
-
-    const result = await verifyStudentPassword(studentName, studentPassword, user);
-    setCheckingStudent(false);
-
-    if (!result.configured) {
-      setMessage('Student login is temporarily unavailable. Please try again.');
-      return;
-    }
-    if (!result.ok) {
-      setMessage(result.reason === 'password-not-set'
-        ? 'This student needs a password. Ask the admin to set one in the User Console.'
-        : result.reason === 'not-found'
-          ? 'Student profile not found. Check the name or ask the admin to create your login.'
-          : 'Student password is incorrect.');
-      return;
-    }
-
+  const loginLegacyStudent = async () => {
+    const user = findUserByName(legacyName, 'student');
+    if (!user) return setMessage('Student profile not found. Check the name or ask the admin.');
+    if (!user.passwordHash) return setMessage('Ask the admin to attach your email and send an account setup link.');
+    const result = await verifyStudentPassword(legacyName, legacyPassword, user);
+    if (!result.configured) return setMessage('Student login is temporarily unavailable.');
+    if (!result.ok) return setMessage('Student name or password is incorrect.');
     loginAs(result.userId && synced.users[result.userId] ? result.userId : user.id);
   };
 
-  const loginAdmin = async () => {
-    if (!adminName.trim()) {
-      setMessage('Enter the admin first name.');
-      return;
-    }
+  const loginLegacyAdmin = async () => {
+    if (!isAdminPasswordConfigured()) return setMessage('Admin password is not configured yet.');
+    const passwordResult = await verifyAdminPassword(legacyPassword);
+    if (!passwordResult.configured) return setMessage('Admin password is not configured yet.');
+    if (!passwordResult.ok) return setMessage('Admin password is incorrect.');
 
-    if (!adminPassword) {
-      setMessage('Enter the admin password.');
-      return;
-    }
-
-    setCheckingAdmin(true);
-    const secureResult = await signInSecurely(adminName, adminPassword, 'admin');
-    if (secureResult.mode === 'secure') {
-      const loaded = secureResult.ok ? await onSecureLogin() : false;
-      setCheckingAdmin(false);
-      if (secureResult.ok && loaded) return;
-      setMessage(secureResult.reason === 'unavailable' || (secureResult.ok && !loaded)
-        ? 'Secure admin login is temporarily unavailable. Please try again.'
-        : 'Admin name or password is incorrect.');
-      return;
-    }
-
-    if (!isAdminPasswordConfigured()) {
-      setCheckingAdmin(false);
-      setMessage('Admin password is not configured yet.');
-      return;
-    }
-
-    const passwordResult = await verifyAdminPassword(adminPassword);
-    setCheckingAdmin(false);
-
-    if (!passwordResult.configured) {
-      setMessage('Admin password is not configured yet.');
-      return;
-    }
-
-    if (!passwordResult.ok) {
-      setMessage('Admin password is incorrect.');
-      return;
-    }
-
-    const user = findUserByName(adminName, 'admin');
-    if (user) {
-      loginAs(user.id);
-      return;
-    }
-
-    const admins = users.filter((user) => user.role === 'admin');
+    const user = findUserByName(legacyName, 'admin');
+    if (user) return loginAs(user.id);
+    const admins = users.filter((candidate) => candidate.role === 'admin');
     const defaultAdmin = admins.length === 1 && admins[0].id === 'user_default' && admins[0].firstName === 'Pilot' ? admins[0] : null;
-    if (defaultAdmin && adminName.trim()) {
-      const renamedData = renameGroundSchoolUser(synced, defaultAdmin.id, adminName);
+    if (defaultAdmin) {
+      const renamedData = renameGroundSchoolUser(synced, defaultAdmin.id, legacyName);
       onDataChange(activateUserData(renamedData, defaultAdmin.id));
       onLogin();
       return;
     }
+    setMessage('Admin profile not found.');
+  };
 
-    if (!user) {
-      setMessage('Admin profile not found.');
+  const loginLegacy = async () => {
+    if (!legacyName.trim()) return setMessage('Enter your first name.');
+    if (!legacyPassword) return setMessage('Enter your password.');
+    setCheckingLegacy(true);
+    setMessage('');
+
+    const secureResult = await signInSecurely(legacyName, legacyPassword, legacyRole);
+    if (secureResult.mode === 'secure') {
+      const loaded = secureResult.ok ? await onSecureLogin() : false;
+      setCheckingLegacy(false);
+      if (secureResult.ok && loaded) return;
+      setMessage(secureResult.reason === 'password-reset-required'
+        ? 'Ask the admin to attach your email and send an account setup link.'
+        : secureResult.reason === 'unavailable' || (secureResult.ok && !loaded)
+          ? 'Secure login is temporarily unavailable. Please try again.'
+          : 'Name or password is incorrect.');
       return;
     }
+
+    if (legacyRole === 'student') await loginLegacyStudent();
+    else await loginLegacyAdmin();
+    setCheckingLegacy(false);
   };
 
-  const adminLoginOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') void loginAdmin();
+  const emailOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') void loginEmail();
   };
 
-  const studentLoginOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') void loginStudent();
+  const legacyOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') void loginLegacy();
   };
 
   return <main className="login-screen">
-    <section className="login-panel">
+    <section className="login-panel standard-login-panel">
       <div className="login-brand"><Plane size={30} /><span>Flight School</span></div>
-      <div className="login-heading"><span className="eyebrow">CYYJ Ground School</span><h1>Welcome aboard</h1><p>Sign in with your first name and password.</p></div>
+      <div className="login-heading"><span className="eyebrow">Ground School</span><h1>Welcome aboard</h1><p>Sign in to continue your training.</p></div>
 
-      {message && <div className="login-message">{message}</div>}
+      {isSupabaseConfigured && <div className="standard-login-form">
+        <label>Email address<div className="login-input-with-icon"><Mail size={18} /><input value={email} onChange={(event) => { setEmail(event.target.value); setMessage(''); }} onKeyDown={emailOnEnter} type="email" autoComplete="email" placeholder="captain@example.com" autoFocus /></div></label>
+        <label>Password<div className="login-input-with-icon"><KeyRound size={18} /><input value={password} onChange={(event) => { setPassword(event.target.value); setMessage(''); }} onKeyDown={emailOnEnter} type="password" autoComplete="current-password" placeholder="Your password" /></div></label>
+        {message && !showLegacy && <div className="login-message" role="status">{message}</div>}
+        <button className="standard-login-submit" onClick={() => void loginEmail()} disabled={checkingEmail}>
+          {checkingEmail ? <LoaderCircle className="spin" size={18} /> : <LogIn size={18} />}{checkingEmail ? 'Signing in' : 'Sign in'}
+        </button>
+        <button className="login-text-button" onClick={() => void sendPasswordReset()} disabled={sendingReset}>{sendingReset ? 'Sending reset email' : 'Forgot password?'}</button>
+      </div>}
 
-      <div className="login-user-list">
-        <div className="login-user-card static">
-          <div><strong>Student login</strong><span>Open your lessons, notes, cards, and tasks.</span></div>
-          <div className="login-field-stack">
-            <input value={studentName} onChange={(event) => { setStudentName(event.target.value); setMessage(''); }} onKeyDown={studentLoginOnEnter} placeholder="First name" autoComplete="username" />
-            <input value={studentPassword} onChange={(event) => { setStudentPassword(event.target.value); setMessage(''); }} onKeyDown={studentLoginOnEnter} placeholder="Password" type="password" autoComplete="current-password" />
-          </div>
-          <button onClick={() => void loginStudent()} disabled={checkingStudent}><LogIn size={17} />{checkingStudent ? 'Checking' : 'Login'}</button>
+      <div className="legacy-login-divider"><span>Transition access</span></div>
+      <button className="legacy-login-toggle" onClick={() => { setShowLegacy((open) => !open); setMessage(''); }}><UserRound size={17} />{showLegacy ? 'Hide first-name login' : 'Use first-name login'}</button>
+
+      {showLegacy && <div className="legacy-login-panel">
+        <p>Use this while your account is being moved to email login.</p>
+        <div className="login-role-control" aria-label="Account type">
+          <button className={legacyRole === 'student' ? 'active' : ''} onClick={() => { setLegacyRole('student'); setMessage(''); }}>Student</button>
+          <button className={legacyRole === 'admin' ? 'active' : ''} onClick={() => { setLegacyRole('admin'); setMessage(''); }}>Admin</button>
         </div>
-        <div className="login-user-card static">
-          <div><strong>Admin login</strong><span>Admin users can open the full user console.</span></div>
-          <div className="login-field-stack">
-            <input value={adminName} onChange={(event) => { setAdminName(event.target.value); setMessage(''); }} onKeyDown={adminLoginOnEnter} placeholder="Admin first name" />
-            <input value={adminPassword} onChange={(event) => { setAdminPassword(event.target.value); setMessage(''); }} onKeyDown={adminLoginOnEnter} placeholder="Admin password" type="password" autoComplete="current-password" />
-          </div>
-          <button onClick={() => void loginAdmin()} disabled={checkingAdmin}><LogIn size={17} />{checkingAdmin ? 'Checking' : 'Admin'}</button>
-        </div>
-      </div>
+        <label>First name<input value={legacyName} onChange={(event) => { setLegacyName(event.target.value); setMessage(''); }} onKeyDown={legacyOnEnter} autoComplete="username" placeholder="First name" /></label>
+        <label>Password<input value={legacyPassword} onChange={(event) => { setLegacyPassword(event.target.value); setMessage(''); }} onKeyDown={legacyOnEnter} type="password" autoComplete="current-password" placeholder="Password" /></label>
+        {message && <div className="login-message" role="status">{message}</div>}
+        <button className="standard-login-submit" onClick={() => void loginLegacy()} disabled={checkingLegacy}>
+          {checkingLegacy ? <LoaderCircle className="spin" size={18} /> : <LogIn size={18} />}{checkingLegacy ? 'Signing in' : `Sign in as ${legacyRole}`}
+        </button>
+      </div>}
     </section>
   </main>;
 };

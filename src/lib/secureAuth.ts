@@ -6,6 +6,39 @@ export type SecureLoginResult = {
   reason?: 'incorrect' | 'password-reset-required' | 'secure-not-configured' | 'unavailable';
 };
 
+export type SecureEmailLoginResult = {
+  ok: boolean;
+  reason?: string;
+};
+
+export type SecureAccountDirectoryEntry = {
+  id: string;
+  email: string;
+  invitedAt?: string;
+  lastSignInAt?: string;
+  emailConfirmedAt?: string;
+};
+
+const getAccessToken = async () => {
+  if (!supabase) return '';
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? '';
+};
+
+export const signInWithEmail = async (email: string, password: string): Promise<SecureEmailLoginResult> => {
+  if (!supabase) return { ok: false, reason: 'Email login is not configured.' };
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+  return error ? { ok: false, reason: 'Email or password is incorrect.' } : { ok: true };
+};
+
+export const requestSecurePasswordReset = async (email: string): Promise<SecureEmailLoginResult> => {
+  if (!supabase) return { ok: false, reason: 'Email login is not configured.' };
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo: window.location.origin
+  });
+  return error ? { ok: false, reason: error.message } : { ok: true };
+};
+
 export const signInSecurely = async (firstName: string, password: string, role: 'admin' | 'student'): Promise<SecureLoginResult> => {
   if (!supabase) return { ok: false, mode: 'legacy', reason: 'secure-not-configured' };
 
@@ -31,8 +64,7 @@ export const signInSecurely = async (firstName: string, password: string, role: 
 
 export const runSecureAdminAction = async (body: Record<string, unknown>): Promise<{ ok: boolean; reason?: string }> => {
   if (!supabase) return { ok: false, reason: 'Secure accounts are not configured.' };
-  const { data } = await supabase.auth.getSession();
-  const accessToken = data.session?.access_token;
+  const accessToken = await getAccessToken();
   if (!accessToken) return { ok: false, reason: 'Admin session expired. Please log in again.' };
 
   try {
@@ -50,6 +82,20 @@ export const runSecureAdminAction = async (body: Record<string, unknown>): Promi
   }
 };
 
+export const getSecureAccountDirectory = async (): Promise<{ ok: boolean; accounts: SecureAccountDirectoryEntry[]; reason?: string }> => {
+  if (!supabase) return { ok: false, accounts: [], reason: 'Secure accounts are not configured.' };
+  const accessToken = await getAccessToken();
+  if (!accessToken) return { ok: false, accounts: [], reason: 'Admin session expired. Please log in again.' };
+  try {
+    const response = await fetch('/api/admin-users', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    return await response.json() as { ok: boolean; accounts: SecureAccountDirectoryEntry[]; reason?: string };
+  } catch {
+    return { ok: false, accounts: [], reason: 'The user service could not be reached.' };
+  }
+};
+
 export const signOutSecurely = async () => {
   if (supabase) await supabase.auth.signOut({ scope: 'local' });
 };
@@ -58,4 +104,25 @@ export const changeSecurePassword = async (password: string): Promise<{ ok: bool
   if (!supabase) return { ok: false, reason: 'Secure accounts are not configured.' };
   const { error } = await supabase.auth.updateUser({ password });
   return error ? { ok: false, reason: error.message } : { ok: true };
+};
+
+export const completeSecurePasswordSetup = async (password: string): Promise<{ ok: boolean; reason?: string }> => {
+  if (!supabase) return { ok: false, reason: 'Secure accounts are not configured.' };
+  const passwordResult = await changeSecurePassword(password);
+  if (!passwordResult.ok) return passwordResult;
+  const accessToken = await getAccessToken();
+  if (!accessToken) return { ok: false, reason: 'Your secure session expired. Open the email link again.' };
+  try {
+    const response = await fetch('/api/account', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ action: 'complete-password-setup' })
+    });
+    return await response.json() as { ok: boolean; reason?: string };
+  } catch {
+    return { ok: false, reason: 'Your password changed, but account setup could not be completed. Please try again.' };
+  }
 };
