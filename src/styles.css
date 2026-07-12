@@ -3906,14 +3906,14 @@ body {
 
 .walkaround-map-panel {
   display: grid;
-  grid-template-rows: minmax(540px, 1fr) auto;
+  grid-template-rows: minmax(500px, 1fr) auto;
   gap: 14px;
   padding: 14px;
 }
 
 .walkaround-aircraft {
   position: relative;
-  min-height: 540px;
+  min-height: 500px;
   overflow: hidden;
   border: 1px solid rgba(72, 103, 134, 0.45);
   border-radius: 8px;
@@ -3927,14 +3927,14 @@ body {
 
 .walkaround-aircraft-svg {
   position: absolute;
-  inset: 18px 10px 8px;
-  width: calc(100% - 20px);
-  height: calc(100% - 26px);
+  inset: 2px 0 0;
+  width: 100%;
+  height: calc(100% - 2px);
   overflow: visible;
 }
 
 .aircraft-drawing {
-  transform: translate(-45px, -20px) scale(1.12);
+  transform: translate(-58px, -54px) scale(1.22);
   transform-origin: center;
 }
 
@@ -4159,8 +4159,8 @@ body {
 }
 
 .walkaround-hotspot.fuel-oil {
-  left: 62%;
-  top: 31%;
+  left: 63%;
+  top: 28%;
 }
 
 .walkaround-hotspot.fuel-oil::before {
@@ -4175,8 +4175,8 @@ body {
 }
 
 .walkaround-hotspot.cabin-docs {
-  left: 29%;
-  top: 36%;
+  left: 30%;
+  top: 33%;
 }
 
 .walkaround-hotspot.cabin-docs::before {
@@ -4192,7 +4192,7 @@ body {
 
 .walkaround-hotspot.fuselage-tail {
   left: 59%;
-  top: 85%;
+  top: 84%;
 }
 
 .walkaround-hotspot.fuselage-tail::before {
@@ -4207,8 +4207,8 @@ body {
 }
 
 .walkaround-hotspot.left-wing {
-  left: 9%;
-  top: 60%;
+  left: 8%;
+  top: 58%;
 }
 
 .walkaround-hotspot.left-wing::before {
@@ -4223,8 +4223,8 @@ body {
 }
 
 .walkaround-hotspot.right-wing {
-  right: 9%;
-  top: 60%;
+  right: 8%;
+  top: 58%;
 }
 
 .walkaround-hotspot.right-wing::before {
@@ -4239,8 +4239,8 @@ body {
 }
 
 .walkaround-hotspot.landing-gear {
-  left: 31%;
-  top: 69%;
+  left: 30%;
+  top: 68%;
 }
 
 .walkaround-hotspot.landing-gear::before {
@@ -4256,7 +4256,7 @@ body {
 
 .walkaround-hotspot.prop-engine {
   left: 63%;
-  top: 15%;
+  top: 11%;
 }
 
 .walkaround-hotspot.prop-engine::before {
