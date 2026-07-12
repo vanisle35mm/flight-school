@@ -225,6 +225,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
     {page === 'outside' && <section className="walkaround-page">
       <div className="walkaround-page-heading">
         <div><h2>Outside Checks</h2><p>Practice the walkaround without the airplane.</p></div>
+        <button className="walkaround-reset-button" onClick={() => resetChecklist('outsideChecks')}><RotateCcw size={15} />Reset</button>
       </div>
       <div className="walkaround-mode-tabs" role="tablist" aria-label="Outside checks mode">
         {(['learn', 'practice', 'test'] as WalkaroundMode[]).map((mode) => <button
@@ -266,12 +267,12 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
           <div className="walkaround-detail-card">
             <div className="walkaround-detail-heading">
               <div><span className="eyebrow">{selectedWalkaroundArea.station}</span><h3>{walkaroundMode === 'test' ? 'Identify this inspection point' : selectedWalkaroundArea.title}</h3></div>
-              <button className="walkaround-reset-button" onClick={() => resetChecklist('outsideChecks')}><RotateCcw size={15} />Reset</button>
             </div>
             <div className="walkaround-practice-card">
               <div className="walkaround-question"><HelpCircle size={24} /><strong>{walkaroundMode === 'test' ? 'Which zone is this, and what do you check?' : 'What are you checking here?'}</strong></div>
               {walkaroundMode !== 'learn' && <textarea value={walkaroundAnswer} onChange={(event) => setWalkaroundAnswer(event.target.value)} placeholder="Type your answer before revealing the checks..." />}
               {walkaroundMode !== 'learn' && <button className="walkaround-reveal-button" onClick={() => setWalkaroundRevealed((revealed) => !revealed)} type="button"><Eye size={17} />{walkaroundRevealed ? 'Hide Checks' : 'Reveal Checks'}</button>}
+              <span className="walkaround-preview-label">Checklist preview</span>
               <div className={checksVisible ? 'walkaround-check-list' : 'walkaround-check-list hidden'}>
                 {selectedWalkaroundArea.checks.map((check, index) => <div className="walkaround-check-row" key={check}>
                   {checksVisible ? <CheckCircle2 size={18} /> : <Circle size={18} />}

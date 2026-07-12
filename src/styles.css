@@ -3832,6 +3832,13 @@ body {
   gap: 16px;
 }
 
+.walkaround-page-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .walkaround-page-heading h2 {
   margin: 0 0 6px;
   color: var(--navy);
@@ -4050,10 +4057,10 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 30px;
-  padding: 6px 10px;
+  min-height: 34px;
+  padding: 7px 10px;
   border: 1px solid rgba(119, 159, 190, 0.6);
-  border-radius: 6px;
+  border-radius: 8px;
   color: #d9e8f6;
   background: rgba(12, 23, 34, 0.92);
   font-size: 12px;
@@ -4063,22 +4070,18 @@ body {
 
 .walkaround-hotspot::before {
   content: "";
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border: 3px solid var(--amber);
+  position: static;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--amber);
   border-radius: 50%;
   background: rgba(224, 177, 88, 0.1);
-  box-shadow: 0 0 0 5px rgba(224, 177, 88, 0.16), 0 0 20px rgba(224, 177, 88, 0.55);
+  box-shadow: 0 0 0 4px rgba(224, 177, 88, 0.12), 0 0 16px rgba(224, 177, 88, 0.45);
 }
 
 .walkaround-hotspot::after {
-  content: "";
-  position: absolute;
-  width: 58px;
-  height: 1px;
-  background: rgba(224, 177, 88, 0.72);
-  transform-origin: left center;
+  display: none;
 }
 
 .walkaround-hotspot.active {
@@ -4091,7 +4094,7 @@ body {
 .walkaround-hotspot.active::before {
   border-color: #bde1ff;
   background: rgba(47, 143, 255, 0.24);
-  box-shadow: 0 0 0 6px rgba(47, 143, 255, 0.24), 0 0 26px rgba(75, 164, 255, 0.82);
+  box-shadow: 0 0 0 5px rgba(47, 143, 255, 0.22), 0 0 22px rgba(75, 164, 255, 0.72);
 }
 
 .walkaround-hotspot.active::after {
@@ -4099,7 +4102,7 @@ body {
 }
 
 .walkaround-hotspot.fuel-oil {
-  left: 62%;
+  left: 61%;
   top: 25%;
 }
 
@@ -4115,8 +4118,8 @@ body {
 }
 
 .walkaround-hotspot.cabin-docs {
-  left: 34%;
-  top: 36%;
+  left: 35%;
+  top: 38%;
 }
 
 .walkaround-hotspot.cabin-docs::before {
@@ -4132,7 +4135,7 @@ body {
 
 .walkaround-hotspot.fuselage-tail {
   left: 58%;
-  top: 86%;
+  top: 85%;
 }
 
 .walkaround-hotspot.fuselage-tail::before {
@@ -4147,8 +4150,8 @@ body {
 }
 
 .walkaround-hotspot.left-wing {
-  left: 14%;
-  top: 58%;
+  left: 13%;
+  top: 59%;
 }
 
 .walkaround-hotspot.left-wing::before {
@@ -4163,8 +4166,8 @@ body {
 }
 
 .walkaround-hotspot.right-wing {
-  right: 14%;
-  top: 58%;
+  right: 13%;
+  top: 59%;
 }
 
 .walkaround-hotspot.right-wing::before {
@@ -4180,7 +4183,7 @@ body {
 
 .walkaround-hotspot.landing-gear {
   left: 35%;
-  top: 69%;
+  top: 68%;
 }
 
 .walkaround-hotspot.landing-gear::before {
@@ -4196,7 +4199,7 @@ body {
 
 .walkaround-hotspot.prop-engine {
   left: 62%;
-  top: 8%;
+  top: 9%;
 }
 
 .walkaround-hotspot.prop-engine::before {
@@ -4349,6 +4352,12 @@ body {
   background: linear-gradient(180deg, #ffd36f, #e3a936);
   font-size: 16px;
   font-weight: 950;
+}
+
+.walkaround-preview-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .walkaround-route {
