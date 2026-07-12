@@ -1,5 +1,5 @@
 import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
 import type { ViewId } from '../types';
@@ -55,14 +55,19 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
   const adminViews: ViewId[] = ['users', 'import'];
   const isAdminView = adminViews.includes(activeView);
   const [adminMenuOpen, setAdminMenuOpen] = useState(isAdminView);
-  const [groundSchoolOpen, setGroundSchoolOpen] = useState(() => loadNavModuleState().groundSchoolOpen || groundSchoolViewIds.has(activeView));
-  const [flightTrainingOpen, setFlightTrainingOpen] = useState(() => loadNavModuleState().flightTrainingOpen || flightTrainingViewIds.has(activeView));
+  const firstActiveViewSync = useRef(true);
+  const [groundSchoolOpen, setGroundSchoolOpen] = useState(() => loadNavModuleState().groundSchoolOpen);
+  const [flightTrainingOpen, setFlightTrainingOpen] = useState(() => loadNavModuleState().flightTrainingOpen);
   useEffect(() => {
     const handleWeatherSummary = (event: Event) => setWeatherSummary((event as CustomEvent<WeatherSummary>).detail);
     window.addEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
     return () => window.removeEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
   }, []);
   useEffect(() => {
+    if (firstActiveViewSync.current) {
+      firstActiveViewSync.current = false;
+      return;
+    }
     if (groundSchoolViewIds.has(activeView)) setGroundSchoolOpen(true);
     if (flightTrainingViewIds.has(activeView)) setFlightTrainingOpen(true);
   }, [activeView]);
