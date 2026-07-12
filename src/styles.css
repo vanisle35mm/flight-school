@@ -3659,7 +3659,6 @@ body {
 }
 
 .flight-training-hero,
-.flight-tabs,
 .flight-panel,
 .c172-panel,
 .flight-schedule-card {
@@ -3687,33 +3686,6 @@ body {
   margin: 0;
   color: var(--muted);
   font-weight: 700;
-}
-
-.flight-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 8px;
-}
-
-.flight-tabs button,
-.panel .flight-tabs button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--muted);
-  background: transparent;
-  font-weight: 900;
-}
-
-.flight-tabs button.active {
-  color: #f8fbff;
-  border-color: rgba(131, 176, 207, 0.45);
-  background: rgba(131, 176, 207, 0.12);
 }
 
 .flight-progress-row {
@@ -3926,7 +3898,6 @@ body {
 }
 
 @media (max-width: 900px) {
-  .flight-tabs,
   .instrument-row,
   .flight-checklist-grid,
   .outside-check-layout,

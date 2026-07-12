@@ -1,21 +1,30 @@
-import { Bell, BookOpen, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
 import type { ViewId } from '../types';
 
-const navItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
+const groundSchoolNavItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
   { id: 'dashboard', label: 'Dashboard', icon: <Gauge size={18} /> },
   { id: 'notes', label: 'Notes', icon: <BookOpen size={18} /> },
   { id: 'flashcards', label: 'Flashcards', icon: <Layers size={18} /> },
   { id: 'pstar', label: 'PSTAR', icon: <GraduationCap size={18} /> },
   { id: 'roca', label: 'ROC-A', icon: <RadioTower size={18} /> },
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={18} /> },
-  { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> },
-  { id: 'flightTraining', label: 'Flight Training', icon: <PlaneTakeoff size={18} /> }
+  { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> }
 ];
-const groundSchoolNavItems = navItems.filter((item) => item.id !== 'flightTraining');
-const flightTrainingNavItems = navItems.filter((item) => item.id === 'flightTraining');
+
+const flightTrainingNavItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
+  { id: 'flightChecklist', label: 'Checklist', icon: <CheckSquare size={18} /> },
+  { id: 'flightPanel', label: 'C172 Panel', icon: <Gauge size={18} /> },
+  { id: 'outsideChecks', label: 'Outside Checks', icon: <PlaneTakeoff size={18} /> },
+  { id: 'flightSchedule', label: 'Flight Schedule', icon: <CalendarPlus size={18} /> }
+];
+
+const navItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
+  ...groundSchoolNavItems,
+  ...flightTrainingNavItems
+];
 const groundSchoolViewIds = new Set<ViewId>(groundSchoolNavItems.map((item) => item.id));
 const flightTrainingViewIds = new Set<ViewId>(flightTrainingNavItems.map((item) => item.id));
 

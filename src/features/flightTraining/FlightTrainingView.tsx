@@ -1,23 +1,14 @@
-import { CalendarPlus, CheckCircle2, ClipboardCheck, Compass, Gauge, PlaneTakeoff, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import { CalendarPlus, CheckCircle2, Compass, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
+import { useMemo } from 'react';
 import { createDefaultFlightTrainingData } from '../../lib/storage';
 import type { FlightChecklistItem, FlightScheduleEntry, GroundSchoolData } from '../../types';
 
-type FlightTab = 'checklist' | 'panel' | 'outside' | 'schedule';
-
-const tabs: Array<{ id: FlightTab; label: string; icon: ReactNode }> = [
-  { id: 'checklist', label: 'Checklist', icon: <ClipboardCheck size={17} /> },
-  { id: 'panel', label: 'C172 Panel', icon: <Gauge size={17} /> },
-  { id: 'outside', label: 'Outside Checks', icon: <PlaneTakeoff size={17} /> },
-  { id: 'schedule', label: 'Flight Schedule', icon: <CalendarPlus size={17} /> }
-];
+type FlightPage = 'checklist' | 'panel' | 'outside' | 'schedule';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const pctDone = (items: FlightChecklistItem[]) => items.length ? Math.round((items.filter((item) => item.checked).length / items.length) * 100) : 0;
 
-export const FlightTrainingView = ({ data, onDataChange }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void }) => {
-  const [tab, setTab] = useState<FlightTab>('checklist');
+export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; page: FlightPage }) => {
   const flightTraining = data.flightTraining ?? createDefaultFlightTrainingData();
   const nextFlight = useMemo(() => flightTraining.schedule
     .filter((entry) => !entry.completed)
@@ -54,7 +45,6 @@ export const FlightTrainingView = ({ data, onDataChange }: { data: GroundSchoolD
       completed: false
     };
     updateFlightTraining({ schedule: [entry, ...flightTraining.schedule] });
-    setTab('schedule');
   };
 
   const updateFlight = (flightId: string, patch: Partial<FlightScheduleEntry>) => {
@@ -69,17 +59,13 @@ export const FlightTrainingView = ({ data, onDataChange }: { data: GroundSchoolD
     <div className="flight-training-hero">
       <div>
         <span className="eyebrow">Flight Training Module</span>
-        <h2>Training cockpit</h2>
+        <h2>{page === 'checklist' ? 'Checklist' : page === 'panel' ? 'C172 Panel' : page === 'outside' ? 'Outside Checks' : 'Flight Schedule'}</h2>
         <p>{nextFlight ? `Next flight: ${nextFlight.date} - ${nextFlight.focus || 'Training flight'}` : 'Build your next flight block.'}</p>
       </div>
       <button onClick={addFlight}><CalendarPlus size={17} />Add Flight</button>
     </div>
 
-    <div className="flight-tabs" role="tablist" aria-label="Flight training areas">
-      {tabs.map((item) => <button className={tab === item.id ? 'active' : ''} key={item.id} onClick={() => setTab(item.id)}>{item.icon}<span>{item.label}</span></button>)}
-    </div>
-
-    {tab === 'checklist' && <section className="panel flight-panel">
+    {page === 'checklist' && <section className="panel flight-panel">
       <div className="panel-heading">
         <div><span className="eyebrow">Training Checklist</span><h2>Lesson Readiness</h2></div>
         <button onClick={() => resetChecklist('checklist')}><RotateCcw size={17} />Reset</button>
@@ -94,7 +80,7 @@ export const FlightTrainingView = ({ data, onDataChange }: { data: GroundSchoolD
       </div>
     </section>}
 
-    {tab === 'panel' && <section className="panel flight-panel">
+    {page === 'panel' && <section className="panel flight-panel">
       <div className="panel-heading"><div><span className="eyebrow">Cessna 172 Practice</span><h2>Panel Flow Trainer</h2></div><SlidersHorizontal size={22} /></div>
       <div className="c172-panel">
         <div className="instrument-row">
@@ -118,7 +104,7 @@ export const FlightTrainingView = ({ data, onDataChange }: { data: GroundSchoolD
       </div>
     </section>}
 
-    {tab === 'outside' && <section className="panel flight-panel">
+    {page === 'outside' && <section className="panel flight-panel">
       <div className="panel-heading">
         <div><span className="eyebrow">Ramp Practice</span><h2>Outside Checks</h2></div>
         <button onClick={() => resetChecklist('outsideChecks')}><RotateCcw size={17} />Reset</button>
@@ -135,7 +121,7 @@ export const FlightTrainingView = ({ data, onDataChange }: { data: GroundSchoolD
       </div>
     </section>}
 
-    {tab === 'schedule' && <section className="panel flight-panel">
+    {page === 'schedule' && <section className="panel flight-panel">
       <div className="panel-heading"><div><span className="eyebrow">Flight Schedule</span><h2>Flight Notes</h2></div><button onClick={addFlight}><CalendarPlus size={17} />Add</button></div>
       <div className="flight-schedule-list">
         {flightTraining.schedule.length ? flightTraining.schedule.map((entry) => <article className={entry.completed ? 'flight-schedule-card completed' : 'flight-schedule-card'} key={entry.id}>

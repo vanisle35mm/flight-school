@@ -218,7 +218,10 @@ export const App = () => {
     {activeView === 'pstar' && <PstarView data={data} onDataChange={setData} />}
     {activeView === 'roca' && <RocaView data={data} onDataChange={setData} />}
     {activeView === 'weather' && <WeatherPanel />}
-    {activeView === 'flightTraining' && <FlightTrainingView data={data} onDataChange={setData} />}
+    {activeView === 'flightChecklist' && <FlightTrainingView data={data} onDataChange={setData} page="checklist" />}
+    {activeView === 'flightPanel' && <FlightTrainingView data={data} onDataChange={setData} page="panel" />}
+    {activeView === 'outsideChecks' && <FlightTrainingView data={data} onDataChange={setData} page="outside" />}
+    {activeView === 'flightSchedule' && <FlightTrainingView data={data} onDataChange={setData} page="schedule" />}
     {activeView === 'account' && canManageAccount && <AccountView firstName={activeUser?.firstName ?? 'Pilot'} />}
     {activeView === 'import' && isAdmin && <LegacyImportView data={data} onDataChange={setData} onViewChange={setActiveView} />}
     {activeView === 'dashboardEdit' && <DashboardEditView data={data} onDataChange={setData} />}
