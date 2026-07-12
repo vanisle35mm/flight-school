@@ -1,5 +1,5 @@
 import { CalendarPlus, CheckCircle2, Circle, Compass, Eye, HelpCircle, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { createDefaultFlightTrainingData } from '../../lib/storage';
 import type { FlightChecklistItem, FlightScheduleEntry, GroundSchoolData } from '../../types';
 
@@ -170,17 +170,18 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
   const completedWalkaroundIds = new Set(flightTraining.outsideChecks.filter((item) => item.checked).map((item) => item.id));
   const walkaroundProgressItems = walkaroundAreas.map((area) => ({ id: area.id, label: area.title, checked: completedWalkaroundIds.has(area.id) }));
   const walkaroundProgress = pctDone(walkaroundProgressItems);
+  const completedWalkaroundCount = flightTraining.outsideChecks.filter((item) => walkaroundAreas.some((area) => area.id === item.id) && item.checked).length;
   const checksVisible = walkaroundMode === 'learn' || walkaroundRevealed;
 
   return <section className="flight-training-module">
-    <div className="flight-training-hero">
+    {page !== 'outside' && <div className="flight-training-hero">
       <div>
         <span className="eyebrow">Flight Training Module</span>
-        <h2>{page === 'checklist' ? 'Checklist' : page === 'panel' ? 'C172 Panel' : page === 'outside' ? 'Outside Checks' : 'Flight Schedule'}</h2>
+        <h2>{page === 'checklist' ? 'Checklist' : page === 'panel' ? 'C172 Panel' : 'Flight Schedule'}</h2>
         <p>{nextFlight ? `Next flight: ${nextFlight.date} - ${nextFlight.focus || 'Training flight'}` : 'Build your next flight block.'}</p>
       </div>
       <button onClick={addFlight}><CalendarPlus size={17} />Add Flight</button>
-    </div>
+    </div>}
 
     {page === 'checklist' && <section className="panel flight-panel">
       <div className="panel-heading">
@@ -221,10 +222,9 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
       </div>
     </section>}
 
-    {page === 'outside' && <section className="panel flight-panel">
-      <div className="panel-heading">
-        <div><span className="eyebrow">Ramp Practice</span><h2>Outside Checks</h2><p>Practice the walkaround without the airplane.</p></div>
-        <button onClick={() => resetChecklist('outsideChecks')}><RotateCcw size={17} />Reset</button>
+    {page === 'outside' && <section className="walkaround-page">
+      <div className="walkaround-page-heading">
+        <div><h2>Outside Checks</h2><p>Practice the walkaround without the airplane.</p></div>
       </div>
       <div className="walkaround-mode-tabs" role="tablist" aria-label="Outside checks mode">
         {(['learn', 'practice', 'test'] as WalkaroundMode[]).map((mode) => <button
@@ -241,6 +241,9 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
           <div className="walkaround-map-panel">
             <div className="walkaround-aircraft" aria-label="Cessna 172 walkaround practice zones">
               <span className="aircraft-shadow" />
+              <span className="aircraft-stripe left-tip" />
+              <span className="aircraft-stripe right-tip" />
+              <span className="aircraft-stripe beacon" />
               <span className="aircraft-part fuselage" />
               <span className="aircraft-part cabin" />
               <span className="aircraft-part nose" />
@@ -250,8 +253,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
               <span className="aircraft-part left-gear" />
               <span className="aircraft-part right-gear" />
               <span className="aircraft-part nose-gear" />
-              {walkaroundAreas.map((area, index) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => selectWalkaroundArea(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
-                <b>{index + 1}</b>
+              {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => selectWalkaroundArea(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
                 <span>{walkaroundMode === 'test' && selectedWalkaroundArea.id !== area.id ? 'Identify' : area.shortLabel}</span>
                 {completedWalkaroundIds.has(area.id) && <CheckCircle2 size={15} />}
               </button>)}
@@ -264,7 +266,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
           <div className="walkaround-detail-card">
             <div className="walkaround-detail-heading">
               <div><span className="eyebrow">{selectedWalkaroundArea.station}</span><h3>{walkaroundMode === 'test' ? 'Identify this inspection point' : selectedWalkaroundArea.title}</h3></div>
-              <span className="walkaround-zone-count">{walkaroundAreas.findIndex((area) => area.id === selectedWalkaroundArea.id) + 1}/{walkaroundAreas.length}</span>
+              <button className="walkaround-reset-button" onClick={() => resetChecklist('outsideChecks')}><RotateCcw size={15} />Reset</button>
             </div>
             <div className="walkaround-practice-card">
               <div className="walkaround-question"><HelpCircle size={24} /><strong>{walkaroundMode === 'test' ? 'Which zone is this, and what do you check?' : 'What are you checking here?'}</strong></div>
@@ -284,15 +286,20 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
           </div>
         </div>
         <div className="walkaround-route">
-          <div className="walkaround-progress-summary"><span>Walkaround Route</span><strong>{flightTraining.outsideChecks.filter((item) => walkaroundAreas.some((area) => area.id === item.id) && item.checked).length}/{walkaroundAreas.length}</strong></div>
+          <div className="walkaround-progress-summary"><span>Walkaround Progress</span><div className="walkaround-progress-dial" style={{ '--walkaround-progress': `${walkaroundProgress}%` } as CSSProperties}><strong>{completedWalkaroundCount}/{walkaroundAreas.length}</strong></div></div>
           {walkaroundAreas.map((area, index) => <button
             className={completedWalkaroundIds.has(area.id) ? 'done' : selectedWalkaroundArea.id === area.id ? 'active' : ''}
             key={area.id}
             onClick={() => selectWalkaroundArea(area.id)}
           >
-            <span>{completedWalkaroundIds.has(area.id) ? <CheckCircle2 size={15} /> : index + 1}</span>
+            <span>{completedWalkaroundIds.has(area.id) ? <CheckCircle2 size={18} /> : null}</span>
             <b>{area.shortLabel}</b>
           </button>)}
+          <div className="walkaround-route-legend">
+            <span><i className="complete" />Complete</span>
+            <span><i className="current" />Current</span>
+            <span><i className="review" />Review</span>
+          </div>
         </div>
       </div>
     </section>}
