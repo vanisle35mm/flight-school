@@ -1,7 +1,7 @@
 import { KeyRound, LoaderCircle, LogIn, Mail, Plane, UserRound } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { isAdminPasswordConfigured, verifyAdminPassword } from '../../lib/adminAuth';
-import { requestSecurePasswordReset, signInSecurely, signInWithEmail } from '../../lib/secureAuth';
+import { recoverAdminAccount, requestSecurePasswordReset, signInSecurely, signInWithEmail } from '../../lib/secureAuth';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
 import { verifyStudentPassword } from '../../lib/studentAuth';
 import { activateUserData, renameGroundSchoolUser, syncActiveUserData } from '../../lib/storage';
@@ -15,6 +15,7 @@ export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [recoveringAdmin, setRecoveringAdmin] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
   const [showLegacy, setShowLegacy] = useState(!isSupabaseConfigured);
   const [legacyRole, setLegacyRole] = useState<LegacyRole>('student');
@@ -52,6 +53,18 @@ export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data
     const result = await requestSecurePasswordReset(email);
     setSendingReset(false);
     setMessage(result.ok ? 'Check your email for a password reset link.' : result.reason ?? 'The reset email could not be sent.');
+  };
+
+  const recoverAdmin = async () => {
+    if (!email.trim() || !email.includes('@')) return setMessage('Enter your admin email address in the email box.');
+    if (!password) return setMessage('Enter the admin password in the password box.');
+    setRecoveringAdmin(true);
+    setMessage('');
+    const result = await recoverAdminAccount(email, password);
+    const loaded = result.ok ? await onSecureLogin() : false;
+    setRecoveringAdmin(false);
+    if (result.ok && loaded) return;
+    setMessage(result.ok ? 'Admin account recovered, but account data could not be loaded. Please try signing in again.' : result.reason ?? 'Admin recovery failed.');
   };
 
   const loginLegacyStudent = async () => {
@@ -127,6 +140,7 @@ export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data
         <button className="standard-login-submit" onClick={() => void loginEmail()} disabled={checkingEmail}>
           {checkingEmail ? <LoaderCircle className="spin" size={18} /> : <LogIn size={18} />}{checkingEmail ? 'Signing in' : 'Sign in'}
         </button>
+        <button className="login-text-button" onClick={() => void recoverAdmin()} disabled={recoveringAdmin}>{recoveringAdmin ? 'Recovering admin' : 'Admin recovery'}</button>
         <button className="login-text-button" onClick={() => void sendPasswordReset()} disabled={sendingReset}>{sendingReset ? 'Sending reset email' : 'Forgot password?'}</button>
       </div>}
 

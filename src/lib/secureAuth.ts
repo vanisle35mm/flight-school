@@ -31,6 +31,26 @@ export const signInWithEmail = async (email: string, password: string): Promise<
   return error ? { ok: false, reason: 'Email or password is incorrect.' } : { ok: true };
 };
 
+export const recoverAdminAccount = async (email: string, password: string): Promise<SecureEmailLoginResult> => {
+  if (!supabase) return { ok: false, reason: 'Email login is not configured.' };
+  try {
+    const response = await fetch('/api/admin-recover', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const result = await response.json() as SecureEmailLoginResult & { accessToken?: string; refreshToken?: string };
+    if (!result.ok || !result.accessToken || !result.refreshToken) return { ok: false, reason: result.reason ?? 'Admin recovery failed.' };
+    const { error } = await supabase.auth.setSession({
+      access_token: result.accessToken,
+      refresh_token: result.refreshToken
+    });
+    return error ? { ok: false, reason: error.message } : { ok: true };
+  } catch {
+    return { ok: false, reason: 'Admin recovery could not be reached.' };
+  }
+};
+
 export const requestSecurePasswordReset = async (email: string): Promise<SecureEmailLoginResult> => {
   if (!supabase) return { ok: false, reason: 'Email login is not configured.' };
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
