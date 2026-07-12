@@ -1,4 +1,4 @@
-import { Bell, BookOpen, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
@@ -9,6 +9,7 @@ const navItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
   { id: 'notes', label: 'Notes', icon: <BookOpen size={18} /> },
   { id: 'flashcards', label: 'Flashcards', icon: <Layers size={18} /> },
   { id: 'pstar', label: 'PSTAR', icon: <GraduationCap size={18} /> },
+  { id: 'roca', label: 'ROC-A', icon: <RadioTower size={18} /> },
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={18} /> },
   { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> }
 ];

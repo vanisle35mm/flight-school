@@ -68,7 +68,10 @@ export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot'
   todos: [],
   flashcardProgress: {},
   tcHistory: [],
-  tcMissedIds: []
+  tcMissedIds: [],
+  rocaHistory: [],
+  rocaMissedIds: [],
+  rocaFlashcardSection: 'all'
 });
 
 export const createEmptyGroundSchoolData = (): GroundSchoolData => {
@@ -81,6 +84,9 @@ export const createEmptyGroundSchoolData = (): GroundSchoolData => {
     tcHistory: [],
     tcMissedIds: [],
     tcFlashcardSection: 'all',
+    rocaHistory: [],
+    rocaMissedIds: [],
+    rocaFlashcardSection: 'all',
     dashboardStatOrder: [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: [],
@@ -111,6 +117,9 @@ export const syncActiveUserData = (data: GroundSchoolData): GroundSchoolData => 
         flashcardProgress: data.flashcardProgress,
         tcHistory: data.tcHistory,
         tcMissedIds: data.tcMissedIds,
+        rocaHistory: data.rocaHistory,
+        rocaMissedIds: data.rocaMissedIds,
+        rocaFlashcardSection: data.rocaFlashcardSection,
         dashboardStatOrder: [...data.dashboardStatOrder],
         dashboardTileOrder: [...data.dashboardTileOrder],
         dashboardHiddenTiles: [...data.dashboardHiddenTiles]
@@ -131,6 +140,9 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
     flashcardProgress: nextUser.flashcardProgress,
     tcHistory: nextUser.tcHistory,
     tcMissedIds: nextUser.tcMissedIds,
+    rocaHistory: nextUser.rocaHistory ?? [],
+    rocaMissedIds: nextUser.rocaMissedIds ?? [],
+    rocaFlashcardSection: nextUser.rocaFlashcardSection ?? 'all',
     dashboardStatOrder: nextUser.dashboardStatOrder?.length ? [...nextUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextUser.dashboardTileOrder?.length ? [...nextUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : []
@@ -196,6 +208,9 @@ export const deleteGroundSchoolUser = (data: GroundSchoolData, userId: string): 
     flashcardProgress: nextActiveUser.flashcardProgress,
     tcHistory: nextActiveUser.tcHistory,
     tcMissedIds: nextActiveUser.tcMissedIds,
+    rocaHistory: nextActiveUser.rocaHistory ?? [],
+    rocaMissedIds: nextActiveUser.rocaMissedIds ?? [],
+    rocaFlashcardSection: nextActiveUser.rocaFlashcardSection ?? 'all',
     dashboardStatOrder: nextActiveUser.dashboardStatOrder?.length ? [...nextActiveUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextActiveUser.dashboardTileOrder?.length ? [...nextActiveUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : []
@@ -218,9 +233,15 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   const users: Record<string, GroundSchoolUser> = {};
   const legacyTcHistory = normalizeTcHistory(source.tcHistory);
   const legacyTcMissedIds = normalizeTcMissedIds(source.tcMissedIds);
+  const legacyRocaHistory = normalizeTcHistory(source.rocaHistory);
+  const legacyRocaMissedIds = normalizeTcMissedIds(source.rocaMissedIds);
   const hasPerUserPstarData = Object.values(sourceUsers).some((value) => {
     const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
     return 'tcHistory' in item || 'tcMissedIds' in item;
+  });
+  const hasPerUserRocaData = Object.values(sourceUsers).some((value) => {
+    const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+    return 'rocaHistory' in item || 'rocaMissedIds' in item;
   });
 
   Object.entries(sourceUsers).forEach(([id, value]) => {
@@ -242,7 +263,10 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       todos: normalizeTodos(item.todos),
       flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress),
       tcHistory: normalizeTcHistory(item.tcHistory),
-      tcMissedIds: normalizeTcMissedIds(item.tcMissedIds)
+      tcMissedIds: normalizeTcMissedIds(item.tcMissedIds),
+      rocaHistory: normalizeTcHistory(item.rocaHistory),
+      rocaMissedIds: normalizeTcMissedIds(item.rocaMissedIds),
+      rocaFlashcardSection: typeof item.rocaFlashcardSection === 'string' ? item.rocaFlashcardSection : 'all'
     };
   });
 
@@ -255,7 +279,10 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       todos: normalizeTodos(source.todos),
       flashcardProgress: normalizeFlashcardProgress(source.flashcardProgress),
       tcHistory: [],
-      tcMissedIds: []
+      tcMissedIds: [],
+      rocaHistory: [],
+      rocaMissedIds: [],
+      rocaFlashcardSection: 'all'
     };
   }
 
@@ -263,6 +290,10 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   if (!hasPerUserPstarData) {
     const legacyOwner = Object.values(users).find((user) => user.role === 'admin') ?? users[requestedUserId];
     users[legacyOwner.id] = { ...legacyOwner, tcHistory: legacyTcHistory, tcMissedIds: legacyTcMissedIds };
+  }
+  if (!hasPerUserRocaData) {
+    const legacyOwner = Object.values(users).find((user) => user.role === 'admin') ?? users[requestedUserId];
+    users[legacyOwner.id] = { ...legacyOwner, rocaHistory: legacyRocaHistory, rocaMissedIds: legacyRocaMissedIds };
   }
   const activeUser = users[requestedUserId];
   data.activeUserId = requestedUserId;
@@ -273,6 +304,9 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   data.tcHistory = activeUser.tcHistory;
   data.tcMissedIds = activeUser.tcMissedIds;
   data.tcFlashcardSection = typeof source.tcFlashcardSection === 'string' ? source.tcFlashcardSection : 'all';
+  data.rocaHistory = activeUser.rocaHistory ?? [];
+  data.rocaMissedIds = activeUser.rocaMissedIds ?? [];
+  data.rocaFlashcardSection = activeUser.rocaFlashcardSection ?? (typeof source.rocaFlashcardSection === 'string' ? source.rocaFlashcardSection : 'all');
   data.dashboardStatOrder = Array.isArray(source.dashboardStatOrder) ? source.dashboardStatOrder.filter((id): id is string => DEFAULT_DASHBOARD_STAT_ORDER.includes(String(id))) : [...DEFAULT_DASHBOARD_STAT_ORDER];
   DEFAULT_DASHBOARD_STAT_ORDER.forEach((id) => { if (!data.dashboardStatOrder.includes(id)) data.dashboardStatOrder.push(id); });
   const legacyTileOrder = [...data.dashboardStatOrder, 'weather', 'progress', 'quickActions'];

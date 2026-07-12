@@ -18,6 +18,9 @@ export type GroundSchoolUser = {
   flashcardProgress: Record<string, FlashcardReviewStatus>;
   tcHistory: TcHistoryEntry[];
   tcMissedIds: string[];
+  rocaHistory?: TcHistoryEntry[];
+  rocaMissedIds?: string[];
+  rocaFlashcardSection?: string;
 };
 export type TcHistoryEntry = {
   title?: string;
@@ -37,10 +40,14 @@ export type GroundSchoolData = {
   tcHistory: TcHistoryEntry[];
   tcMissedIds: string[];
   tcFlashcardSection: string;
+  rocaHistory: TcHistoryEntry[];
+  rocaMissedIds: string[];
+  rocaFlashcardSection: string;
   dashboardStatOrder: string[];
   dashboardTileOrder: string[];
   dashboardHiddenTiles: string[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
 };
-export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'weather' | 'import' | 'dashboardEdit' | 'users' | 'account';
-export type PstarQuestion = { id: string; section: string; q: string; options: string[]; correct: string };
+export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'roca' | 'weather' | 'import' | 'dashboardEdit' | 'users' | 'account';
+export type PracticeQuestion = { id: string; section: string; q: string; options: string[]; correct: string };
+export type PstarQuestion = PracticeQuestion;

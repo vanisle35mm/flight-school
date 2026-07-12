@@ -21,7 +21,8 @@ export default async function handler(request, response) {
 
   const body = typeof request.body === 'object' && request.body ? request.body : {};
   const password = typeof body.password === 'string' ? body.password : '';
-  const ok = adminPassword ? password === adminPassword : hashPassword(password) === adminPasswordHash;
+  const hashedPassword = hashPassword(password);
+  const ok = (adminPasswordHash && hashedPassword === adminPasswordHash) || (adminPassword && password === adminPassword);
 
   response.status(200).json({ ok, configured: true });
 }
