@@ -3,6 +3,26 @@ import { createClient } from '@supabase/supabase-js';
 
 const DEFAULT_STAT_ORDER = ['classes', 'cards', 'accuracy', 'tasks'];
 const DEFAULT_TILE_ORDER = ['classes', 'cards', 'accuracy', 'tasks', 'taskList', 'weather', 'progress', 'quickActions'];
+const defaultFlightTraining = () => ({
+  checklist: [
+    { id: 'preflight-docs', label: 'Documents, weather, weight and balance reviewed', checked: false },
+    { id: 'briefing', label: 'Lesson objective and emergency plan briefed', checked: false },
+    { id: 'before-start', label: 'Before-start flow practiced', checked: false },
+    { id: 'runup', label: 'Run-up flow practiced', checked: false },
+    { id: 'before-takeoff', label: 'Before-takeoff briefing complete', checked: false },
+    { id: 'post-flight', label: 'Post-flight notes and defects recorded', checked: false }
+  ],
+  outsideChecks: [
+    { id: 'left-wing', label: 'Left wing walkaround points reviewed', checked: false },
+    { id: 'nose', label: 'Nose, propeller, oil, and air inlets reviewed', checked: false },
+    { id: 'right-wing', label: 'Right wing walkaround points reviewed', checked: false },
+    { id: 'tail', label: 'Empennage and control surfaces reviewed', checked: false },
+    { id: 'fuel', label: 'Fuel quantity, caps, drains, and contamination checks reviewed', checked: false },
+    { id: 'final-look', label: 'Final ramp area and tie-down check reviewed', checked: false }
+  ],
+  schedule: [],
+  panelPractice: { throttle: 35, mixture: 100, flaps: 0, heading: 270, altitude: 1200, airspeed: 0, masterOn: false, avionicsOn: false, fuelPumpOn: false }
+});
 
 export const getSupabaseServerConfig = () => ({
   url: (process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ?? '').replace(/\/$/, ''),
@@ -39,6 +59,10 @@ export const emptyUserPayload = () => ({
   tcHistory: [],
   tcMissedIds: [],
   tcFlashcardSection: 'all',
+  rocaHistory: [],
+  rocaMissedIds: [],
+  rocaFlashcardSection: 'all',
+  flightTraining: defaultFlightTraining(),
   dashboardStatOrder: [...DEFAULT_STAT_ORDER],
   dashboardTileOrder: [...DEFAULT_TILE_ORDER],
   dashboardHiddenTiles: []
@@ -50,7 +74,11 @@ export const legacyUserPayload = (user = {}, root = {}) => ({
   flashcardProgress: user.flashcardProgress && typeof user.flashcardProgress === 'object' ? user.flashcardProgress : {},
   tcHistory: Array.isArray(user.tcHistory) ? user.tcHistory : [],
   tcMissedIds: Array.isArray(user.tcMissedIds) ? user.tcMissedIds : [],
+  rocaHistory: Array.isArray(user.rocaHistory) ? user.rocaHistory : [],
+  rocaMissedIds: Array.isArray(user.rocaMissedIds) ? user.rocaMissedIds : [],
   tcFlashcardSection: typeof root.tcFlashcardSection === 'string' ? root.tcFlashcardSection : 'all',
+  rocaFlashcardSection: typeof root.rocaFlashcardSection === 'string' ? root.rocaFlashcardSection : 'all',
+  flightTraining: user.flightTraining && typeof user.flightTraining === 'object' ? user.flightTraining : defaultFlightTraining(),
   dashboardStatOrder: Array.isArray(root.dashboardStatOrder) ? root.dashboardStatOrder : [...DEFAULT_STAT_ORDER],
   dashboardTileOrder: Array.isArray(root.dashboardTileOrder) ? root.dashboardTileOrder : [...DEFAULT_TILE_ORDER],
   dashboardHiddenTiles: Array.isArray(root.dashboardHiddenTiles) ? root.dashboardHiddenTiles : []

@@ -1,4 +1,4 @@
-import { Bell, BookOpen, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
@@ -11,8 +11,11 @@ const navItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
   { id: 'pstar', label: 'PSTAR', icon: <GraduationCap size={18} /> },
   { id: 'roca', label: 'ROC-A', icon: <RadioTower size={18} /> },
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={18} /> },
-  { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> }
+  { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> },
+  { id: 'flightTraining', label: 'Flight Training', icon: <PlaneTakeoff size={18} /> }
 ];
+const groundSchoolNavItems = navItems.filter((item) => item.id !== 'flightTraining');
+const flightTrainingNavItems = navItems.filter((item) => item.id === 'flightTraining');
 
 const titleForView = (view: ViewId) => view === 'import' ? 'Import' : view === 'dashboardEdit' ? 'Edit Dashboard' : view === 'users' ? 'Admin Console' : view === 'account' ? 'Account' : navItems.find((item) => item.id === view)?.label ?? 'Dashboard';
 
@@ -41,7 +44,12 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
   return <div className="app-shell cockpit-shell">
   <aside className="sidebar cockpit-sidebar">
     <div className="brand cockpit-brand"><span className="brand-mark"><Plane size={21} /></span><strong>Flight School</strong></div>
-    <nav className="nav-list" aria-label="Primary">{navItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</nav>
+    <nav className="nav-list" aria-label="Primary">
+      <span className="nav-module-label">Ground School</span>
+      {groundSchoolNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}
+      <span className="nav-module-label">Flight Training</span>
+      {flightTrainingNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}
+    </nav>
     <div className="sidebar-footer">
       {canAdmin && <div className="admin-nav-group">
         <button className={isAdminView ? 'nav-item admin-nav-toggle active' : 'nav-item admin-nav-toggle'} onClick={() => setAdminMenuOpen((open) => !open)} aria-expanded={adminMenuOpen} aria-controls="admin-navigation"><ShieldCheck size={19} /><span>Admin</span><ChevronDown className={adminMenuOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>

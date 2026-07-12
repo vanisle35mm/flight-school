@@ -64,9 +64,13 @@ const securePayloadFromData = (data: GroundSchoolData) => {
       flashcardProgress: user.flashcardProgress,
       tcHistory: user.tcHistory,
       tcMissedIds: user.tcMissedIds,
+      rocaHistory: user.rocaHistory,
+      rocaMissedIds: user.rocaMissedIds,
       homeAirport: user.homeAirport,
       airportSetupRequired: user.airportSetupRequired,
       tcFlashcardSection: prepared.tcFlashcardSection,
+      rocaFlashcardSection: prepared.rocaFlashcardSection,
+      flightTraining: prepared.flightTraining,
       dashboardStatOrder: prepared.dashboardStatOrder,
       dashboardTileOrder: prepared.dashboardTileOrder,
       dashboardHiddenTiles: prepared.dashboardHiddenTiles
@@ -90,10 +94,16 @@ const secureUserFromRows = (profile: SecureProfileRow, row?: SecureUserDataRow):
         todos: payload.todos,
         flashcardProgress: payload.flashcardProgress,
         tcHistory: payload.tcHistory,
-        tcMissedIds: payload.tcMissedIds
+        tcMissedIds: payload.tcMissedIds,
+        rocaHistory: payload.rocaHistory,
+        rocaMissedIds: payload.rocaMissedIds,
+        rocaFlashcardSection: payload.rocaFlashcardSection,
+        flightTraining: payload.flightTraining
       }
     },
     tcFlashcardSection: payload.tcFlashcardSection,
+    rocaFlashcardSection: payload.rocaFlashcardSection,
+    flightTraining: payload.flightTraining,
     dashboardStatOrder: payload.dashboardStatOrder,
     dashboardTileOrder: payload.dashboardTileOrder,
     dashboardHiddenTiles: payload.dashboardHiddenTiles

@@ -2,6 +2,24 @@ export type Flashcard = { question: string; answer: string };
 export type FlashcardReviewStatus = 'known' | 'unknown';
 export type ClassSession = { date: string; topics: string; notes: string; flashcards: Flashcard[] };
 export type Todo = { text: string; done: boolean; dueDate: string };
+export type FlightChecklistItem = { id: string; label: string; checked: boolean };
+export type FlightScheduleEntry = { id: string; date: string; aircraft: string; instructor: string; focus: string; notes: string; completed: boolean };
+export type FlightTrainingData = {
+  checklist: FlightChecklistItem[];
+  outsideChecks: FlightChecklistItem[];
+  schedule: FlightScheduleEntry[];
+  panelPractice: {
+    throttle: number;
+    mixture: number;
+    flaps: number;
+    heading: number;
+    altitude: number;
+    airspeed: number;
+    masterOn: boolean;
+    avionicsOn: boolean;
+    fuelPumpOn: boolean;
+  };
+};
 export type GroundSchoolUser = {
   id: string;
   firstName: string;
@@ -21,6 +39,7 @@ export type GroundSchoolUser = {
   rocaHistory?: TcHistoryEntry[];
   rocaMissedIds?: string[];
   rocaFlashcardSection?: string;
+  flightTraining?: FlightTrainingData;
 };
 export type TcHistoryEntry = {
   title?: string;
@@ -47,7 +66,8 @@ export type GroundSchoolData = {
   dashboardTileOrder: string[];
   dashboardHiddenTiles: string[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
+  flightTraining: FlightTrainingData;
 };
-export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'roca' | 'weather' | 'import' | 'dashboardEdit' | 'users' | 'account';
+export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'roca' | 'weather' | 'flightTraining' | 'import' | 'dashboardEdit' | 'users' | 'account';
 export type PracticeQuestion = { id: string; section: string; q: string; options: string[]; correct: string };
 export type PstarQuestion = PracticeQuestion;

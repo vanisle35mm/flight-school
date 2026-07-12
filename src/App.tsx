@@ -5,6 +5,7 @@ import { AdminConsoleView } from './features/admin/AdminConsoleView';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { DashboardEditView } from './features/dashboard/DashboardEditView';
 import { FlashcardsView } from './features/flashcards/FlashcardsView';
+import { FlightTrainingView } from './features/flightTraining/FlightTrainingView';
 import { NotesView } from './features/notes/NotesView';
 import { PstarView } from './features/pstar/PstarView';
 import { RocaView } from './features/roca/RocaView';
@@ -217,6 +218,7 @@ export const App = () => {
     {activeView === 'pstar' && <PstarView data={data} onDataChange={setData} />}
     {activeView === 'roca' && <RocaView data={data} onDataChange={setData} />}
     {activeView === 'weather' && <WeatherPanel />}
+    {activeView === 'flightTraining' && <FlightTrainingView data={data} onDataChange={setData} />}
     {activeView === 'account' && canManageAccount && <AccountView firstName={activeUser?.firstName ?? 'Pilot'} />}
     {activeView === 'import' && isAdmin && <LegacyImportView data={data} onDataChange={setData} onViewChange={setActiveView} />}
     {activeView === 'dashboardEdit' && <DashboardEditView data={data} onDataChange={setData} />}

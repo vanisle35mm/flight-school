@@ -144,6 +144,15 @@ button:disabled {
   gap: 9px;
 }
 
+.nav-module-label {
+  margin: 8px 4px 0;
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -3616,5 +3625,293 @@ body {
 
   .cockpit-dashboard .weather-grid div:last-child {
     border-bottom: 0;
+  }
+}
+
+.flight-training-module {
+  display: grid;
+  gap: 16px;
+}
+
+.flight-training-hero,
+.flight-tabs,
+.flight-panel,
+.c172-panel,
+.flight-schedule-card {
+  border: 1px solid rgba(58, 75, 93, 0.75);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(18, 31, 43, 0.98), rgba(11, 18, 27, 0.98));
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.22);
+}
+
+.flight-training-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px;
+}
+
+.flight-training-hero h2 {
+  margin: 4px 0 6px;
+  color: var(--navy);
+  font-size: 32px;
+}
+
+.flight-training-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.flight-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+
+.flight-tabs button,
+.panel .flight-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 900;
+}
+
+.flight-tabs button.active {
+  color: #f8fbff;
+  border-color: rgba(131, 176, 207, 0.45);
+  background: rgba(131, 176, 207, 0.12);
+}
+
+.flight-progress-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.flight-progress-row strong {
+  color: var(--amber);
+  font-size: 22px;
+}
+
+.flight-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.flight-check-item {
+  display: grid;
+  grid-template-columns: 18px 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(10, 18, 27, 0.58);
+  font-weight: 800;
+}
+
+.flight-check-item input {
+  width: 16px;
+  height: 16px;
+}
+
+.flight-check-item svg {
+  color: var(--muted);
+}
+
+.flight-check-item.checked {
+  border-color: rgba(119, 189, 145, 0.52);
+  background: rgba(119, 189, 145, 0.12);
+}
+
+.flight-check-item.checked svg {
+  color: var(--green);
+}
+
+.c172-panel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.instrument-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 14px;
+}
+
+.round-instrument {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 8px solid #070d13;
+  border-radius: 50%;
+  color: #f6fbff;
+  background:
+    radial-gradient(circle, rgba(131, 176, 207, 0.14), transparent 56%),
+    #0b121a;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 35px rgba(0, 0, 0, 0.32);
+  text-align: center;
+}
+
+.round-instrument span,
+.round-instrument small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.round-instrument strong {
+  font-size: 28px;
+}
+
+.horizon {
+  position: relative;
+  width: 76%;
+  height: 42%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(#5c8eb8 0 50%, #8a6445 50% 100%);
+}
+
+.horizon b {
+  position: absolute;
+  inset: 50% 8% auto;
+  height: 3px;
+  background: #f8fbff;
+  transform-origin: center;
+}
+
+.panel-switches,
+.panel-controls,
+.flight-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.panel-switches button {
+  min-height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: #0a121b;
+  font-weight: 900;
+}
+
+.panel-switches button.active {
+  color: #101821;
+  background: var(--amber);
+}
+
+.panel-controls label,
+.flight-schedule-card label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.outside-check-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.aircraft-walkaround {
+  position: relative;
+  min-height: 260px;
+  border: 1px solid rgba(72, 103, 134, 0.5);
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 50%, rgba(131, 176, 207, 0.12), transparent 52%), #08111b;
+}
+
+.aircraft-walkaround span {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #c9d7e2, #7599b4);
+}
+
+.aircraft-walkaround .fuselage {
+  left: 47%;
+  top: 20%;
+  width: 6%;
+  height: 58%;
+}
+
+.aircraft-walkaround .wing {
+  top: 45%;
+  width: 38%;
+  height: 7%;
+}
+
+.aircraft-walkaround .left {
+  left: 9%;
+  transform: rotate(-6deg);
+}
+
+.aircraft-walkaround .right {
+  right: 9%;
+  transform: rotate(6deg);
+}
+
+.aircraft-walkaround .tail {
+  left: 39%;
+  top: 73%;
+  width: 22%;
+  height: 6%;
+}
+
+.flight-schedule-list {
+  display: grid;
+  gap: 12px;
+}
+
+.flight-schedule-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.flight-schedule-card.completed {
+  opacity: 0.72;
+}
+
+.flight-schedule-card textarea {
+  min-height: 110px;
+}
+
+@media (max-width: 900px) {
+  .flight-tabs,
+  .instrument-row,
+  .flight-checklist-grid,
+  .outside-check-layout,
+  .panel-controls,
+  .flight-schedule-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-training-hero {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

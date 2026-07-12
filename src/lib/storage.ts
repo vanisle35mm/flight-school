@@ -1,4 +1,4 @@
-import type { ClassSession, FlashcardReviewStatus, GroundSchoolData, GroundSchoolUser, TcHistoryEntry, Todo } from '../types';
+import type { ClassSession, FlashcardReviewStatus, FlightChecklistItem, FlightScheduleEntry, FlightTrainingData, GroundSchoolData, GroundSchoolUser, TcHistoryEntry, Todo } from '../types';
 
 export const STORAGE_KEY = 'groundschool_v496';
 export const LEGACY_STORAGE_KEY = 'groundschool_v47';
@@ -7,6 +7,37 @@ export const RESTORE_KEY = 'groundschool_restore_payload';
 export const DEFAULT_USER_ID = 'user_default';
 export const DEFAULT_DASHBOARD_STAT_ORDER = ['classes', 'cards', 'accuracy', 'tasks'];
 export const DEFAULT_DASHBOARD_TILE_ORDER = ['classes', 'cards', 'accuracy', 'tasks', 'taskList', 'weather', 'progress', 'quickActions'];
+
+export const createDefaultFlightTrainingData = (): FlightTrainingData => ({
+  checklist: [
+    { id: 'preflight-docs', label: 'Documents, weather, weight and balance reviewed', checked: false },
+    { id: 'briefing', label: 'Lesson objective and emergency plan briefed', checked: false },
+    { id: 'before-start', label: 'Before-start flow practiced', checked: false },
+    { id: 'runup', label: 'Run-up flow practiced', checked: false },
+    { id: 'before-takeoff', label: 'Before-takeoff briefing complete', checked: false },
+    { id: 'post-flight', label: 'Post-flight notes and defects recorded', checked: false }
+  ],
+  outsideChecks: [
+    { id: 'left-wing', label: 'Left wing walkaround points reviewed', checked: false },
+    { id: 'nose', label: 'Nose, propeller, oil, and air inlets reviewed', checked: false },
+    { id: 'right-wing', label: 'Right wing walkaround points reviewed', checked: false },
+    { id: 'tail', label: 'Empennage and control surfaces reviewed', checked: false },
+    { id: 'fuel', label: 'Fuel quantity, caps, drains, and contamination checks reviewed', checked: false },
+    { id: 'final-look', label: 'Final ramp area and tie-down check reviewed', checked: false }
+  ],
+  schedule: [],
+  panelPractice: {
+    throttle: 35,
+    mixture: 100,
+    flaps: 0,
+    heading: 270,
+    altitude: 1200,
+    airspeed: 0,
+    masterOn: false,
+    avionicsOn: false,
+    fuelPumpOn: false
+  }
+});
 
 const normalizeFlashcardProgress = (value: unknown): Record<string, FlashcardReviewStatus> => {
   const progress: Record<string, FlashcardReviewStatus> = {};
@@ -41,6 +72,50 @@ const normalizeTodos = (value: unknown): Todo[] => Array.isArray(value) ? value.
   return { text: typeof item.text === 'string' ? item.text : '', done: typeof item.done === 'boolean' ? item.done : false, dueDate: typeof item.dueDate === 'string' ? item.dueDate : '' };
 }) : [];
 
+const normalizeChecklist = (value: unknown, fallback: FlightChecklistItem[]): FlightChecklistItem[] => Array.isArray(value) ? value.map((entry, index) => {
+  const item = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
+  return {
+    id: typeof item.id === 'string' && item.id ? item.id : `item-${index}`,
+    label: typeof item.label === 'string' ? item.label : '',
+    checked: typeof item.checked === 'boolean' ? item.checked : false
+  };
+}).filter((item) => item.label.trim()) : fallback;
+
+const normalizeFlightSchedule = (value: unknown): FlightScheduleEntry[] => Array.isArray(value) ? value.map((entry, index) => {
+  const item = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
+  return {
+    id: typeof item.id === 'string' && item.id ? item.id : `flight-${index}`,
+    date: typeof item.date === 'string' ? item.date : '',
+    aircraft: typeof item.aircraft === 'string' ? item.aircraft : '',
+    instructor: typeof item.instructor === 'string' ? item.instructor : '',
+    focus: typeof item.focus === 'string' ? item.focus : '',
+    notes: typeof item.notes === 'string' ? item.notes : '',
+    completed: typeof item.completed === 'boolean' ? item.completed : false
+  };
+}) : [];
+
+const normalizeFlightTraining = (value: unknown): FlightTrainingData => {
+  const fallback = createDefaultFlightTrainingData();
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  const panel = source.panelPractice && typeof source.panelPractice === 'object' ? source.panelPractice as Record<string, unknown> : {};
+  return {
+    checklist: normalizeChecklist(source.checklist, fallback.checklist),
+    outsideChecks: normalizeChecklist(source.outsideChecks, fallback.outsideChecks),
+    schedule: normalizeFlightSchedule(source.schedule),
+    panelPractice: {
+      throttle: typeof panel.throttle === 'number' ? panel.throttle : fallback.panelPractice.throttle,
+      mixture: typeof panel.mixture === 'number' ? panel.mixture : fallback.panelPractice.mixture,
+      flaps: typeof panel.flaps === 'number' ? panel.flaps : fallback.panelPractice.flaps,
+      heading: typeof panel.heading === 'number' ? panel.heading : fallback.panelPractice.heading,
+      altitude: typeof panel.altitude === 'number' ? panel.altitude : fallback.panelPractice.altitude,
+      airspeed: typeof panel.airspeed === 'number' ? panel.airspeed : fallback.panelPractice.airspeed,
+      masterOn: typeof panel.masterOn === 'boolean' ? panel.masterOn : fallback.panelPractice.masterOn,
+      avionicsOn: typeof panel.avionicsOn === 'boolean' ? panel.avionicsOn : fallback.panelPractice.avionicsOn,
+      fuelPumpOn: typeof panel.fuelPumpOn === 'boolean' ? panel.fuelPumpOn : fallback.panelPractice.fuelPumpOn
+    }
+  };
+};
+
 const normalizeTcHistory = (value: unknown): TcHistoryEntry[] => Array.isArray(value) ? value.map((entry) => {
   const item = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
   return {
@@ -71,7 +146,8 @@ export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot'
   tcMissedIds: [],
   rocaHistory: [],
   rocaMissedIds: [],
-  rocaFlashcardSection: 'all'
+  rocaFlashcardSection: 'all',
+  flightTraining: createDefaultFlightTrainingData()
 });
 
 export const createEmptyGroundSchoolData = (): GroundSchoolData => {
@@ -90,7 +166,8 @@ export const createEmptyGroundSchoolData = (): GroundSchoolData => {
     dashboardStatOrder: [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: [],
-    flashcardProgress: {}
+    flashcardProgress: {},
+    flightTraining: createDefaultFlightTrainingData()
   };
 };
 
@@ -120,6 +197,7 @@ export const syncActiveUserData = (data: GroundSchoolData): GroundSchoolData => 
         rocaHistory: data.rocaHistory,
         rocaMissedIds: data.rocaMissedIds,
         rocaFlashcardSection: data.rocaFlashcardSection,
+        flightTraining: data.flightTraining,
         dashboardStatOrder: [...data.dashboardStatOrder],
         dashboardTileOrder: [...data.dashboardTileOrder],
         dashboardHiddenTiles: [...data.dashboardHiddenTiles]
@@ -143,6 +221,7 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
     rocaHistory: nextUser.rocaHistory ?? [],
     rocaMissedIds: nextUser.rocaMissedIds ?? [],
     rocaFlashcardSection: nextUser.rocaFlashcardSection ?? 'all',
+    flightTraining: nextUser.flightTraining ?? createDefaultFlightTrainingData(),
     dashboardStatOrder: nextUser.dashboardStatOrder?.length ? [...nextUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextUser.dashboardTileOrder?.length ? [...nextUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : []
@@ -211,6 +290,7 @@ export const deleteGroundSchoolUser = (data: GroundSchoolData, userId: string): 
     rocaHistory: nextActiveUser.rocaHistory ?? [],
     rocaMissedIds: nextActiveUser.rocaMissedIds ?? [],
     rocaFlashcardSection: nextActiveUser.rocaFlashcardSection ?? 'all',
+    flightTraining: nextActiveUser.flightTraining ?? createDefaultFlightTrainingData(),
     dashboardStatOrder: nextActiveUser.dashboardStatOrder?.length ? [...nextActiveUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextActiveUser.dashboardTileOrder?.length ? [...nextActiveUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : []
@@ -266,7 +346,8 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       tcMissedIds: normalizeTcMissedIds(item.tcMissedIds),
       rocaHistory: normalizeTcHistory(item.rocaHistory),
       rocaMissedIds: normalizeTcMissedIds(item.rocaMissedIds),
-      rocaFlashcardSection: typeof item.rocaFlashcardSection === 'string' ? item.rocaFlashcardSection : 'all'
+      rocaFlashcardSection: typeof item.rocaFlashcardSection === 'string' ? item.rocaFlashcardSection : 'all',
+      flightTraining: normalizeFlightTraining(item.flightTraining)
     };
   });
 
@@ -282,7 +363,8 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       tcMissedIds: [],
       rocaHistory: [],
       rocaMissedIds: [],
-      rocaFlashcardSection: 'all'
+      rocaFlashcardSection: 'all',
+      flightTraining: normalizeFlightTraining(source.flightTraining)
     };
   }
 
@@ -307,6 +389,7 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   data.rocaHistory = activeUser.rocaHistory ?? [];
   data.rocaMissedIds = activeUser.rocaMissedIds ?? [];
   data.rocaFlashcardSection = activeUser.rocaFlashcardSection ?? (typeof source.rocaFlashcardSection === 'string' ? source.rocaFlashcardSection : 'all');
+  data.flightTraining = activeUser.flightTraining ?? createDefaultFlightTrainingData();
   data.dashboardStatOrder = Array.isArray(source.dashboardStatOrder) ? source.dashboardStatOrder.filter((id): id is string => DEFAULT_DASHBOARD_STAT_ORDER.includes(String(id))) : [...DEFAULT_DASHBOARD_STAT_ORDER];
   DEFAULT_DASHBOARD_STAT_ORDER.forEach((id) => { if (!data.dashboardStatOrder.includes(id)) data.dashboardStatOrder.push(id); });
   const legacyTileOrder = [...data.dashboardStatOrder, 'weather', 'progress', 'quickActions'];
