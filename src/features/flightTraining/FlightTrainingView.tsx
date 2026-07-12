@@ -257,7 +257,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
                   </filter>
                 </defs>
                 <ellipse cx="380" cy="272" rx="286" ry="178" fill="rgba(0,0,0,0.22)" />
-                <g filter="url(#aircraftShadow)">
+                <g className="aircraft-drawing" filter="url(#aircraftShadow)">
                   <path className="aircraft-wing" d="M72 226 C204 213 283 211 355 228 L405 228 C477 211 556 213 688 226 L705 230 L702 274 C566 273 483 260 405 245 L355 245 C277 260 194 273 58 274 L55 230 Z" />
                   <path className="aircraft-aileron left" d="M77 261 C198 260 270 252 348 238" />
                   <path className="aircraft-aileron right" d="M412 238 C490 252 562 260 683 261" />
