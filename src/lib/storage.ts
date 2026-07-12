@@ -18,12 +18,12 @@ export const createDefaultFlightTrainingData = (): FlightTrainingData => ({
     { id: 'post-flight', label: 'Post-flight notes and defects recorded', checked: false }
   ],
   outsideChecks: [
-    { id: 'left-wing', label: 'Left wing walkaround points reviewed', checked: false },
-    { id: 'nose', label: 'Nose, propeller, oil, and air inlets reviewed', checked: false },
-    { id: 'right-wing', label: 'Right wing walkaround points reviewed', checked: false },
-    { id: 'tail', label: 'Empennage and control surfaces reviewed', checked: false },
-    { id: 'fuel', label: 'Fuel quantity, caps, drains, and contamination checks reviewed', checked: false },
-    { id: 'final-look', label: 'Final ramp area and tie-down check reviewed', checked: false }
+    { id: 'fuel-oil', label: 'Fuel and oil checks reviewed', checked: false },
+    { id: 'cabin-docs', label: 'Cabin and documentation reviewed', checked: false },
+    { id: 'fuselage-tail', label: 'Fuselage and tail reviewed', checked: false },
+    { id: 'wings-controls', label: 'Wings and control surfaces reviewed', checked: false },
+    { id: 'landing-gear', label: 'Landing gear reviewed', checked: false },
+    { id: 'prop-engine', label: 'Propeller and engine area reviewed', checked: false }
   ],
   schedule: [],
   panelPractice: {

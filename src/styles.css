@@ -3827,55 +3827,292 @@ body {
   text-transform: uppercase;
 }
 
-.outside-check-layout {
+.walkaround-practice-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 0.95fr) minmax(320px, 1.05fr);
   gap: 18px;
+  align-items: stretch;
 }
 
-.aircraft-walkaround {
-  position: relative;
-  min-height: 260px;
+.walkaround-map-panel,
+.walkaround-detail-card {
   border: 1px solid rgba(72, 103, 134, 0.5);
   border-radius: 8px;
-  background: radial-gradient(circle at 50% 50%, rgba(131, 176, 207, 0.12), transparent 52%), #08111b;
+  background: rgba(8, 17, 27, 0.72);
 }
 
-.aircraft-walkaround span {
+.walkaround-map-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.walkaround-aircraft {
+  position: relative;
+  min-height: 470px;
+  overflow: hidden;
+  border: 1px solid rgba(72, 103, 134, 0.45);
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 50% 48%, rgba(131, 176, 207, 0.16), transparent 48%),
+    #08111b;
+  background-size: 34px 34px, 34px 34px, auto, auto;
+}
+
+.aircraft-shadow,
+.aircraft-part {
   position: absolute;
   display: block;
   border-radius: 999px;
-  background: linear-gradient(180deg, #c9d7e2, #7599b4);
 }
 
-.aircraft-walkaround .fuselage {
-  left: 47%;
-  top: 20%;
-  width: 6%;
+.aircraft-shadow {
+  left: 17%;
+  top: 22%;
+  width: 66%;
   height: 58%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.32), transparent 64%);
 }
 
-.aircraft-walkaround .wing {
-  top: 45%;
-  width: 38%;
-  height: 7%;
+.aircraft-part {
+  z-index: 1;
+  background: linear-gradient(180deg, #dce8f1, #7ea5bf);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.26);
 }
 
-.aircraft-walkaround .left {
-  left: 9%;
-  transform: rotate(-6deg);
+.aircraft-part.fuselage {
+  left: 47.5%;
+  top: 18%;
+  width: 5%;
+  height: 62%;
 }
 
-.aircraft-walkaround .right {
-  right: 9%;
-  transform: rotate(6deg);
+.aircraft-part.cabin {
+  left: 44.8%;
+  top: 36%;
+  width: 10.4%;
+  height: 16%;
+  background: linear-gradient(180deg, #6ea4cb, #24394d);
 }
 
-.aircraft-walkaround .tail {
+.aircraft-part.nose {
+  left: 46.5%;
+  top: 12%;
+  width: 7%;
+  height: 10%;
+}
+
+.aircraft-part.tail {
   left: 39%;
-  top: 73%;
+  top: 76%;
   width: 22%;
-  height: 6%;
+  height: 5%;
+}
+
+.aircraft-part.left-wing,
+.aircraft-part.right-wing {
+  top: 47%;
+  width: 39%;
+  height: 6.5%;
+}
+
+.aircraft-part.left-wing {
+  left: 9%;
+  transform: rotate(-5deg);
+}
+
+.aircraft-part.right-wing {
+  right: 9%;
+  transform: rotate(5deg);
+}
+
+.aircraft-part.left-gear,
+.aircraft-part.right-gear,
+.aircraft-part.nose-gear {
+  width: 22px;
+  height: 22px;
+  background: #0b1118;
+  border: 4px solid #8fb2ca;
+}
+
+.aircraft-part.left-gear {
+  left: 36%;
+  top: 57%;
+}
+
+.aircraft-part.right-gear {
+  right: 36%;
+  top: 57%;
+}
+
+.aircraft-part.nose-gear {
+  left: calc(50% - 11px);
+  top: 25%;
+}
+
+.walkaround-hotspot {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid rgba(131, 176, 207, 0.62);
+  border-radius: 999px;
+  color: #f8fbff;
+  background: rgba(12, 29, 45, 0.92);
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.walkaround-hotspot.active {
+  color: #101821;
+  border-color: rgba(224, 177, 88, 0.92);
+  background: var(--amber);
+}
+
+.walkaround-hotspot.fuel-oil {
+  left: 58%;
+  top: 20%;
+}
+
+.walkaround-hotspot.cabin-docs {
+  left: 56%;
+  top: 38%;
+}
+
+.walkaround-hotspot.fuselage-tail {
+  left: 56%;
+  top: 74%;
+}
+
+.walkaround-hotspot.wings-controls {
+  left: 8%;
+  top: 40%;
+}
+
+.walkaround-hotspot.landing-gear {
+  left: 56%;
+  top: 57%;
+}
+
+.walkaround-hotspot.prop-engine {
+  left: 37%;
+  top: 9%;
+}
+
+.walkaround-progress {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.walkaround-progress strong {
+  color: var(--amber);
+  font-size: 21px;
+}
+
+.walkaround-detail-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.walkaround-detail-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.walkaround-detail-heading h3 {
+  margin: 5px 0 0;
+  color: var(--navy);
+  font-size: 26px;
+  line-height: 1.08;
+}
+
+.walkaround-complete-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(119, 189, 145, 0.45);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(119, 189, 145, 0.1);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.walkaround-check-list {
+  display: grid;
+  gap: 9px;
+}
+
+.walkaround-check-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid rgba(72, 103, 134, 0.48);
+  border-radius: 8px;
+  background: rgba(13, 27, 40, 0.72);
+}
+
+.walkaround-check-row span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #101821;
+  background: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.walkaround-check-row p {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.walkaround-area-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.walkaround-area-strip button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid rgba(72, 103, 134, 0.7);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(10, 18, 27, 0.65);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.walkaround-area-strip button.active {
+  color: #101821;
+  border-color: transparent;
+  background: var(--amber);
 }
 
 .flight-schedule-list {
@@ -3900,10 +4137,19 @@ body {
 @media (max-width: 900px) {
   .instrument-row,
   .flight-checklist-grid,
-  .outside-check-layout,
+  .walkaround-practice-layout,
   .panel-controls,
   .flight-schedule-grid {
     grid-template-columns: 1fr;
+  }
+
+  .walkaround-aircraft {
+    min-height: 380px;
+  }
+
+  .walkaround-detail-heading {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .flight-training-hero {
