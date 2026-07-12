@@ -3925,6 +3925,58 @@ body {
   background-size: 36px 36px, 36px 36px, auto, auto;
 }
 
+.walkaround-aircraft-svg {
+  position: absolute;
+  inset: 34px 22px 10px;
+  width: calc(100% - 44px);
+  height: calc(100% - 44px);
+  overflow: visible;
+}
+
+.aircraft-wing,
+.aircraft-fuselage,
+.aircraft-nose,
+.aircraft-tail {
+  fill: url("#aircraftSkin");
+  stroke: rgba(4, 12, 20, 0.58);
+  stroke-width: 2;
+}
+
+.aircraft-aileron,
+.aircraft-tail-line {
+  fill: none;
+  stroke: rgba(4, 12, 20, 0.42);
+  stroke-width: 2;
+}
+
+.aircraft-cabin {
+  fill: url("#aircraftGlass");
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1.5;
+}
+
+.aircraft-window {
+  fill: #0b1520;
+  stroke: #9ec3db;
+  stroke-width: 4;
+}
+
+.aircraft-gear {
+  fill: #07111b;
+  stroke: #9ec3db;
+  stroke-width: 4;
+}
+
+.aircraft-tip {
+  fill: #ef443d;
+}
+
+.aircraft-beacon {
+  fill: #ef443d;
+  stroke: #fff3f1;
+  stroke-width: 1;
+}
+
 .aircraft-shadow,
 .aircraft-part,
 .aircraft-stripe {
@@ -4102,8 +4154,8 @@ body {
 }
 
 .walkaround-hotspot.fuel-oil {
-  left: 61%;
-  top: 25%;
+  left: 60%;
+  top: 31%;
 }
 
 .walkaround-hotspot.fuel-oil::before {
@@ -4118,8 +4170,8 @@ body {
 }
 
 .walkaround-hotspot.cabin-docs {
-  left: 35%;
-  top: 38%;
+  left: 31%;
+  top: 37%;
 }
 
 .walkaround-hotspot.cabin-docs::before {
@@ -4134,8 +4186,8 @@ body {
 }
 
 .walkaround-hotspot.fuselage-tail {
-  left: 58%;
-  top: 85%;
+  left: 59%;
+  top: 84%;
 }
 
 .walkaround-hotspot.fuselage-tail::before {
@@ -4151,7 +4203,7 @@ body {
 
 .walkaround-hotspot.left-wing {
   left: 13%;
-  top: 59%;
+  top: 63%;
 }
 
 .walkaround-hotspot.left-wing::before {
@@ -4167,7 +4219,7 @@ body {
 
 .walkaround-hotspot.right-wing {
   right: 13%;
-  top: 59%;
+  top: 63%;
 }
 
 .walkaround-hotspot.right-wing::before {
@@ -4183,7 +4235,7 @@ body {
 
 .walkaround-hotspot.landing-gear {
   left: 35%;
-  top: 68%;
+  top: 72%;
 }
 
 .walkaround-hotspot.landing-gear::before {
@@ -4198,8 +4250,8 @@ body {
 }
 
 .walkaround-hotspot.prop-engine {
-  left: 62%;
-  top: 9%;
+  left: 60%;
+  top: 17%;
 }
 
 .walkaround-hotspot.prop-engine::before {
