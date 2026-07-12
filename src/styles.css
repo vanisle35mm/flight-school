@@ -3830,8 +3830,8 @@ body {
 .walkaround-mode-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  max-width: 580px;
-  margin-bottom: 16px;
+  max-width: 440px;
+  margin-bottom: 14px;
   overflow: hidden;
   border: 1px solid rgba(72, 103, 134, 0.72);
   border-radius: 8px;
@@ -3839,7 +3839,7 @@ body {
 }
 
 .walkaround-mode-tabs button {
-  min-height: 48px;
+  min-height: 40px;
   border: 0;
   border-right: 1px solid rgba(72, 103, 134, 0.45);
   color: var(--muted);
@@ -3858,10 +3858,15 @@ body {
   box-shadow: inset 0 0 0 1px rgba(137, 196, 255, 0.42);
 }
 
+.walkaround-trainer {
+  display: grid;
+  gap: 16px;
+}
+
 .walkaround-practice-layout {
   display: grid;
-  grid-template-columns: minmax(440px, 1.25fr) minmax(300px, 0.75fr);
-  gap: 18px;
+  grid-template-columns: minmax(520px, 1.45fr) minmax(320px, 0.72fr);
+  gap: 16px;
   align-items: stretch;
 }
 
@@ -3874,14 +3879,14 @@ body {
 
 .walkaround-map-panel {
   display: grid;
-  grid-template-rows: minmax(440px, 1fr) auto;
+  grid-template-rows: minmax(560px, 1fr) auto;
   gap: 12px;
-  padding: 14px;
+  padding: 12px;
 }
 
 .walkaround-aircraft {
   position: relative;
-  min-height: 460px;
+  min-height: 560px;
   overflow: hidden;
   border: 1px solid rgba(72, 103, 134, 0.45);
   border-radius: 8px;
@@ -3901,10 +3906,10 @@ body {
 }
 
 .aircraft-shadow {
-  left: 11%;
-  top: 18%;
-  width: 78%;
-  height: 66%;
+  left: 8%;
+  top: 15%;
+  width: 84%;
+  height: 70%;
   background: radial-gradient(ellipse, rgba(0, 0, 0, 0.32), transparent 64%);
 }
 
@@ -3916,15 +3921,15 @@ body {
 }
 
 .aircraft-part.fuselage {
-  left: 47%;
-  top: 14%;
+  left: 47.6%;
+  top: 10%;
   width: 6%;
-  height: 66%;
+  height: 72%;
 }
 
 .aircraft-part.cabin {
-  left: 43.9%;
-  top: 34%;
+  left: 44.1%;
+  top: 32%;
   width: 12.2%;
   height: 17%;
   border-radius: 44% 44% 36% 36%;
@@ -3933,33 +3938,33 @@ body {
 
 .aircraft-part.nose {
   left: 46.2%;
-  top: 8%;
+  top: 5%;
   width: 7.6%;
   height: 11%;
 }
 
 .aircraft-part.tail {
   left: 38.5%;
-  top: 78%;
+  top: 82%;
   width: 22%;
   height: 5.5%;
 }
 
 .aircraft-part.left-wing,
 .aircraft-part.right-wing {
-  top: 45%;
-  width: 40%;
+  top: 46%;
+  width: 42%;
   height: 8%;
   border-radius: 24px 999px 999px 24px;
 }
 
 .aircraft-part.left-wing {
-  left: 8%;
+  left: 6%;
   transform: rotate(-5deg);
 }
 
 .aircraft-part.right-wing {
-  right: 8%;
+  right: 6%;
   transform: rotate(5deg);
 }
 
@@ -3973,18 +3978,18 @@ body {
 }
 
 .aircraft-part.left-gear {
-  left: 36%;
-  top: 58%;
+  left: 34%;
+  top: 60%;
 }
 
 .aircraft-part.right-gear {
-  right: 36%;
-  top: 58%;
+  right: 34%;
+  top: 60%;
 }
 
 .aircraft-part.nose-gear {
   left: calc(50% - 11px);
-  top: 24%;
+  top: 25%;
 }
 
 .walkaround-hotspot {
@@ -3993,25 +3998,29 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 7px;
   min-height: 36px;
-  padding: 7px 10px;
-  border: 1px solid rgba(224, 177, 88, 0.72);
-  border-radius: 8px;
-  color: #f8fbff;
-  background: rgba(12, 23, 34, 0.95);
+  padding: 6px 9px 6px 7px;
+  border: 1px solid rgba(119, 159, 190, 0.58);
+  border-radius: 999px;
+  color: #d9e8f6;
+  background: rgba(9, 20, 31, 0.9);
   font-size: 11px;
   font-weight: 900;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
-.walkaround-hotspot::before {
-  content: "";
-  width: 18px;
-  height: 18px;
+.walkaround-hotspot b {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   flex: 0 0 auto;
-  border: 3px solid var(--amber);
+  border: 2px solid var(--amber);
   border-radius: 50%;
+  color: var(--amber);
+  background: rgba(224, 177, 88, 0.1);
+  font-size: 11px;
   box-shadow: 0 0 0 5px rgba(224, 177, 88, 0.16), 0 0 20px rgba(224, 177, 88, 0.55);
 }
 
@@ -4022,44 +4031,46 @@ body {
   box-shadow: 0 0 0 1px rgba(114, 190, 255, 0.38), 0 16px 34px rgba(0, 0, 0, 0.32);
 }
 
-.walkaround-hotspot.active::before {
+.walkaround-hotspot.active b {
+  color: #f8fbff;
   border-color: #bde1ff;
+  background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 0 6px rgba(47, 143, 255, 0.24), 0 0 26px rgba(75, 164, 255, 0.82);
 }
 
 .walkaround-hotspot.fuel-oil {
-  left: 58%;
-  top: 25%;
+  left: 56%;
+  top: 26%;
 }
 
 .walkaround-hotspot.cabin-docs {
-  left: 34%;
-  top: 35%;
+  left: 31%;
+  top: 37%;
 }
 
 .walkaround-hotspot.fuselage-tail {
-  left: 55%;
-  top: 76%;
+  left: 54%;
+  top: 83%;
 }
 
 .walkaround-hotspot.left-wing {
-  left: 12%;
-  top: 53%;
+  left: 10%;
+  top: 55%;
 }
 
 .walkaround-hotspot.right-wing {
-  right: 11%;
-  top: 53%;
+  right: 9%;
+  top: 55%;
 }
 
 .walkaround-hotspot.landing-gear {
-  left: 33%;
-  top: 62%;
+  left: 31%;
+  top: 64%;
 }
 
 .walkaround-hotspot.prop-engine {
   left: 55%;
-  top: 12%;
+  top: 9%;
 }
 
 .walkaround-progress {
@@ -4077,8 +4088,8 @@ body {
 .walkaround-detail-card {
   display: grid;
   align-content: start;
-  gap: 14px;
-  padding: 18px;
+  gap: 12px;
+  padding: 14px;
 }
 
 .walkaround-detail-heading {
@@ -4091,16 +4102,29 @@ body {
 .walkaround-detail-heading h3 {
   margin: 5px 0 0;
   color: var(--navy);
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.08;
+}
+
+.walkaround-zone-count {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  min-height: 38px;
+  border: 1px solid rgba(224, 177, 88, 0.45);
+  border-radius: 8px;
+  color: var(--amber);
+  background: rgba(224, 177, 88, 0.09);
+  font-weight: 950;
 }
 
 .walkaround-complete-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 38px;
-  padding: 8px 10px;
+  min-height: 48px;
+  padding: 10px 12px;
   border: 1px solid rgba(119, 189, 145, 0.45);
   border-radius: 8px;
   color: var(--ink);
@@ -4108,6 +4132,12 @@ body {
   font-size: 12px;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.walkaround-complete-toggle.complete {
+  border-color: rgba(119, 189, 145, 0.75);
+  color: #f8fbff;
+  background: rgba(119, 189, 145, 0.24);
 }
 
 .walkaround-check-list {
@@ -4144,8 +4174,8 @@ body {
 
 .walkaround-practice-card {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   border: 1px solid rgba(72, 103, 134, 0.52);
   border-radius: 8px;
   background: rgba(7, 14, 22, 0.56);
@@ -4156,7 +4186,7 @@ body {
   align-items: center;
   gap: 12px;
   color: var(--navy);
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .walkaround-question svg {
@@ -4164,7 +4194,7 @@ body {
 }
 
 .walkaround-practice-card textarea {
-  min-height: 88px;
+  min-height: 82px;
   resize: vertical;
 }
 
@@ -4177,44 +4207,74 @@ body {
   font-weight: 950;
 }
 
-.walkaround-area-strip {
+.walkaround-route {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid rgba(72, 103, 134, 0.5);
+  grid-template-columns: minmax(130px, 0.42fr) repeat(7, minmax(86px, 1fr));
+  gap: 8px;
+  align-items: stretch;
+  padding: 10px;
+  border: 1px solid rgba(72, 103, 134, 0.58);
   border-radius: 8px;
-  background: rgba(7, 14, 22, 0.56);
+  background: linear-gradient(180deg, rgba(11, 24, 37, 0.9), rgba(7, 15, 24, 0.94));
 }
 
-.walkaround-area-strip button {
+.walkaround-route button {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  min-height: 66px;
-  padding: 8px;
+  gap: 8px;
+  min-height: 64px;
+  padding: 8px 10px;
   border: 1px solid rgba(72, 103, 134, 0.7);
   border-radius: 8px;
   color: var(--muted);
   background: rgba(10, 18, 27, 0.65);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
+  line-height: 1.15;
   text-align: center;
 }
 
-.walkaround-area-strip button.active {
+.walkaround-route button span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(131, 176, 207, 0.72);
+  border-radius: 50%;
+  color: #f8fbff;
+}
+
+.walkaround-route button b {
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.walkaround-route button.active {
   color: #f8fbff;
   border-color: rgba(79, 164, 255, 0.95);
   background: linear-gradient(180deg, rgba(38, 115, 205, 0.96), rgba(14, 64, 123, 0.96));
 }
 
+.walkaround-route button.done {
+  color: #ecfff4;
+  border-color: rgba(119, 189, 145, 0.72);
+  background: rgba(119, 189, 145, 0.17);
+}
+
+.walkaround-route button.done span {
+  border-color: rgba(119, 189, 145, 0.8);
+  color: var(--green);
+  background: rgba(119, 189, 145, 0.14);
+}
+
 .walkaround-progress-summary {
   display: grid;
   place-items: center;
-  grid-column: 1 / -1;
-  min-height: 76px;
+  min-height: 54px;
+  padding: 6px 10px;
+  border-right: 1px solid rgba(72, 103, 134, 0.5);
   color: var(--ink);
   font-weight: 900;
 }
@@ -4258,12 +4318,22 @@ body {
   }
 
   .walkaround-aircraft {
-    min-height: 380px;
+    min-height: 420px;
   }
 
   .walkaround-detail-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .walkaround-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .walkaround-progress-summary {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-bottom: 1px solid rgba(72, 103, 134, 0.5);
   }
 
   .flight-training-hero {

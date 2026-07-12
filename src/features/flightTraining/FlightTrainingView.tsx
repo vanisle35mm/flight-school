@@ -236,52 +236,63 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
           {mode}
         </button>)}
       </div>
-      <div className="walkaround-practice-layout">
-        <div className="walkaround-map-panel">
-          <div className="walkaround-aircraft" aria-label="Cessna 172 walkaround practice zones">
-            <span className="aircraft-shadow" />
-            <span className="aircraft-part fuselage" />
-            <span className="aircraft-part cabin" />
-            <span className="aircraft-part nose" />
-            <span className="aircraft-part tail" />
-            <span className="aircraft-part left-wing" />
-            <span className="aircraft-part right-wing" />
-            <span className="aircraft-part left-gear" />
-            <span className="aircraft-part right-gear" />
-            <span className="aircraft-part nose-gear" />
-            {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => selectWalkaroundArea(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
-              <span>{area.shortLabel}</span>
-              {completedWalkaroundIds.has(area.id) && <CheckCircle2 size={15} />}
-            </button>)}
-          </div>
-          <div className="walkaround-progress">
-            <strong>{walkaroundProgress}%</strong>
-            <div className="progress"><div className="bar" style={{ width: `${walkaroundProgress}%` }} /></div>
-          </div>
-        </div>
-        <div className="walkaround-detail-card">
-          <div className="walkaround-detail-heading">
-            <div><span className="eyebrow">{selectedWalkaroundArea.station}</span><h3>{selectedWalkaroundArea.title}</h3></div>
-            <label className="walkaround-complete-toggle">
-              <input type="checkbox" checked={completedWalkaroundIds.has(selectedWalkaroundArea.id)} onChange={(event) => updateChecklist('outsideChecks', selectedWalkaroundArea.id, event.target.checked)} />
-              Complete
-            </label>
-          </div>
-          <div className="walkaround-practice-card">
-            <div className="walkaround-question"><HelpCircle size={24} /><strong>What are you checking here?</strong></div>
-            {walkaroundMode !== 'learn' && <textarea value={walkaroundAnswer} onChange={(event) => setWalkaroundAnswer(event.target.value)} placeholder="Type your answer before revealing the checks..." />}
-            {walkaroundMode !== 'learn' && <button className="walkaround-reveal-button" onClick={() => setWalkaroundRevealed((revealed) => !revealed)} type="button"><Eye size={17} />{walkaroundRevealed ? 'Hide Checks' : 'Reveal Checks'}</button>}
-            <div className={checksVisible ? 'walkaround-check-list' : 'walkaround-check-list hidden'}>
-              {selectedWalkaroundArea.checks.map((check, index) => <div className="walkaround-check-row" key={check}>
-                {checksVisible ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                <p>{checksVisible ? check : `Hidden check ${index + 1}`}</p>
-              </div>)}
+      <div className="walkaround-trainer">
+        <div className="walkaround-practice-layout">
+          <div className="walkaround-map-panel">
+            <div className="walkaround-aircraft" aria-label="Cessna 172 walkaround practice zones">
+              <span className="aircraft-shadow" />
+              <span className="aircraft-part fuselage" />
+              <span className="aircraft-part cabin" />
+              <span className="aircraft-part nose" />
+              <span className="aircraft-part tail" />
+              <span className="aircraft-part left-wing" />
+              <span className="aircraft-part right-wing" />
+              <span className="aircraft-part left-gear" />
+              <span className="aircraft-part right-gear" />
+              <span className="aircraft-part nose-gear" />
+              {walkaroundAreas.map((area, index) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => selectWalkaroundArea(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
+                <b>{index + 1}</b>
+                <span>{walkaroundMode === 'test' && selectedWalkaroundArea.id !== area.id ? 'Identify' : area.shortLabel}</span>
+                {completedWalkaroundIds.has(area.id) && <CheckCircle2 size={15} />}
+              </button>)}
+            </div>
+            <div className="walkaround-progress">
+              <strong>{walkaroundProgress}%</strong>
+              <div className="progress"><div className="bar" style={{ width: `${walkaroundProgress}%` }} /></div>
             </div>
           </div>
-          <div className="walkaround-area-strip">
-            <div className="walkaround-progress-summary"><span>Walkaround Progress</span><strong>{flightTraining.outsideChecks.filter((item) => walkaroundAreas.some((area) => area.id === item.id) && item.checked).length}/{walkaroundAreas.length}</strong></div>
-            {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? 'active' : ''} key={area.id} onClick={() => selectWalkaroundArea(area.id)}>{completedWalkaroundIds.has(area.id) ? <CheckCircle2 size={14} /> : <Circle size={14} />}{area.shortLabel}</button>)}
+          <div className="walkaround-detail-card">
+            <div className="walkaround-detail-heading">
+              <div><span className="eyebrow">{selectedWalkaroundArea.station}</span><h3>{walkaroundMode === 'test' ? 'Identify this inspection point' : selectedWalkaroundArea.title}</h3></div>
+              <span className="walkaround-zone-count">{walkaroundAreas.findIndex((area) => area.id === selectedWalkaroundArea.id) + 1}/{walkaroundAreas.length}</span>
+            </div>
+            <div className="walkaround-practice-card">
+              <div className="walkaround-question"><HelpCircle size={24} /><strong>{walkaroundMode === 'test' ? 'Which zone is this, and what do you check?' : 'What are you checking here?'}</strong></div>
+              {walkaroundMode !== 'learn' && <textarea value={walkaroundAnswer} onChange={(event) => setWalkaroundAnswer(event.target.value)} placeholder="Type your answer before revealing the checks..." />}
+              {walkaroundMode !== 'learn' && <button className="walkaround-reveal-button" onClick={() => setWalkaroundRevealed((revealed) => !revealed)} type="button"><Eye size={17} />{walkaroundRevealed ? 'Hide Checks' : 'Reveal Checks'}</button>}
+              <div className={checksVisible ? 'walkaround-check-list' : 'walkaround-check-list hidden'}>
+                {selectedWalkaroundArea.checks.map((check, index) => <div className="walkaround-check-row" key={check}>
+                  {checksVisible ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                  <p>{checksVisible ? check : `Hidden check ${index + 1}`}</p>
+                </div>)}
+              </div>
+              <label className={completedWalkaroundIds.has(selectedWalkaroundArea.id) ? 'walkaround-complete-toggle complete' : 'walkaround-complete-toggle'}>
+                <input type="checkbox" checked={completedWalkaroundIds.has(selectedWalkaroundArea.id)} onChange={(event) => updateChecklist('outsideChecks', selectedWalkaroundArea.id, event.target.checked)} />
+                {completedWalkaroundIds.has(selectedWalkaroundArea.id) ? 'Completed' : 'Mark zone complete'}
+              </label>
+            </div>
           </div>
+        </div>
+        <div className="walkaround-route">
+          <div className="walkaround-progress-summary"><span>Walkaround Route</span><strong>{flightTraining.outsideChecks.filter((item) => walkaroundAreas.some((area) => area.id === item.id) && item.checked).length}/{walkaroundAreas.length}</strong></div>
+          {walkaroundAreas.map((area, index) => <button
+            className={completedWalkaroundIds.has(area.id) ? 'done' : selectedWalkaroundArea.id === area.id ? 'active' : ''}
+            key={area.id}
+            onClick={() => selectWalkaroundArea(area.id)}
+          >
+            <span>{completedWalkaroundIds.has(area.id) ? <CheckCircle2 size={15} /> : index + 1}</span>
+            <b>{area.shortLabel}</b>
+          </button>)}
         </div>
       </div>
     </section>}
