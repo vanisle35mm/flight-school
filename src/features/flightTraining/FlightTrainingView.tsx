@@ -1,5 +1,6 @@
 import { CalendarPlus, CheckCircle2, Circle, Compass, Eye, HelpCircle, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
+import walkaroundAircraft from '../../assets/walkaround-aircraft-topdown.png';
 import { createDefaultFlightTrainingData } from '../../lib/storage';
 import type { FlightChecklistItem, FlightScheduleEntry, GroundSchoolData } from '../../types';
 
@@ -241,39 +242,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
         <div className="walkaround-practice-layout">
           <div className="walkaround-map-panel">
             <div className="walkaround-aircraft" aria-label="Cessna 172 walkaround practice zones">
-              <svg className="walkaround-aircraft-svg" viewBox="0 0 760 520" role="img" aria-hidden="true">
-                <defs>
-                  <linearGradient id="aircraftSkin" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#fffdf6" />
-                    <stop offset="50%" stopColor="#dfeaf0" />
-                    <stop offset="100%" stopColor="#9fb7c8" />
-                  </linearGradient>
-                  <linearGradient id="aircraftGlass" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#20374a" />
-                    <stop offset="100%" stopColor="#050a10" />
-                  </linearGradient>
-                  <filter id="aircraftShadow" x="-20%" y="-20%" width="140%" height="150%">
-                    <feDropShadow dx="0" dy="12" stdDeviation="10" floodColor="#000000" floodOpacity="0.35" />
-                  </filter>
-                </defs>
-                <ellipse cx="380" cy="272" rx="286" ry="178" fill="rgba(0,0,0,0.22)" />
-                <g className="aircraft-drawing" filter="url(#aircraftShadow)">
-                  <path className="aircraft-wing" d="M72 226 C204 213 283 211 355 228 L405 228 C477 211 556 213 688 226 L705 230 L702 274 C566 273 483 260 405 245 L355 245 C277 260 194 273 58 274 L55 230 Z" />
-                  <path className="aircraft-aileron left" d="M77 261 C198 260 270 252 348 238" />
-                  <path className="aircraft-aileron right" d="M412 238 C490 252 562 260 683 261" />
-                  <path className="aircraft-fuselage" d="M361 74 C361 46 399 46 399 74 L409 390 C410 427 350 427 351 390 Z" />
-                  <path className="aircraft-nose" d="M358 59 C360 29 400 29 402 59 C402 92 394 108 380 108 C366 108 358 92 358 59 Z" />
-                  <path className="aircraft-tail" d="M297 424 L463 424 C454 461 425 476 380 476 C335 476 306 461 297 424 Z" />
-                  <path className="aircraft-tail-line" d="M312 434 L448 434" />
-                  <path className="aircraft-cabin" d="M333 223 C341 184 363 168 380 168 C397 168 419 184 427 223 C418 245 400 257 380 257 C360 257 342 245 333 223 Z" />
-                  <circle className="aircraft-window" cx="380" cy="150" r="12" />
-                  <circle className="aircraft-gear" cx="312" cy="306" r="10" />
-                  <circle className="aircraft-gear" cx="448" cy="306" r="10" />
-                  <rect className="aircraft-tip left" x="60" y="224" width="7" height="50" rx="3" />
-                  <rect className="aircraft-tip right" x="693" y="224" width="7" height="50" rx="3" />
-                  <path className="aircraft-beacon" d="M380 31 L388 54 L372 54 Z" />
-                </g>
-              </svg>
+              <img className="walkaround-aircraft-image" src={walkaroundAircraft} alt="" aria-hidden="true" />
               {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => selectWalkaroundArea(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
                 <span>{walkaroundMode === 'test' && selectedWalkaroundArea.id !== area.id ? 'Identify' : area.shortLabel}</span>
                 {completedWalkaroundIds.has(area.id) && <CheckCircle2 size={15} />}
