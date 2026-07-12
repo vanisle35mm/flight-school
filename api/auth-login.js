@@ -104,10 +104,11 @@ export default async function handler(request, response) {
     }
     profile = profileResult.data;
 
-    if (!profile && role === 'admin' && verifyConfiguredAdminPassword(password)) {
+    const adminPasswordVerified = role === 'admin' && verifyConfiguredAdminPassword(password);
+    if (!profile && adminPasswordVerified) {
       const { data: existingAdmin, error: existingAdminError } = await clients.admin
         .from('groundschool_profiles')
-        .select('id')
+        .select(PROFILE_SELECT)
         .eq('role', 'admin')
         .limit(1)
         .maybeSingle();
@@ -122,6 +123,8 @@ export default async function handler(request, response) {
         const migratedStudents = await migrateLegacyUsers(clients, user, firstName, loginName);
         profile = { id: user.id, first_name: firstName, login_name: loginName, role: 'admin', requires_password_reset: false };
         console.info(`Flight School secure migration created ${migratedStudents} student accounts.`);
+      } else {
+        profile = existingAdmin;
       }
     }
 
@@ -136,6 +139,11 @@ export default async function handler(request, response) {
 
     const { data: authUserData, error: authUserError } = await clients.admin.auth.admin.getUserById(profile.id);
     if (authUserError || !authUserData.user?.email) throw authUserError ?? new Error('Auth account not found.');
+
+    if (adminPasswordVerified) {
+      const { error: updatePasswordError } = await clients.admin.auth.admin.updateUserById(profile.id, { password });
+      if (updatePasswordError) throw updatePasswordError;
+    }
 
     const { data: signInData, error: signInError } = await clients.publicClient.auth.signInWithPassword({
       email: authUserData.user.email,
