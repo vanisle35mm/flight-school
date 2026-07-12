@@ -1,4 +1,5 @@
 import { PSTAR_QUESTIONS } from '../data/pstarQuestions';
+import { ROCA_QUESTIONS } from '../data/rocaQuestions';
 import type { GroundSchoolData } from '../types';
 
 const MIN_PSTAR_SCORE_QUESTIONS = 10;
@@ -13,7 +14,6 @@ export const isTaskDueSoon = (dateValue: string) => {
 };
 
 export const getStats = (data: GroundSchoolData) => {
-  const importedCards = data.classes.reduce((sum, session) => sum + session.flashcards.length, 0);
   const tasksRemaining = data.todos.filter((todo) => !todo.done).length;
   const completedTasks = data.todos.filter((todo) => todo.done).length;
   const scoreableAttempts = data.tcHistory.filter((entry) => typeof entry.total === 'number' && entry.total >= MIN_PSTAR_SCORE_QUESTIONS);
@@ -23,8 +23,8 @@ export const getStats = (data: GroundSchoolData) => {
   const latestAttempt = data.tcHistory[0] ?? null;
   return {
     classes: data.classes.length,
-    cards: PSTAR_QUESTIONS.length + importedCards,
-    importedCards,
+    cards: PSTAR_QUESTIONS.length + ROCA_QUESTIONS.length,
+    importedCards: 0,
     tasksRemaining,
     dueSoon: data.todos.filter((todo) => !todo.done && isTaskDueSoon(todo.dueDate)).length,
     taskPct: data.todos.length ? Math.round((completedTasks / data.todos.length) * 100) : 0,

@@ -29,7 +29,7 @@ export const NotesView = ({ data, onDataChange, search }: { data: GroundSchoolDa
   };
 
   const deleteSession = () => {
-    if (!activeClass || !window.confirm('Delete this class and its imported flashcards?')) return;
+    if (!activeClass || !window.confirm('Delete this class?')) return;
     onDataChange({ ...data, classes: data.classes.filter((_, index) => index !== activeIndex) });
     setSelectedIndex(Math.max(0, activeIndex - 1));
     setMessage('Class deleted.');
@@ -48,7 +48,7 @@ export const NotesView = ({ data, onDataChange, search }: { data: GroundSchoolDa
         <div className="stack-list">
           {visibleClasses.length ? visibleClasses.map(({ session, index }) => (
             <button className={index === activeIndex ? 'lesson-row active' : 'lesson-row'} key={`${session.date}-${session.topics}-${index}`} onClick={() => { setSelectedIndex(index); setMessage(''); }}>
-              <span className="lesson-meta"><span>{session.date || 'No date'}</span><span>{session.flashcards.length} cards</span></span>
+              <span className="lesson-meta"><span>{session.date || 'No date'}</span></span>
               <strong>{session.topics || `Class ${index + 1}`}</strong>
             </button>
           )) : <p className="empty-state">No lessons match the current search.</p>}
