@@ -3827,38 +3827,70 @@ body {
   text-transform: uppercase;
 }
 
+.walkaround-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 580px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(72, 103, 134, 0.72);
+  border-radius: 8px;
+  background: rgba(7, 14, 22, 0.68);
+}
+
+.walkaround-mode-tabs button {
+  min-height: 48px;
+  border: 0;
+  border-right: 1px solid rgba(72, 103, 134, 0.45);
+  color: var(--muted);
+  background: transparent;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.walkaround-mode-tabs button:last-child {
+  border-right: 0;
+}
+
+.walkaround-mode-tabs button.active {
+  color: #f8fbff;
+  background: linear-gradient(180deg, rgba(50, 129, 217, 0.8), rgba(22, 72, 130, 0.86));
+  box-shadow: inset 0 0 0 1px rgba(137, 196, 255, 0.42);
+}
+
 .walkaround-practice-layout {
   display: grid;
-  grid-template-columns: minmax(360px, 0.95fr) minmax(320px, 1.05fr);
+  grid-template-columns: minmax(440px, 1.25fr) minmax(300px, 0.75fr);
   gap: 18px;
   align-items: stretch;
 }
 
 .walkaround-map-panel,
 .walkaround-detail-card {
-  border: 1px solid rgba(72, 103, 134, 0.5);
+  border: 1px solid rgba(72, 103, 134, 0.58);
   border-radius: 8px;
-  background: rgba(8, 17, 27, 0.72);
+  background: linear-gradient(180deg, rgba(11, 24, 37, 0.9), rgba(7, 15, 24, 0.94));
 }
 
 .walkaround-map-panel {
   display: grid;
+  grid-template-rows: minmax(440px, 1fr) auto;
   gap: 12px;
   padding: 14px;
 }
 
 .walkaround-aircraft {
   position: relative;
-  min-height: 470px;
+  min-height: 460px;
   overflow: hidden;
   border: 1px solid rgba(72, 103, 134, 0.45);
   border-radius: 8px;
   background:
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    radial-gradient(circle at 50% 48%, rgba(131, 176, 207, 0.16), transparent 48%),
-    #08111b;
-  background-size: 34px 34px, 34px 34px, auto, auto;
+    radial-gradient(circle at 50% 44%, rgba(48, 126, 187, 0.16), transparent 48%),
+    #07111b;
+  background-size: 36px 36px, 36px 36px, auto, auto;
 }
 
 .aircraft-shadow,
@@ -3869,62 +3901,65 @@ body {
 }
 
 .aircraft-shadow {
-  left: 17%;
-  top: 22%;
-  width: 66%;
-  height: 58%;
+  left: 11%;
+  top: 18%;
+  width: 78%;
+  height: 66%;
   background: radial-gradient(ellipse, rgba(0, 0, 0, 0.32), transparent 64%);
 }
 
 .aircraft-part {
   z-index: 1;
-  background: linear-gradient(180deg, #dce8f1, #7ea5bf);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.26);
+  border: 1px solid rgba(2, 9, 15, 0.38);
+  background: linear-gradient(180deg, #fffaf0, #d9e4ea 48%, #9fb8ca);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
 .aircraft-part.fuselage {
-  left: 47.5%;
-  top: 18%;
-  width: 5%;
-  height: 62%;
+  left: 47%;
+  top: 14%;
+  width: 6%;
+  height: 66%;
 }
 
 .aircraft-part.cabin {
-  left: 44.8%;
-  top: 36%;
-  width: 10.4%;
-  height: 16%;
-  background: linear-gradient(180deg, #6ea4cb, #24394d);
+  left: 43.9%;
+  top: 34%;
+  width: 12.2%;
+  height: 17%;
+  border-radius: 44% 44% 36% 36%;
+  background: linear-gradient(180deg, #182c3e, #050a10);
 }
 
 .aircraft-part.nose {
-  left: 46.5%;
-  top: 12%;
-  width: 7%;
-  height: 10%;
+  left: 46.2%;
+  top: 8%;
+  width: 7.6%;
+  height: 11%;
 }
 
 .aircraft-part.tail {
-  left: 39%;
-  top: 76%;
+  left: 38.5%;
+  top: 78%;
   width: 22%;
-  height: 5%;
+  height: 5.5%;
 }
 
 .aircraft-part.left-wing,
 .aircraft-part.right-wing {
-  top: 47%;
-  width: 39%;
-  height: 6.5%;
+  top: 45%;
+  width: 40%;
+  height: 8%;
+  border-radius: 24px 999px 999px 24px;
 }
 
 .aircraft-part.left-wing {
-  left: 9%;
+  left: 8%;
   transform: rotate(-5deg);
 }
 
 .aircraft-part.right-wing {
-  right: 9%;
+  right: 8%;
   transform: rotate(5deg);
 }
 
@@ -3939,17 +3974,17 @@ body {
 
 .aircraft-part.left-gear {
   left: 36%;
-  top: 57%;
+  top: 58%;
 }
 
 .aircraft-part.right-gear {
   right: 36%;
-  top: 57%;
+  top: 58%;
 }
 
 .aircraft-part.nose-gear {
   left: calc(50% - 11px);
-  top: 25%;
+  top: 24%;
 }
 
 .walkaround-hotspot {
@@ -3959,51 +3994,72 @@ body {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 34px;
-  padding: 7px 9px;
-  border: 1px solid rgba(131, 176, 207, 0.62);
-  border-radius: 999px;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid rgba(224, 177, 88, 0.72);
+  border-radius: 8px;
   color: #f8fbff;
-  background: rgba(12, 29, 45, 0.92);
+  background: rgba(12, 23, 34, 0.95);
   font-size: 11px;
   font-weight: 900;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
+.walkaround-hotspot::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border: 3px solid var(--amber);
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px rgba(224, 177, 88, 0.16), 0 0 20px rgba(224, 177, 88, 0.55);
+}
+
 .walkaround-hotspot.active {
-  color: #101821;
-  border-color: rgba(224, 177, 88, 0.92);
-  background: var(--amber);
+  color: #f8fbff;
+  border-color: rgba(79, 164, 255, 0.95);
+  background: linear-gradient(180deg, rgba(38, 115, 205, 0.96), rgba(14, 64, 123, 0.96));
+  box-shadow: 0 0 0 1px rgba(114, 190, 255, 0.38), 0 16px 34px rgba(0, 0, 0, 0.32);
+}
+
+.walkaround-hotspot.active::before {
+  border-color: #bde1ff;
+  box-shadow: 0 0 0 6px rgba(47, 143, 255, 0.24), 0 0 26px rgba(75, 164, 255, 0.82);
 }
 
 .walkaround-hotspot.fuel-oil {
   left: 58%;
-  top: 20%;
+  top: 25%;
 }
 
 .walkaround-hotspot.cabin-docs {
-  left: 56%;
-  top: 38%;
+  left: 34%;
+  top: 35%;
 }
 
 .walkaround-hotspot.fuselage-tail {
-  left: 56%;
-  top: 74%;
+  left: 55%;
+  top: 76%;
 }
 
-.walkaround-hotspot.wings-controls {
-  left: 8%;
-  top: 40%;
+.walkaround-hotspot.left-wing {
+  left: 12%;
+  top: 53%;
+}
+
+.walkaround-hotspot.right-wing {
+  right: 11%;
+  top: 53%;
 }
 
 .walkaround-hotspot.landing-gear {
-  left: 56%;
-  top: 57%;
+  left: 33%;
+  top: 62%;
 }
 
 .walkaround-hotspot.prop-engine {
-  left: 37%;
-  top: 9%;
+  left: 55%;
+  top: 12%;
 }
 
 .walkaround-progress {
@@ -4020,7 +4076,8 @@ body {
 
 .walkaround-detail-card {
   display: grid;
-  gap: 16px;
+  align-content: start;
+  gap: 14px;
   padding: 18px;
 }
 
@@ -4034,7 +4091,7 @@ body {
 .walkaround-detail-heading h3 {
   margin: 5px 0 0;
   color: var(--navy);
-  font-size: 26px;
+  font-size: 24px;
   line-height: 1.08;
 }
 
@@ -4055,64 +4112,121 @@ body {
 
 .walkaround-check-list {
   display: grid;
-  gap: 9px;
+  gap: 0;
+  border-top: 1px solid rgba(72, 103, 134, 0.48);
 }
 
 .walkaround-check-row {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-columns: 22px minmax(0, 1fr);
   gap: 10px;
   align-items: start;
-  padding: 12px;
-  border: 1px solid rgba(72, 103, 134, 0.48);
-  border-radius: 8px;
-  background: rgba(13, 27, 40, 0.72);
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(72, 103, 134, 0.48);
+  background: transparent;
 }
 
-.walkaround-check-row span {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: #101821;
-  background: var(--blue);
-  font-size: 12px;
-  font-weight: 900;
+.walkaround-check-row svg {
+  color: var(--amber);
+  margin-top: 3px;
 }
 
 .walkaround-check-row p {
-  margin: 2px 0 0;
+  margin: 0;
   color: var(--ink);
   font-weight: 750;
   line-height: 1.45;
 }
 
-.walkaround-area-strip {
+.walkaround-check-list.hidden .walkaround-check-row p {
+  color: var(--muted);
+}
+
+.walkaround-practice-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(72, 103, 134, 0.52);
+  border-radius: 8px;
+  background: rgba(7, 14, 22, 0.56);
+}
+
+.walkaround-question {
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding-top: 4px;
+  align-items: center;
+  gap: 12px;
+  color: var(--navy);
+  font-size: 20px;
+}
+
+.walkaround-question svg {
+  color: var(--amber);
+}
+
+.walkaround-practice-card textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.walkaround-reveal-button {
+  min-height: 48px;
+  border: 0;
+  color: #111820;
+  background: linear-gradient(180deg, #ffd36f, #e3a936);
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.walkaround-area-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(72, 103, 134, 0.5);
+  border-radius: 8px;
+  background: rgba(7, 14, 22, 0.56);
 }
 
 .walkaround-area-strip button {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  min-height: 32px;
-  padding: 6px 9px;
+  min-height: 66px;
+  padding: 8px;
   border: 1px solid rgba(72, 103, 134, 0.7);
-  border-radius: 999px;
+  border-radius: 8px;
   color: var(--muted);
   background: rgba(10, 18, 27, 0.65);
   font-size: 11px;
   font-weight: 900;
+  text-align: center;
 }
 
 .walkaround-area-strip button.active {
-  color: #101821;
-  border-color: transparent;
-  background: var(--amber);
+  color: #f8fbff;
+  border-color: rgba(79, 164, 255, 0.95);
+  background: linear-gradient(180deg, rgba(38, 115, 205, 0.96), rgba(14, 64, 123, 0.96));
+}
+
+.walkaround-progress-summary {
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  min-height: 76px;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.walkaround-progress-summary span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.walkaround-progress-summary strong {
+  color: var(--navy);
+  font-size: 24px;
 }
 
 .flight-schedule-list {

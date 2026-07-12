@@ -1,9 +1,10 @@
-import { CalendarPlus, CheckCircle2, Compass, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
+import { CalendarPlus, CheckCircle2, Circle, Compass, Eye, HelpCircle, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { createDefaultFlightTrainingData } from '../../lib/storage';
 import type { FlightChecklistItem, FlightScheduleEntry, GroundSchoolData } from '../../types';
 
 type FlightPage = 'checklist' | 'panel' | 'outside' | 'schedule';
+type WalkaroundMode = 'learn' | 'practice' | 'test';
 type WalkaroundArea = {
   id: string;
   title: string;
@@ -36,6 +37,30 @@ const walkaroundAreas: WalkaroundArea[] = [
     ]
   },
   {
+    id: 'left-wing',
+    title: 'Left Wing',
+    shortLabel: 'Left Wing',
+    station: 'Work from root to tip, then trailing edge back in',
+    checks: [
+      'Inspect leading edge, wing tip, underside, panels, and tiedown point for damage.',
+      'Confirm fuel cap is secure and check the tank vent or drain points as applicable.',
+      'Check flap and aileron condition, hinges, freedom of movement, and security.',
+      'Confirm landing, navigation, and strobe lights are intact and serviceable.'
+    ]
+  },
+  {
+    id: 'right-wing',
+    title: 'Right Wing',
+    shortLabel: 'Right Wing',
+    station: 'Repeat the wing inspection without rushing the duplicate side',
+    checks: [
+      'Inspect leading edge, wing tip, underside, panels, and tiedown point for damage.',
+      'Confirm fuel cap is secure and check the tank vent or drain points as applicable.',
+      'Check flap and aileron condition, hinges, freedom of movement, and security.',
+      'Confirm landing, navigation, and strobe lights are intact and serviceable.'
+    ]
+  },
+  {
     id: 'fuselage-tail',
     title: 'Fuselage and Tail',
     shortLabel: 'Tail',
@@ -44,17 +69,6 @@ const walkaroundAreas: WalkaroundArea[] = [
       'Inspect upper and lower fuselage for damage.',
       'Check horizontal stabilizer and elevator movement, hinges, and attachment.',
       'Inspect vertical stabilizer, rudder, antennas, static wicks, and cable integrity.'
-    ]
-  },
-  {
-    id: 'wings-controls',
-    title: 'Wings and Control Surfaces',
-    shortLabel: 'Wings',
-    station: 'Work each wing from root to tip and back',
-    checks: [
-      'Check flaps for security and proper condition.',
-      'Inspect ailerons for free movement, hinges, and secure attachment.',
-      'Scan tips, leading edges, underside, panels, landing lights, nav lights, and strobes.'
     ]
   },
   {
@@ -86,6 +100,9 @@ const pctDone = (items: FlightChecklistItem[]) => items.length ? Math.round((ite
 
 export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; page: FlightPage }) => {
   const [selectedWalkaroundAreaId, setSelectedWalkaroundAreaId] = useState(walkaroundAreas[0].id);
+  const [walkaroundMode, setWalkaroundMode] = useState<WalkaroundMode>('practice');
+  const [walkaroundAnswer, setWalkaroundAnswer] = useState('');
+  const [walkaroundRevealed, setWalkaroundRevealed] = useState(false);
   const flightTraining = data.flightTraining ?? createDefaultFlightTrainingData();
   const nextFlight = useMemo(() => flightTraining.schedule
     .filter((entry) => !entry.completed)
@@ -139,8 +156,21 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
   const deleteFlight = (flightId: string) => {
     updateFlightTraining({ schedule: flightTraining.schedule.filter((entry) => entry.id !== flightId) });
   };
+  const selectWalkaroundArea = (areaId: string) => {
+    setSelectedWalkaroundAreaId(areaId);
+    setWalkaroundAnswer('');
+    setWalkaroundRevealed(false);
+  };
+  const setMode = (mode: WalkaroundMode) => {
+    setWalkaroundMode(mode);
+    setWalkaroundAnswer('');
+    setWalkaroundRevealed(mode === 'learn');
+  };
   const selectedWalkaroundArea = walkaroundAreas.find((area) => area.id === selectedWalkaroundAreaId) ?? walkaroundAreas[0];
   const completedWalkaroundIds = new Set(flightTraining.outsideChecks.filter((item) => item.checked).map((item) => item.id));
+  const walkaroundProgressItems = walkaroundAreas.map((area) => ({ id: area.id, label: area.title, checked: completedWalkaroundIds.has(area.id) }));
+  const walkaroundProgress = pctDone(walkaroundProgressItems);
+  const checksVisible = walkaroundMode === 'learn' || walkaroundRevealed;
 
   return <section className="flight-training-module">
     <div className="flight-training-hero">
@@ -193,8 +223,18 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
 
     {page === 'outside' && <section className="panel flight-panel">
       <div className="panel-heading">
-        <div><span className="eyebrow">Ramp Practice</span><h2>Outside Checks</h2></div>
+        <div><span className="eyebrow">Ramp Practice</span><h2>Outside Checks</h2><p>Practice the walkaround without the airplane.</p></div>
         <button onClick={() => resetChecklist('outsideChecks')}><RotateCcw size={17} />Reset</button>
+      </div>
+      <div className="walkaround-mode-tabs" role="tablist" aria-label="Outside checks mode">
+        {(['learn', 'practice', 'test'] as WalkaroundMode[]).map((mode) => <button
+          className={walkaroundMode === mode ? 'active' : ''}
+          key={mode}
+          onClick={() => setMode(mode)}
+          type="button"
+        >
+          {mode}
+        </button>)}
       </div>
       <div className="walkaround-practice-layout">
         <div className="walkaround-map-panel">
@@ -209,14 +249,14 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
             <span className="aircraft-part left-gear" />
             <span className="aircraft-part right-gear" />
             <span className="aircraft-part nose-gear" />
-            {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => setSelectedWalkaroundAreaId(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
+            {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? `walkaround-hotspot ${area.id} active` : `walkaround-hotspot ${area.id}`} key={area.id} onClick={() => selectWalkaroundArea(area.id)} aria-pressed={selectedWalkaroundArea.id === area.id}>
               <span>{area.shortLabel}</span>
               {completedWalkaroundIds.has(area.id) && <CheckCircle2 size={15} />}
             </button>)}
           </div>
           <div className="walkaround-progress">
-            <strong>{pctDone(walkaroundAreas.map((area) => ({ id: area.id, label: area.title, checked: completedWalkaroundIds.has(area.id) })))}%</strong>
-            <div className="progress"><div className="bar" style={{ width: `${pctDone(walkaroundAreas.map((area) => ({ id: area.id, label: area.title, checked: completedWalkaroundIds.has(area.id) })))}%` }} /></div>
+            <strong>{walkaroundProgress}%</strong>
+            <div className="progress"><div className="bar" style={{ width: `${walkaroundProgress}%` }} /></div>
           </div>
         </div>
         <div className="walkaround-detail-card">
@@ -227,14 +267,20 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
               Complete
             </label>
           </div>
-          <div className="walkaround-check-list">
-            {selectedWalkaroundArea.checks.map((check, index) => <div className="walkaround-check-row" key={check}>
-              <span>{index + 1}</span>
-              <p>{check}</p>
-            </div>)}
+          <div className="walkaround-practice-card">
+            <div className="walkaround-question"><HelpCircle size={24} /><strong>What are you checking here?</strong></div>
+            {walkaroundMode !== 'learn' && <textarea value={walkaroundAnswer} onChange={(event) => setWalkaroundAnswer(event.target.value)} placeholder="Type your answer before revealing the checks..." />}
+            {walkaroundMode !== 'learn' && <button className="walkaround-reveal-button" onClick={() => setWalkaroundRevealed((revealed) => !revealed)} type="button"><Eye size={17} />{walkaroundRevealed ? 'Hide Checks' : 'Reveal Checks'}</button>}
+            <div className={checksVisible ? 'walkaround-check-list' : 'walkaround-check-list hidden'}>
+              {selectedWalkaroundArea.checks.map((check, index) => <div className="walkaround-check-row" key={check}>
+                {checksVisible ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                <p>{checksVisible ? check : `Hidden check ${index + 1}`}</p>
+              </div>)}
+            </div>
           </div>
           <div className="walkaround-area-strip">
-            {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? 'active' : ''} key={area.id} onClick={() => setSelectedWalkaroundAreaId(area.id)}>{completedWalkaroundIds.has(area.id) ? <CheckCircle2 size={14} /> : null}{area.shortLabel}</button>)}
+            <div className="walkaround-progress-summary"><span>Walkaround Progress</span><strong>{flightTraining.outsideChecks.filter((item) => walkaroundAreas.some((area) => area.id === item.id) && item.checked).length}/{walkaroundAreas.length}</strong></div>
+            {walkaroundAreas.map((area) => <button className={selectedWalkaroundArea.id === area.id ? 'active' : ''} key={area.id} onClick={() => selectWalkaroundArea(area.id)}>{completedWalkaroundIds.has(area.id) ? <CheckCircle2 size={14} /> : <Circle size={14} />}{area.shortLabel}</button>)}
           </div>
         </div>
       </div>

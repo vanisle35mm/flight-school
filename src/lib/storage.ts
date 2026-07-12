@@ -20,8 +20,9 @@ export const createDefaultFlightTrainingData = (): FlightTrainingData => ({
   outsideChecks: [
     { id: 'fuel-oil', label: 'Fuel and oil checks reviewed', checked: false },
     { id: 'cabin-docs', label: 'Cabin and documentation reviewed', checked: false },
+    { id: 'left-wing', label: 'Left wing reviewed', checked: false },
+    { id: 'right-wing', label: 'Right wing reviewed', checked: false },
     { id: 'fuselage-tail', label: 'Fuselage and tail reviewed', checked: false },
-    { id: 'wings-controls', label: 'Wings and control surfaces reviewed', checked: false },
     { id: 'landing-gear', label: 'Landing gear reviewed', checked: false },
     { id: 'prop-engine', label: 'Propeller and engine area reviewed', checked: false }
   ],
