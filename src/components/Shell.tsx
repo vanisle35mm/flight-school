@@ -37,14 +37,26 @@ const cloudStatusLabel: Record<CloudSyncStatus, string> = {
   syncing: 'Cloud syncing',
   error: 'Cloud error'
 };
+const NAV_STATE_KEY = 'flightschool_nav_modules';
+const loadNavModuleState = () => {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(NAV_STATE_KEY) ?? '{}') as Partial<Record<'groundSchoolOpen' | 'flightTrainingOpen', boolean>>;
+    return {
+      groundSchoolOpen: typeof parsed.groundSchoolOpen === 'boolean' ? parsed.groundSchoolOpen : true,
+      flightTrainingOpen: typeof parsed.flightTrainingOpen === 'boolean' ? parsed.flightTrainingOpen : false
+    };
+  } catch {
+    return { groundSchoolOpen: true, flightTrainingOpen: false };
+  }
+};
 
 export const Shell = ({ children, activeView, onViewChange, search, onSearchChange, activeUserName, canAdmin, canManageAccount, cloudStatus, onLogout }: { children: ReactNode; activeView: ViewId; onViewChange: (view: ViewId) => void; search: string; onSearchChange: (value: string) => void; activeUserName: string; canAdmin: boolean; canManageAccount: boolean; cloudStatus: CloudSyncStatus; onLogout: () => void }) => {
   const [weatherSummary, setWeatherSummary] = useState(getStoredWeatherSummary);
   const adminViews: ViewId[] = ['users', 'import'];
   const isAdminView = adminViews.includes(activeView);
   const [adminMenuOpen, setAdminMenuOpen] = useState(isAdminView);
-  const [groundSchoolOpen, setGroundSchoolOpen] = useState(() => groundSchoolViewIds.has(activeView));
-  const [flightTrainingOpen, setFlightTrainingOpen] = useState(() => flightTrainingViewIds.has(activeView));
+  const [groundSchoolOpen, setGroundSchoolOpen] = useState(() => loadNavModuleState().groundSchoolOpen || groundSchoolViewIds.has(activeView));
+  const [flightTrainingOpen, setFlightTrainingOpen] = useState(() => loadNavModuleState().flightTrainingOpen || flightTrainingViewIds.has(activeView));
   useEffect(() => {
     const handleWeatherSummary = (event: Event) => setWeatherSummary((event as CustomEvent<WeatherSummary>).detail);
     window.addEventListener(WEATHER_SUMMARY_EVENT, handleWeatherSummary);
@@ -54,6 +66,9 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
     if (groundSchoolViewIds.has(activeView)) setGroundSchoolOpen(true);
     if (flightTrainingViewIds.has(activeView)) setFlightTrainingOpen(true);
   }, [activeView]);
+  useEffect(() => {
+    window.localStorage.setItem(NAV_STATE_KEY, JSON.stringify({ groundSchoolOpen, flightTrainingOpen }));
+  }, [flightTrainingOpen, groundSchoolOpen]);
   const changeView = (view: ViewId) => {
     onViewChange(view);
     setAdminMenuOpen(false);
