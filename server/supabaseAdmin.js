@@ -25,7 +25,7 @@ export const normalizeLoginName = (value) => String(value ?? '').trim().toLocale
 
 export const verifyConfiguredAdminPassword = (password) => {
   const adminPassword = process.env.ADMIN_PASSWORD ?? '';
-  const adminPasswordHash = (process.env.ADMIN_PASSWORD_HASH ?? '').trim().toLowerCase();
+  const adminPasswordHash = (process.env.ADMIN_PASSWORD_HASH ?? process.env.VITE_ADMIN_PASSWORD_HASH ?? '').trim().toLowerCase();
   const hashedPassword = createHash('sha256').update(password, 'utf8').digest('hex');
   return Boolean((adminPasswordHash && hashedPassword === adminPasswordHash) || (adminPassword && password === adminPassword));
 };
