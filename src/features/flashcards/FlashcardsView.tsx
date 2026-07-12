@@ -24,6 +24,7 @@ const modes: Array<{ id: StudyMode; label: string; hint: string }> = [
 ];
 
 const shuffleCards = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+const sourceForMode = (mode: StudyMode): StudyCard['source'] | null => mode === 'tc' ? 'tc' : mode === 'roca' ? 'roca' : null;
 
 export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; search: string }) => {
   const [mode, setMode] = useState<StudyMode>('all');
@@ -32,7 +33,6 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
   const [section, setSection] = useState('all');
   const [shuffleToken, setShuffleToken] = useState(0);
   const [isShuffled, setIsShuffled] = useState(false);
-  const sections = useMemo(() => [...new Set([...PSTAR_QUESTIONS, ...ROCA_QUESTIONS].map((question) => question.section))].sort(), []);
   const missedIds = useMemo(() => new Set([
     ...data.tcMissedIds.map((id) => `tc:${id}`),
     ...data.tcHistory.flatMap((entry) => entry.missed ?? []).map((id) => `tc:${id}`),
@@ -40,6 +40,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
     ...data.rocaHistory.flatMap((entry) => entry.missed ?? []).map((id) => `roca:${id}`)
   ]), [data.rocaHistory, data.rocaMissedIds, data.tcHistory, data.tcMissedIds]);
   const query = search.trim().toLowerCase();
+  const selectedSource = sourceForMode(mode);
 
   const baseCards = useMemo<StudyCard[]>(() => {
     const pstarCards = PSTAR_QUESTIONS.map((question) => ({
@@ -60,6 +61,10 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
     }));
     return [...pstarCards, ...rocaCards];
   }, []);
+  const sections = useMemo(() => {
+    const sourceCards = selectedSource ? baseCards.filter((card) => card.source === selectedSource) : baseCards;
+    return [...new Set(sourceCards.map((card) => card.section))].sort();
+  }, [baseCards, selectedSource]);
 
   const filteredCards = useMemo(() => {
     const filtered = baseCards.filter((card) => {
@@ -86,6 +91,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
 
   const switchMode = (nextMode: StudyMode) => {
     setMode(nextMode);
+    setSection('all');
     setCardIndex(0);
     setShowAnswer(false);
   };
@@ -134,7 +140,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
 
       <div className="flashcard-toolbar">
         <label>
-          Section
+          {mode === 'roca' ? 'ROC-A Section' : mode === 'tc' ? 'PSTAR Section' : 'Section'}
           <select value={section} onChange={(event) => { setSection(event.target.value); setCardIndex(0); setShowAnswer(false); }}>
             <option value="all">All sections</option>
             {sections.map((item) => <option key={item} value={item}>{item}</option>)}
