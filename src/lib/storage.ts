@@ -1,4 +1,5 @@
-import type { ClassSession, FlashcardReviewStatus, FlightChecklistItem, FlightScheduleEntry, FlightTrainingData, GroundSchoolData, GroundSchoolUser, TcHistoryEntry, Todo } from '../types';
+import { c172sChecklistLibrary } from '../data/c172sChecklists';
+import type { ClassSession, FlashcardReviewStatus, FlightChecklistItem, FlightChecklistTemplate, FlightChecklistTemplateItem, FlightChecklistTemplateSection, FlightScheduleEntry, FlightTrainingData, GroundSchoolData, GroundSchoolUser, TcHistoryEntry, Todo } from '../types';
 
 export const STORAGE_KEY = 'groundschool_v496';
 export const LEGACY_STORAGE_KEY = 'groundschool_v47';
@@ -7,6 +8,15 @@ export const RESTORE_KEY = 'groundschool_restore_payload';
 export const DEFAULT_USER_ID = 'user_default';
 export const DEFAULT_DASHBOARD_STAT_ORDER = ['classes', 'cards', 'accuracy', 'tasks'];
 export const DEFAULT_DASHBOARD_TILE_ORDER = ['classes', 'cards', 'accuracy', 'tasks', 'taskList', 'weather', 'progress', 'quickActions'];
+
+const cloneChecklistLibrary = (library: FlightChecklistTemplate[]): FlightChecklistTemplate[] =>
+  library.map((template) => ({
+    ...template,
+    sections: template.sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) => ({ ...item }))
+    }))
+  }));
 
 export const createDefaultFlightTrainingData = (): FlightTrainingData => ({
   checklist: [
@@ -26,6 +36,7 @@ export const createDefaultFlightTrainingData = (): FlightTrainingData => ({
     { id: 'landing-gear', label: 'Landing gear reviewed', checked: false },
     { id: 'prop-engine', label: 'Propeller and engine area reviewed', checked: false }
   ],
+  checklistLibrary: cloneChecklistLibrary(c172sChecklistLibrary),
   schedule: [],
   panelPractice: {
     throttle: 35,
@@ -95,6 +106,59 @@ const normalizeFlightSchedule = (value: unknown): FlightScheduleEntry[] => Array
   };
 }) : [];
 
+const normalizeChecklistTemplateItem = (value: unknown, fallbackId: string): FlightChecklistTemplateItem | null => {
+  const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  const text = typeof item.text === 'string' ? item.text.trim() : '';
+  if (!text) return null;
+  return {
+    id: typeof item.id === 'string' && item.id.trim() ? item.id : fallbackId,
+    text
+  };
+};
+
+const normalizeChecklistTemplateSection = (value: unknown, fallbackId: string): FlightChecklistTemplateSection | null => {
+  const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  const title = typeof item.title === 'string' ? item.title.trim() : '';
+  const id = typeof item.id === 'string' && item.id.trim() ? item.id : fallbackId;
+  const items = Array.isArray(item.items)
+    ? item.items
+      .map((entry, index) => normalizeChecklistTemplateItem(entry, `${id}-${index + 1}`))
+      .filter((entry): entry is FlightChecklistTemplateItem => Boolean(entry))
+    : [];
+  if (!title || !items.length) return null;
+  return { id, title, items };
+};
+
+const normalizeChecklistTemplate = (value: unknown, fallbackId: string): FlightChecklistTemplate | null => {
+  const item = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  const id = typeof item.id === 'string' && item.id.trim() ? item.id : fallbackId;
+  const aircraft = typeof item.aircraft === 'string' && item.aircraft.trim() ? item.aircraft.trim() : 'C-172S';
+  const title = typeof item.title === 'string' ? item.title.trim() : '';
+  const category = item.category === 'emergency' ? 'emergency' : 'normal';
+  const source = typeof item.source === 'string' && item.source.trim() ? item.source.trim() : 'Flight School checklist';
+  const revisionDate = typeof item.revisionDate === 'string' && item.revisionDate.trim() ? item.revisionDate.trim() : '';
+  const sections = Array.isArray(item.sections)
+    ? item.sections
+      .map((entry, index) => normalizeChecklistTemplateSection(entry, `${id}-section-${index + 1}`))
+      .filter((entry): entry is FlightChecklistTemplateSection => Boolean(entry))
+    : [];
+  if (!title || !sections.length) return null;
+  return { id, aircraft, title, category, source, revisionDate, sections };
+};
+
+const normalizeChecklistLibrary = (value: unknown, fallback: FlightChecklistTemplate[]): FlightChecklistTemplate[] => {
+  const parsed = Array.isArray(value)
+    ? value
+      .map((entry, index) => normalizeChecklistTemplate(entry, `checklist-template-${index + 1}`))
+      .filter((entry): entry is FlightChecklistTemplate => Boolean(entry))
+    : [];
+  const templatesById = new Map(parsed.map((template) => [template.id, template]));
+  cloneChecklistLibrary(fallback).forEach((template) => {
+    if (!templatesById.has(template.id)) templatesById.set(template.id, template);
+  });
+  return Array.from(templatesById.values());
+};
+
 const normalizeFlightTraining = (value: unknown): FlightTrainingData => {
   const fallback = createDefaultFlightTrainingData();
   const source = value && typeof value === 'object' ? value as Record<string, unknown> : {};
@@ -102,6 +166,7 @@ const normalizeFlightTraining = (value: unknown): FlightTrainingData => {
   return {
     checklist: normalizeChecklist(source.checklist, fallback.checklist),
     outsideChecks: normalizeChecklist(source.outsideChecks, fallback.outsideChecks),
+    checklistLibrary: normalizeChecklistLibrary(source.checklistLibrary, fallback.checklistLibrary),
     schedule: normalizeFlightSchedule(source.schedule),
     panelPractice: {
       throttle: typeof panel.throttle === 'number' ? panel.throttle : fallback.panelPractice.throttle,

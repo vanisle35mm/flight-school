@@ -3,10 +3,22 @@ export type FlashcardReviewStatus = 'known' | 'unknown';
 export type ClassSession = { date: string; topics: string; notes: string; flashcards: Flashcard[] };
 export type Todo = { text: string; done: boolean; dueDate: string };
 export type FlightChecklistItem = { id: string; label: string; checked: boolean };
+export type FlightChecklistTemplateItem = { id: string; text: string };
+export type FlightChecklistTemplateSection = { id: string; title: string; items: FlightChecklistTemplateItem[] };
+export type FlightChecklistTemplate = {
+  id: string;
+  aircraft: string;
+  title: string;
+  category: 'normal' | 'emergency';
+  source: string;
+  revisionDate: string;
+  sections: FlightChecklistTemplateSection[];
+};
 export type FlightScheduleEntry = { id: string; date: string; aircraft: string; instructor: string; focus: string; notes: string; completed: boolean };
 export type FlightTrainingData = {
   checklist: FlightChecklistItem[];
   outsideChecks: FlightChecklistItem[];
+  checklistLibrary: FlightChecklistTemplate[];
   schedule: FlightScheduleEntry[];
   panelPractice: {
     throttle: number;
