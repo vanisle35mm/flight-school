@@ -1,5 +1,6 @@
 import { CalendarPlus, CheckCircle2, Circle, Compass, Eye, HelpCircle, RotateCcw, Save, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
+import c172sPanelImage from '../../assets/c172s-navii-panel.png';
 import walkaroundAircraft from '../../assets/walkaround-aircraft-topdown.png';
 import { createDefaultFlightTrainingData } from '../../lib/storage';
 import type { FlightChecklistItem, FlightScheduleEntry, GroundSchoolData } from '../../types';
@@ -12,6 +13,14 @@ type WalkaroundArea = {
   shortLabel: string;
   station: string;
   checks: string[];
+};
+type PanelHotspot = {
+  id: string;
+  label: string;
+  title: string;
+  zone: string;
+  style: CSSProperties;
+  notes: string[];
 };
 
 const walkaroundAreas: WalkaroundArea[] = [
@@ -99,7 +108,95 @@ const walkaroundAreas: WalkaroundArea[] = [
 const today = () => new Date().toISOString().slice(0, 10);
 const pctDone = (items: FlightChecklistItem[]) => items.length ? Math.round((items.filter((item) => item.checked).length / items.length) * 100) : 0;
 
+const panelHotspots: PanelHotspot[] = [
+  {
+    id: 'six-pack',
+    label: 'Six Pack',
+    title: 'Primary Flight Instruments',
+    zone: 'Scan from left to right, then support with engine and navigation instruments.',
+    style: { left: '25%', top: '24%', width: '28%', height: '32%' },
+    notes: [
+      'Airspeed, attitude, altimeter, turn coordinator, heading indicator, and VSI form the main instrument scan.',
+      'Use this area for attitude, altitude, heading, airspeed, and trend cross-checks.',
+      'During flows, confirm the required instruments are set before taxi, takeoff, and approach.'
+    ]
+  },
+  {
+    id: 'engine-gauges',
+    label: 'Engine',
+    title: 'Engine Gauges',
+    zone: 'Monitor powerplant health before takeoff, in climb, cruise, and before landing.',
+    style: { left: '45%', top: '13%', width: '8%', height: '37%' },
+    notes: [
+      'Check RPM, oil pressure, oil temperature, fuel quantity, and electrical indications.',
+      'During run-up, confirm oil pressure and temperature are in the green and the ammeter is sensible.',
+      'Use abnormal indications to trigger the aircraft checklist and instructor briefing.'
+    ]
+  },
+  {
+    id: 'avionics-stack',
+    label: 'NAV/COM',
+    title: 'Radio and GPS Stack',
+    zone: 'Set communication, navigation, transponder, and GPS before taxi or while workload is low.',
+    style: { left: '53%', top: '10%', width: '18%', height: '39%' },
+    notes: [
+      'Set COM frequencies, NAV aids, GPS route or direct-to, and transponder mode/code.',
+      'Keep one radio ready for tower or mandatory frequency and one for monitoring or backup.',
+      'Practice saying what each box is doing before pressing buttons.'
+    ]
+  },
+  {
+    id: 'mfd',
+    label: 'MFD',
+    title: 'Multifunction Display',
+    zone: 'Use as a situational-awareness aid, not a replacement for outside scan and basic navigation.',
+    style: { left: '73%', top: '13%', width: '19%', height: '30%' },
+    notes: [
+      'Review map, traffic or weather displays when equipped and appropriate.',
+      'Cross-check MFD information against the chart, radios, heading, and visual references.',
+      'Keep eyes outside during VFR manoeuvring and circuit work.'
+    ]
+  },
+  {
+    id: 'switch-row',
+    label: 'Switches',
+    title: 'Electrical and Light Switch Row',
+    zone: 'Work left to right during pre-start, taxi, takeoff, landing, and shutdown flows.',
+    style: { left: '5%', top: '50%', width: '75%', height: '12%' },
+    notes: [
+      'Master, avionics master, fuel pump, pitot heat, beacon, landing, taxi, nav, and strobe lights live here.',
+      'Use the aircraft checklist to decide what should be on for each phase.',
+      'Verbalize switch changes so the flow is deliberate rather than random.'
+    ]
+  },
+  {
+    id: 'throttle-mixture',
+    label: 'Power',
+    title: 'Throttle and Mixture',
+    zone: 'Power controls sit on the upper center pedestal.',
+    style: { left: '40%', top: '63%', width: '22%', height: '15%' },
+    notes: [
+      'Throttle controls engine power; mixture controls fuel-air ratio.',
+      'Practice smooth throttle movements and mixture rich/lean calls by phase of flight.',
+      'Confirm mixture rich for run-up, takeoff, and landing unless your instructor/operator procedure says otherwise.'
+    ]
+  },
+  {
+    id: 'flaps-trim-fuel',
+    label: 'Pedestal',
+    title: 'Flaps, Trim, Fuel Selector',
+    zone: 'Lower center pedestal: configuration and fuel management controls.',
+    style: { left: '38%', top: '77%', width: '25%', height: '18%' },
+    notes: [
+      'Flap selector, trim wheel, fuel selector, and fuel pump controls are grouped here.',
+      'Before takeoff: trim set, flaps set and checked, fuel selector both, fuel shutoff in.',
+      'Before landing: fuel selector both, mixture rich, flaps as required, trim as needed.'
+    ]
+  }
+];
+
 export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; page: FlightPage }) => {
+  const [selectedPanelHotspotId, setSelectedPanelHotspotId] = useState(panelHotspots[0].id);
   const [selectedWalkaroundAreaId, setSelectedWalkaroundAreaId] = useState(walkaroundAreas[0].id);
   const [walkaroundMode, setWalkaroundMode] = useState<WalkaroundMode>('practice');
   const [walkaroundAnswer, setWalkaroundAnswer] = useState('');
@@ -173,6 +270,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
   const walkaroundProgress = pctDone(walkaroundProgressItems);
   const completedWalkaroundCount = flightTraining.outsideChecks.filter((item) => walkaroundAreas.some((area) => area.id === item.id) && item.checked).length;
   const checksVisible = walkaroundMode === 'learn' || walkaroundRevealed;
+  const selectedPanelHotspot = panelHotspots.find((hotspot) => hotspot.id === selectedPanelHotspotId) ?? panelHotspots[0];
 
   return <section className="flight-training-module">
     {page !== 'outside' && <div className="flight-training-hero">
@@ -201,64 +299,38 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
 
     {page === 'panel' && <section className="panel flight-panel">
       <div className="panel-heading"><div><span className="eyebrow">Cessna 172S Nav II + MFD</span><h2>Panel Flow Trainer</h2></div><SlidersHorizontal size={22} /></div>
-      <div className="c172-panel navii-panel">
-        <div className="cockpit-panel-layout">
-          <div className="main-instrument-panel" aria-label="Cessna 172S Nav II instrument panel practice area">
-            <div className="panel-glare-shield" />
-            <div className="six-pack">
-              <div className="round-instrument airspeed"><span>Airspeed</span><strong>{flightTraining.panelPractice.airspeed}</strong><small>KIAS</small></div>
-              <div className="round-instrument attitude"><span>Attitude</span><div className="horizon"><b style={{ transform: `rotate(${(flightTraining.panelPractice.heading - 270) / 8}deg)` }} /></div></div>
-              <div className="round-instrument altimeter"><span>Altimeter</span><strong>{flightTraining.panelPractice.altitude}</strong><small>ft</small></div>
-              <div className="round-instrument turn"><span>Turn Coord</span><strong>{flightTraining.panelPractice.masterOn ? 'ON' : 'OFF'}</strong><small>elec</small></div>
-              <div className="round-instrument heading"><span>Heading</span><strong>{flightTraining.panelPractice.heading}</strong><small>deg</small></div>
-              <div className="round-instrument vsi"><span>VSI</span><strong>{Math.round((flightTraining.panelPractice.throttle - 35) * 18)}</strong><small>fpm</small></div>
+      <div className="c172-panel-real">
+        <div className="panel-practice-stage">
+          <div className="panel-image-wrap" aria-label="Cessna 172S Nav II cockpit panel practice image">
+            <img className="panel-reference-image" src={c172sPanelImage} alt="Cessna 172S-style Nav II cockpit panel with center pedestal" />
+            {panelHotspots.map((hotspot) => <button
+              aria-pressed={selectedPanelHotspot.id === hotspot.id}
+              className={selectedPanelHotspot.id === hotspot.id ? 'panel-hotspot active' : 'panel-hotspot'}
+              key={hotspot.id}
+              onClick={() => setSelectedPanelHotspotId(hotspot.id)}
+              style={hotspot.style}
+              type="button"
+            >
+              <span>{hotspot.label}</span>
+            </button>)}
+          </div>
+          <aside className="panel-practice-card">
+            <span className="eyebrow">{selectedPanelHotspot.zone}</span>
+            <h3>{selectedPanelHotspot.title}</h3>
+            <div className="panel-practice-notes">
+              {selectedPanelHotspot.notes.map((note) => <p key={note}>{note}</p>)}
             </div>
-            <div className="engine-stack">
-              <div><span>Oil</span><strong>{flightTraining.panelPractice.masterOn ? 'Green' : '--'}</strong></div>
-              <div><span>Vac</span><strong>{flightTraining.panelPractice.throttle > 20 ? '5.0' : '--'}</strong></div>
-              <div><span>Fuel</span><strong>{flightTraining.panelPractice.fuelPumpOn ? 'Pump' : 'Both'}</strong></div>
-              <div><span>Amps</span><strong>{flightTraining.panelPractice.masterOn ? '+12' : '0'}</strong></div>
-            </div>
-            <div className="avionics-stack">
-              <div className="radio-unit"><span>NAV/COM 1</span><strong>118.00</strong><em>CYYJ tower</em></div>
-              <div className="radio-unit"><span>NAV/COM 2</span><strong>121.50</strong><em>guard</em></div>
-              <div className="radio-unit gps-unit"><span>GPS / MFD</span><strong>{flightTraining.panelPractice.avionicsOn ? 'MAP' : 'OFF'}</strong><em>Nav II reference</em></div>
-              <div className="radio-unit"><span>XPDR</span><strong>{flightTraining.panelPractice.avionicsOn ? '1200 ALT' : 'STBY'}</strong><em>mode</em></div>
-            </div>
-            <div className="mfd-screen">
-              <div className="mfd-title"><span>MFD</span><strong>{flightTraining.panelPractice.avionicsOn ? 'CYJ TRAINING AREA' : 'AVIONICS OFF'}</strong></div>
-              <div className="mfd-map">
-                <i className="range-ring large" />
-                <i className="range-ring small" />
-                <b style={{ transform: `rotate(${flightTraining.panelPractice.heading}deg)` }} />
-              </div>
-              <div className="mfd-data">
-                <span>GS {flightTraining.panelPractice.airspeed} kt</span>
-                <span>ALT {flightTraining.panelPractice.altitude} ft</span>
-                <span>HDG {flightTraining.panelPractice.heading}</span>
-              </div>
-            </div>
-            <div className="switch-row">
+            <div className="panel-flow-controls">
               <button className={flightTraining.panelPractice.masterOn ? 'active' : ''} onClick={() => updatePanel({ masterOn: !flightTraining.panelPractice.masterOn })}>Master</button>
               <button className={flightTraining.panelPractice.avionicsOn ? 'active' : ''} onClick={() => updatePanel({ avionicsOn: !flightTraining.panelPractice.avionicsOn })}>Avionics</button>
               <button className={flightTraining.panelPractice.fuelPumpOn ? 'active' : ''} onClick={() => updatePanel({ fuelPumpOn: !flightTraining.panelPractice.fuelPumpOn })}>Fuel Pump</button>
-              <button>Beacon</button>
-              <button>Nav</button>
-              <button>Strobe</button>
-              <button>Pitot</button>
             </div>
-          </div>
-          <div className="center-pedestal" aria-label="Cessna 172S center pedestal practice controls">
-            <div className="pedestal-heading"><span>Center Pedestal</span><strong>Power / Trim / Flaps</strong></div>
-            <label className="pedestal-control throttle-control">Throttle<input type="range" min="0" max="100" value={flightTraining.panelPractice.throttle} onChange={(event) => updatePanel({ throttle: Number(event.target.value), airspeed: Math.round(Number(event.target.value) * 1.1) })} /><span>{flightTraining.panelPractice.throttle}%</span></label>
-            <label className="pedestal-control mixture-control">Mixture<input type="range" min="0" max="100" value={flightTraining.panelPractice.mixture} onChange={(event) => updatePanel({ mixture: Number(event.target.value) })} /><span>{flightTraining.panelPractice.mixture}%</span></label>
-            <label className="pedestal-control">Flaps<select value={flightTraining.panelPractice.flaps} onChange={(event) => updatePanel({ flaps: Number(event.target.value) })}><option value={0}>0 deg</option><option value={10}>10 deg</option><option value={20}>20 deg</option><option value={30}>30 deg</option></select></label>
-            <div className="trim-wheel"><span>Elevator Trim</span><b style={{ transform: `rotate(${flightTraining.panelPractice.flaps * 5}deg)` }} /></div>
-            <div className="pedestal-grid">
-              <label>Heading<input type="number" min="0" max="359" value={flightTraining.panelPractice.heading} onChange={(event) => updatePanel({ heading: Number(event.target.value) })} /></label>
-              <label>Altitude<input type="number" step="100" value={flightTraining.panelPractice.altitude} onChange={(event) => updatePanel({ altitude: Number(event.target.value) })} /></label>
+            <div className="panel-flow-readout">
+              <span>Throttle {flightTraining.panelPractice.throttle}%</span>
+              <span>Mixture {flightTraining.panelPractice.mixture}%</span>
+              <span>Flaps {flightTraining.panelPractice.flaps} deg</span>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </section>}

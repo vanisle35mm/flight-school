@@ -3745,6 +3745,151 @@ body {
   padding: 18px;
 }
 
+.c172-panel-real {
+  border: 1px solid rgba(58, 75, 93, 0.75);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(18, 31, 43, 0.98), rgba(7, 13, 20, 0.98));
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.22);
+  padding: 16px;
+}
+
+.panel-practice-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.panel-image-wrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(99, 128, 151, 0.58);
+  border-radius: 8px;
+  background: #03070b;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 24px 48px rgba(0, 0, 0, 0.3);
+}
+
+.panel-reference-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.panel-hotspot {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(143, 194, 228, 0.34);
+  border-radius: 8px;
+  color: #f6fbff;
+  background: rgba(10, 20, 31, 0.02) !important;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.panel-hotspot span {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  border: 1px solid rgba(143, 194, 228, 0.55);
+  border-radius: 999px;
+  color: #f6fbff;
+  background: rgba(4, 10, 16, 0.82);
+  box-shadow: 0 0 0 3px rgba(48, 153, 226, 0.12);
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.panel-hotspot:hover,
+.panel-hotspot.active {
+  border-color: rgba(255, 197, 79, 0.82);
+  background: rgba(255, 194, 72, 0.055) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 194, 72, 0.16), 0 0 24px rgba(255, 194, 72, 0.22);
+}
+
+.panel-hotspot.active span {
+  border-color: rgba(255, 203, 91, 0.9);
+  color: #101821;
+  background: linear-gradient(180deg, #ffd36f, #e9aa25);
+}
+
+.panel-practice-card {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  border: 1px solid rgba(99, 128, 151, 0.58);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(143, 194, 228, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(24, 38, 51, 0.96), rgba(8, 14, 22, 0.98));
+  padding: 18px;
+}
+
+.panel-practice-card h3 {
+  margin: -8px 0 0;
+  color: #f6fbff;
+  font-size: 24px;
+  line-height: 1.08;
+}
+
+.panel-practice-notes {
+  display: grid;
+  gap: 10px;
+}
+
+.panel-practice-notes p {
+  margin: 0;
+  border-bottom: 1px solid rgba(118, 147, 171, 0.22);
+  color: var(--muted);
+  padding-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.panel-flow-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.panel-flow-controls button {
+  min-height: 46px;
+  border: 1px solid rgba(127, 154, 177, 0.42);
+  border-radius: 6px;
+  color: var(--muted);
+  background: linear-gradient(180deg, #142130, #080f17);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.panel-flow-controls button.active {
+  color: #101821;
+  border-color: rgba(255, 198, 82, 0.62);
+  background: linear-gradient(180deg, #ffd26d, #e6a71e);
+}
+
+.panel-flow-readout {
+  display: grid;
+  gap: 8px;
+  color: #f6fbff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.panel-flow-readout span {
+  border: 1px solid rgba(127, 154, 177, 0.24);
+  border-radius: 6px;
+  background: rgba(5, 11, 17, 0.58);
+  padding: 10px;
+}
+
 .navii-panel {
   background:
     radial-gradient(circle at 22% 8%, rgba(143, 194, 228, 0.14), transparent 30%),
@@ -4710,6 +4855,7 @@ body {
 @media (max-width: 900px) {
   .cockpit-panel-layout,
   .main-instrument-panel,
+  .panel-practice-stage,
   .instrument-row,
   .flight-checklist-grid,
   .walkaround-practice-layout,
@@ -4733,6 +4879,14 @@ body {
 
   .switch-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel-practice-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-flow-controls {
+    grid-template-columns: 1fr;
   }
 
   .walkaround-aircraft {
