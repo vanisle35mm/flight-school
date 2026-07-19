@@ -3745,6 +3745,306 @@ body {
   padding: 18px;
 }
 
+.navii-panel {
+  background:
+    radial-gradient(circle at 22% 8%, rgba(143, 194, 228, 0.14), transparent 30%),
+    linear-gradient(180deg, #172431 0%, #0b121b 58%, #070d13 100%);
+}
+
+.cockpit-panel-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 330px);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.main-instrument-panel,
+.center-pedestal {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(83, 105, 126, 0.7);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(33, 45, 58, 0.94), rgba(12, 18, 26, 0.98)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 56px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 42px rgba(0, 0, 0, 0.28);
+}
+
+.main-instrument-panel {
+  display: grid;
+  grid-template-columns: minmax(340px, 1.05fr) minmax(190px, 0.58fr) minmax(260px, 0.82fr);
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  min-height: 520px;
+  padding: 54px 18px 18px;
+}
+
+.panel-glare-shield {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 38px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.75);
+  background: linear-gradient(180deg, #02060a, #111b25);
+  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.34);
+}
+
+.six-pack {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.six-pack .round-instrument {
+  min-width: 0;
+}
+
+.engine-stack,
+.avionics-stack,
+.mfd-screen {
+  position: relative;
+  z-index: 1;
+}
+
+.engine-stack {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.engine-stack div,
+.radio-unit {
+  min-height: 58px;
+  border: 1px solid rgba(124, 152, 174, 0.36);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #121c27, #060c13);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.42);
+}
+
+.engine-stack div {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 9px 10px;
+}
+
+.engine-stack span,
+.radio-unit span,
+.mfd-title span,
+.pedestal-heading span,
+.pedestal-control,
+.pedestal-grid label,
+.trim-wheel span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.engine-stack strong,
+.radio-unit strong,
+.mfd-title strong,
+.pedestal-heading strong {
+  color: #f6fbff;
+  font-size: 16px;
+}
+
+.avionics-stack {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.radio-unit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 10px;
+}
+
+.radio-unit em {
+  grid-column: 1 / -1;
+  color: #82a7c1;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gps-unit {
+  min-height: 86px;
+  background:
+    linear-gradient(135deg, rgba(48, 118, 182, 0.38), transparent 55%),
+    linear-gradient(180deg, #122032, #050a10);
+}
+
+.mfd-screen {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 330px;
+  border: 10px solid #05090f;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #07151e, #02060a);
+  box-shadow: inset 0 0 0 1px rgba(120, 162, 193, 0.32);
+}
+
+.mfd-title,
+.mfd-data {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.mfd-map {
+  position: relative;
+  overflow: hidden;
+  margin: 0 12px;
+  border: 1px solid rgba(77, 153, 202, 0.36);
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, rgba(93, 171, 219, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(93, 171, 219, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 62% 40%, rgba(248, 191, 74, 0.16), transparent 5%),
+    linear-gradient(135deg, rgba(27, 104, 141, 0.35), rgba(12, 40, 62, 0.9));
+  background-size: 36px 36px, 36px 36px, auto, auto;
+}
+
+.mfd-map b {
+  position: absolute;
+  left: calc(50% - 7px);
+  top: calc(50% - 18px);
+  width: 14px;
+  height: 36px;
+  clip-path: polygon(50% 0, 100% 100%, 50% 82%, 0 100%);
+  background: #f7fbff;
+  transform-origin: 50% 80%;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.45));
+}
+
+.range-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px dashed rgba(173, 218, 245, 0.38);
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.range-ring.large {
+  width: 78%;
+  aspect-ratio: 1;
+}
+
+.range-ring.small {
+  width: 42%;
+  aspect-ratio: 1;
+}
+
+.mfd-data {
+  color: #b9d7e9;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.switch-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-self: end;
+}
+
+.switch-row button {
+  min-height: 46px;
+  border: 1px solid rgba(127, 154, 177, 0.42);
+  border-radius: 6px;
+  color: var(--muted);
+  background: linear-gradient(180deg, #142130, #080f17);
+  font-weight: 900;
+}
+
+.switch-row button.active {
+  color: #101821;
+  border-color: rgba(255, 198, 82, 0.62);
+  background: linear-gradient(180deg, #ffd26d, #e6a71e);
+}
+
+.center-pedestal {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  padding: 18px;
+}
+
+.pedestal-heading {
+  display: grid;
+  gap: 5px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(118, 147, 171, 0.28);
+}
+
+.pedestal-control {
+  display: grid;
+  gap: 8px;
+}
+
+.pedestal-control span {
+  color: #f6fbff;
+  font-size: 17px;
+}
+
+.pedestal-control input[type="range"] {
+  accent-color: var(--sky);
+}
+
+.mixture-control input[type="range"] {
+  accent-color: #d94a44;
+}
+
+.pedestal-control select,
+.pedestal-grid input {
+  min-height: 44px;
+  border: 1px solid rgba(127, 154, 177, 0.45);
+  border-radius: 6px;
+  color: #f6fbff;
+  background: #080f17;
+  padding: 0 12px;
+  font-weight: 900;
+}
+
+.trim-wheel {
+  display: grid;
+  place-items: center;
+  gap: 9px;
+  min-height: 122px;
+  border: 1px solid rgba(127, 154, 177, 0.36);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(11, 18, 27, 0.5), rgba(2, 6, 10, 0.7));
+}
+
+.trim-wheel b {
+  display: block;
+  width: 72px;
+  aspect-ratio: 1;
+  border: 9px solid #0a1119;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 45%, rgba(255, 255, 255, 0.36) 45% 55%, transparent 55%),
+    repeating-radial-gradient(circle, #2a3947 0 5px, #111923 5px 10px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.pedestal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .instrument-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(130px, 1fr));
@@ -4408,12 +4708,31 @@ body {
 }
 
 @media (max-width: 900px) {
+  .cockpit-panel-layout,
+  .main-instrument-panel,
   .instrument-row,
   .flight-checklist-grid,
   .walkaround-practice-layout,
   .panel-controls,
   .flight-schedule-grid {
     grid-template-columns: 1fr;
+  }
+
+  .main-instrument-panel {
+    min-height: 0;
+  }
+
+  .six-pack {
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+  }
+
+  .mfd-screen {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .switch-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .walkaround-aircraft {

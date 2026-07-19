@@ -200,25 +200,65 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
     </section>}
 
     {page === 'panel' && <section className="panel flight-panel">
-      <div className="panel-heading"><div><span className="eyebrow">Cessna 172 Practice</span><h2>Panel Flow Trainer</h2></div><SlidersHorizontal size={22} /></div>
-      <div className="c172-panel">
-        <div className="instrument-row">
-          <div className="round-instrument"><span>Airspeed</span><strong>{flightTraining.panelPractice.airspeed}</strong><small>kt</small></div>
-          <div className="round-instrument attitude"><span>Attitude</span><div className="horizon"><b style={{ transform: `rotate(${(flightTraining.panelPractice.heading - 270) / 8}deg)` }} /></div></div>
-          <div className="round-instrument"><span>Altimeter</span><strong>{flightTraining.panelPractice.altitude}</strong><small>ft</small></div>
-          <div className="round-instrument"><span>Heading</span><strong>{flightTraining.panelPractice.heading}</strong><small>deg</small></div>
-        </div>
-        <div className="panel-switches">
-          <button className={flightTraining.panelPractice.masterOn ? 'active' : ''} onClick={() => updatePanel({ masterOn: !flightTraining.panelPractice.masterOn })}>Master</button>
-          <button className={flightTraining.panelPractice.avionicsOn ? 'active' : ''} onClick={() => updatePanel({ avionicsOn: !flightTraining.panelPractice.avionicsOn })}>Avionics</button>
-          <button className={flightTraining.panelPractice.fuelPumpOn ? 'active' : ''} onClick={() => updatePanel({ fuelPumpOn: !flightTraining.panelPractice.fuelPumpOn })}>Fuel Pump</button>
-        </div>
-        <div className="panel-controls">
-          <label>Throttle<input type="range" min="0" max="100" value={flightTraining.panelPractice.throttle} onChange={(event) => updatePanel({ throttle: Number(event.target.value), airspeed: Math.round(Number(event.target.value) * 1.1) })} /></label>
-          <label>Mixture<input type="range" min="0" max="100" value={flightTraining.panelPractice.mixture} onChange={(event) => updatePanel({ mixture: Number(event.target.value) })} /></label>
-          <label>Flaps<select value={flightTraining.panelPractice.flaps} onChange={(event) => updatePanel({ flaps: Number(event.target.value) })}><option value={0}>0 deg</option><option value={10}>10 deg</option><option value={20}>20 deg</option><option value={30}>30 deg</option></select></label>
-          <label>Heading<input type="number" min="0" max="359" value={flightTraining.panelPractice.heading} onChange={(event) => updatePanel({ heading: Number(event.target.value) })} /></label>
-          <label>Altitude<input type="number" step="100" value={flightTraining.panelPractice.altitude} onChange={(event) => updatePanel({ altitude: Number(event.target.value) })} /></label>
+      <div className="panel-heading"><div><span className="eyebrow">Cessna 172S Nav II + MFD</span><h2>Panel Flow Trainer</h2></div><SlidersHorizontal size={22} /></div>
+      <div className="c172-panel navii-panel">
+        <div className="cockpit-panel-layout">
+          <div className="main-instrument-panel" aria-label="Cessna 172S Nav II instrument panel practice area">
+            <div className="panel-glare-shield" />
+            <div className="six-pack">
+              <div className="round-instrument airspeed"><span>Airspeed</span><strong>{flightTraining.panelPractice.airspeed}</strong><small>KIAS</small></div>
+              <div className="round-instrument attitude"><span>Attitude</span><div className="horizon"><b style={{ transform: `rotate(${(flightTraining.panelPractice.heading - 270) / 8}deg)` }} /></div></div>
+              <div className="round-instrument altimeter"><span>Altimeter</span><strong>{flightTraining.panelPractice.altitude}</strong><small>ft</small></div>
+              <div className="round-instrument turn"><span>Turn Coord</span><strong>{flightTraining.panelPractice.masterOn ? 'ON' : 'OFF'}</strong><small>elec</small></div>
+              <div className="round-instrument heading"><span>Heading</span><strong>{flightTraining.panelPractice.heading}</strong><small>deg</small></div>
+              <div className="round-instrument vsi"><span>VSI</span><strong>{Math.round((flightTraining.panelPractice.throttle - 35) * 18)}</strong><small>fpm</small></div>
+            </div>
+            <div className="engine-stack">
+              <div><span>Oil</span><strong>{flightTraining.panelPractice.masterOn ? 'Green' : '--'}</strong></div>
+              <div><span>Vac</span><strong>{flightTraining.panelPractice.throttle > 20 ? '5.0' : '--'}</strong></div>
+              <div><span>Fuel</span><strong>{flightTraining.panelPractice.fuelPumpOn ? 'Pump' : 'Both'}</strong></div>
+              <div><span>Amps</span><strong>{flightTraining.panelPractice.masterOn ? '+12' : '0'}</strong></div>
+            </div>
+            <div className="avionics-stack">
+              <div className="radio-unit"><span>NAV/COM 1</span><strong>118.00</strong><em>CYYJ tower</em></div>
+              <div className="radio-unit"><span>NAV/COM 2</span><strong>121.50</strong><em>guard</em></div>
+              <div className="radio-unit gps-unit"><span>GPS / MFD</span><strong>{flightTraining.panelPractice.avionicsOn ? 'MAP' : 'OFF'}</strong><em>Nav II reference</em></div>
+              <div className="radio-unit"><span>XPDR</span><strong>{flightTraining.panelPractice.avionicsOn ? '1200 ALT' : 'STBY'}</strong><em>mode</em></div>
+            </div>
+            <div className="mfd-screen">
+              <div className="mfd-title"><span>MFD</span><strong>{flightTraining.panelPractice.avionicsOn ? 'CYJ TRAINING AREA' : 'AVIONICS OFF'}</strong></div>
+              <div className="mfd-map">
+                <i className="range-ring large" />
+                <i className="range-ring small" />
+                <b style={{ transform: `rotate(${flightTraining.panelPractice.heading}deg)` }} />
+              </div>
+              <div className="mfd-data">
+                <span>GS {flightTraining.panelPractice.airspeed} kt</span>
+                <span>ALT {flightTraining.panelPractice.altitude} ft</span>
+                <span>HDG {flightTraining.panelPractice.heading}</span>
+              </div>
+            </div>
+            <div className="switch-row">
+              <button className={flightTraining.panelPractice.masterOn ? 'active' : ''} onClick={() => updatePanel({ masterOn: !flightTraining.panelPractice.masterOn })}>Master</button>
+              <button className={flightTraining.panelPractice.avionicsOn ? 'active' : ''} onClick={() => updatePanel({ avionicsOn: !flightTraining.panelPractice.avionicsOn })}>Avionics</button>
+              <button className={flightTraining.panelPractice.fuelPumpOn ? 'active' : ''} onClick={() => updatePanel({ fuelPumpOn: !flightTraining.panelPractice.fuelPumpOn })}>Fuel Pump</button>
+              <button>Beacon</button>
+              <button>Nav</button>
+              <button>Strobe</button>
+              <button>Pitot</button>
+            </div>
+          </div>
+          <div className="center-pedestal" aria-label="Cessna 172S center pedestal practice controls">
+            <div className="pedestal-heading"><span>Center Pedestal</span><strong>Power / Trim / Flaps</strong></div>
+            <label className="pedestal-control throttle-control">Throttle<input type="range" min="0" max="100" value={flightTraining.panelPractice.throttle} onChange={(event) => updatePanel({ throttle: Number(event.target.value), airspeed: Math.round(Number(event.target.value) * 1.1) })} /><span>{flightTraining.panelPractice.throttle}%</span></label>
+            <label className="pedestal-control mixture-control">Mixture<input type="range" min="0" max="100" value={flightTraining.panelPractice.mixture} onChange={(event) => updatePanel({ mixture: Number(event.target.value) })} /><span>{flightTraining.panelPractice.mixture}%</span></label>
+            <label className="pedestal-control">Flaps<select value={flightTraining.panelPractice.flaps} onChange={(event) => updatePanel({ flaps: Number(event.target.value) })}><option value={0}>0 deg</option><option value={10}>10 deg</option><option value={20}>20 deg</option><option value={30}>30 deg</option></select></label>
+            <div className="trim-wheel"><span>Elevator Trim</span><b style={{ transform: `rotate(${flightTraining.panelPractice.flaps * 5}deg)` }} /></div>
+            <div className="pedestal-grid">
+              <label>Heading<input type="number" min="0" max="359" value={flightTraining.panelPractice.heading} onChange={(event) => updatePanel({ heading: Number(event.target.value) })} /></label>
+              <label>Altitude<input type="number" step="100" value={flightTraining.panelPractice.altitude} onChange={(event) => updatePanel({ altitude: Number(event.target.value) })} /></label>
+            </div>
+          </div>
         </div>
       </div>
     </section>}
