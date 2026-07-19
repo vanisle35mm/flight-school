@@ -114,7 +114,7 @@ const panelHotspots: PanelHotspot[] = [
     label: 'Six Pack',
     title: 'Primary Flight Instruments',
     zone: 'Scan from left to right, then support with engine and navigation instruments.',
-    style: { left: '25%', top: '24%', width: '28%', height: '32%' },
+    style: { left: '20%', top: '20%', width: '25%', height: '37%' },
     notes: [
       'Airspeed, attitude, altimeter, turn coordinator, heading indicator, and VSI form the main instrument scan.',
       'Use this area for attitude, altitude, heading, airspeed, and trend cross-checks.',
@@ -126,7 +126,7 @@ const panelHotspots: PanelHotspot[] = [
     label: 'Engine',
     title: 'Engine Gauges',
     zone: 'Monitor powerplant health before takeoff, in climb, cruise, and before landing.',
-    style: { left: '45%', top: '13%', width: '8%', height: '37%' },
+    style: { left: '5%', top: '22%', width: '14%', height: '35%' },
     notes: [
       'Check RPM, oil pressure, oil temperature, fuel quantity, and electrical indications.',
       'During run-up, confirm oil pressure and temperature are in the green and the ammeter is sensible.',
@@ -138,7 +138,7 @@ const panelHotspots: PanelHotspot[] = [
     label: 'NAV/COM',
     title: 'Radio and GPS Stack',
     zone: 'Set communication, navigation, transponder, and GPS before taxi or while workload is low.',
-    style: { left: '53%', top: '10%', width: '18%', height: '39%' },
+    style: { left: '55%', top: '17%', width: '16%', height: '42%' },
     notes: [
       'Set COM frequencies, NAV aids, GPS route or direct-to, and transponder mode/code.',
       'Keep one radio ready for tower or mandatory frequency and one for monitoring or backup.',
@@ -150,7 +150,7 @@ const panelHotspots: PanelHotspot[] = [
     label: 'MFD',
     title: 'Multifunction Display',
     zone: 'Use as a situational-awareness aid, not a replacement for outside scan and basic navigation.',
-    style: { left: '73%', top: '13%', width: '19%', height: '30%' },
+    style: { left: '57%', top: '27%', width: '12%', height: '14%' },
     notes: [
       'Review map, traffic or weather displays when equipped and appropriate.',
       'Cross-check MFD information against the chart, radios, heading, and visual references.',
@@ -162,7 +162,7 @@ const panelHotspots: PanelHotspot[] = [
     label: 'Switches',
     title: 'Electrical and Light Switch Row',
     zone: 'Work left to right during pre-start, taxi, takeoff, landing, and shutdown flows.',
-    style: { left: '5%', top: '50%', width: '75%', height: '12%' },
+    style: { left: '2%', top: '71%', width: '42%', height: '16%' },
     notes: [
       'Master, avionics master, fuel pump, pitot heat, beacon, landing, taxi, nav, and strobe lights live here.',
       'Use the aircraft checklist to decide what should be on for each phase.',
@@ -173,8 +173,8 @@ const panelHotspots: PanelHotspot[] = [
     id: 'throttle-mixture',
     label: 'Power',
     title: 'Throttle and Mixture',
-    zone: 'Power controls sit on the upper center pedestal.',
-    style: { left: '40%', top: '63%', width: '22%', height: '15%' },
+    zone: 'Power controls sit along the lower center panel.',
+    style: { left: '45%', top: '72%', width: '19%', height: '16%' },
     notes: [
       'Throttle controls engine power; mixture controls fuel-air ratio.',
       'Practice smooth throttle movements and mixture rich/lean calls by phase of flight.',
@@ -183,10 +183,10 @@ const panelHotspots: PanelHotspot[] = [
   },
   {
     id: 'flaps-trim-fuel',
-    label: 'Pedestal',
+    label: 'Config',
     title: 'Flaps, Trim, Fuel Selector',
-    zone: 'Lower center pedestal: configuration and fuel management controls.',
-    style: { left: '38%', top: '77%', width: '25%', height: '18%' },
+    zone: 'Lower panel: configuration and fuel management controls.',
+    style: { left: '63%', top: '70%', width: '20%', height: '18%' },
     notes: [
       'Flap selector, trim wheel, fuel selector, and fuel pump controls are grouped here.',
       'Before takeoff: trim set, flaps set and checked, fuel selector both, fuel shutoff in.',
@@ -302,7 +302,7 @@ export const FlightTrainingView = ({ data, onDataChange, page }: { data: GroundS
       <div className="c172-panel-real">
         <div className="panel-practice-stage">
           <div className="panel-image-wrap" aria-label="Cessna 172S Nav II cockpit panel practice image">
-            <img className="panel-reference-image" src={c172sPanelImage} alt="Cessna 172S-style Nav II cockpit panel with center pedestal" />
+            <img className="panel-reference-image" src={c172sPanelImage} alt="Cessna 172S-style Nav II cockpit panel practice reference" />
             {panelHotspots.map((hotspot) => <button
               aria-pressed={selectedPanelHotspot.id === hotspot.id}
               className={selectedPanelHotspot.id === hotspot.id ? 'panel-hotspot active' : 'panel-hotspot'}
