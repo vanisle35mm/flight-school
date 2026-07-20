@@ -5,7 +5,7 @@ import type { CloudSyncStatus } from '../lib/cloudStorage';
 import type { ViewId } from '../types';
 
 const groundSchoolNavItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
-  { id: 'dashboard', label: 'Dashboard', icon: <Gauge size={18} /> },
+  { id: 'dashboard', label: 'Roadmap', icon: <Gauge size={18} /> },
   { id: 'notes', label: 'Notes', icon: <BookOpen size={18} /> },
   { id: 'flashcards', label: 'Flashcards', icon: <Layers size={18} /> },
   { id: 'testing', label: 'Testing', icon: <GraduationCap size={18} /> },
