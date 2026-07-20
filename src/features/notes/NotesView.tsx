@@ -86,7 +86,7 @@ export const NotesView = ({ data, onDataChange, search }: { data: GroundSchoolDa
         <div className="panel-heading">
           <div>
             <span className="eyebrow">Classes</span>
-            <h2>Class Schedule</h2>
+            <h2>Ground School</h2>
             <p>{completedCount} complete - {groundSchoolHours} hours</p>
           </div>
           <div className="button-row">
@@ -149,7 +149,7 @@ export const NotesView = ({ data, onDataChange, search }: { data: GroundSchoolDa
         ) : (
           <div className="empty-workspace">
             <h2>No lessons yet</h2>
-            <p className="empty-state">Create a class or import your old saved lesson.</p>
+            <p className="empty-state">Create a ground school class or import your old saved lesson.</p>
             <button onClick={addSession}><Plus size={17} /> New Class</button>
           </div>
         )}

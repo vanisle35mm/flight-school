@@ -58,7 +58,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const activeUser = data.users[data.activeUserId];
   const firstName = activeUser?.firstName || 'Pilot';
   const stats = getStats(data);
-  const [selectedMilestoneId, setSelectedMilestoneId] = useState('medical');
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState('ground-school-hours');
   const [isDetailOpen, setIsDetailOpen] = useState(true);
   const roadmapProgress = data.roadmapProgress ?? {};
   const touchedPhases = data.roadmapTouchedPhases ?? [];
@@ -100,7 +100,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         helper: `${groundSchoolHours} / 40 hours`,
         description: 'Record each classroom lesson by title or subject. For now, each lesson record counts as 8 ground-school hours.',
         requirements: ['Record the lesson title or subject', 'Keep a short note for what was covered', 'Reach the ground-school hour target your school uses'],
-        action: { label: 'Open Notes', view: 'notes' }
+        action: { label: 'Open Ground School', view: 'notes' }
       },
       {
         id: 'medical',
@@ -226,6 +226,13 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const selectedProgress = roadmapProgress[selectedMilestone.id] ?? {};
   const selectedPhase = phases.find((phase) => phase.id === selectedMilestone.phaseId) ?? phases[0];
   const visiblePhases = isDetailOpen ? phases.filter((phase) => phase.id === selectedPhase.id) : phases;
+  const groundSchoolSchedule = [...data.classes].sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return a.date.localeCompare(b.date);
+  });
+  const isGroundSchoolDetail = selectedMilestone.id === 'ground-school-hours';
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
   const nextActions = selectedMilestone.status === 'complete'
     ? ['Review the next milestone in this phase', 'Keep notes current for your instructor or school']
@@ -234,7 +241,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     ...(selectedMilestone.action ? [selectedMilestone.action] : []),
     ...(selectedMilestone.id === 'foundation-study-reminder' || selectedMilestone.id === 'pstar' || selectedMilestone.id === 'roca' ? [{ label: 'Flashcards', view: 'flashcards' as ViewId }] : []),
     ...(selectedMilestone.phaseId === 'navigation' || selectedMilestone.id === 'first-solo' ? [{ label: 'Weather', view: 'weather' as ViewId }] : []),
-    { label: 'Notes', view: 'notes' as ViewId }
+    { label: 'Ground School', view: 'notes' as ViewId }
   ].map((tool) => [tool.label, tool])).values());
 
   const selectMilestone = (milestone: RoadmapMilestone) => {
@@ -315,28 +322,46 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
           <button className="icon-button" onClick={() => setIsDetailOpen(false)} aria-label="Close milestone details"><X size={17} /></button>
         </div>
         <span className={`status-chip ${selectedMilestone.status}`}>{statusLabels[selectedMilestone.status]}</span>
-        <p>{selectedMilestone.description}</p>
-        <div className="roadmap-requirements">
-          <h4>Requirements</h4>
-          {selectedMilestone.requirements.map((requirement) => <div key={requirement}><CheckCircle2 size={15} /><span>{requirement}</span></div>)}
-        </div>
-
-        <div className="roadmap-next-steps">
-          <h4>Next Actions</h4>
-          {nextActions.map((action) => <div key={action}><span className="roadmap-action-number" /> <span>{action}</span></div>)}
-        </div>
-
-        <div className="roadmap-related-tools">
-          <h4>Related Tools</h4>
-          <div>
-            {relatedTools.map((tool) => <button key={`${selectedMilestone.id}-${tool.label}`} onClick={() => onViewChange(tool.view)}>
-              {tool.label === 'Open Testing' ? <FileCheck2 size={16} /> : tool.label === 'Flashcards' ? <Layers size={16} /> : tool.label === 'Weather' ? <CloudSun size={16} /> : <ShieldCheck size={16} />}
-              {tool.label}
-            </button>)}
+        {isGroundSchoolDetail ? <div className="groundschool-detail-card">
+          <div className="groundschool-detail-stats">
+            <div><strong>{data.classes.length}</strong><span>scheduled</span></div>
+            <div><strong>{completedClassCount}</strong><span>complete</span></div>
+            <div><strong>{groundSchoolHours}</strong><span>hours</span></div>
           </div>
-        </div>
+          <button className="groundschool-open-button" onClick={() => onViewChange('notes')}><BookOpen size={17} />Open Ground School</button>
+          <div className="groundschool-schedule-preview">
+            <h4>Class Schedule</h4>
+            {groundSchoolSchedule.length ? groundSchoolSchedule.map((session, index) => <div className={session.completed ? 'groundschool-schedule-row complete' : 'groundschool-schedule-row'} key={`${session.date}-${session.topics}-${index}`}>
+              <span className="groundschool-check">{session.completed ? <CheckCircle2 size={16} /> : index + 1}</span>
+              <div>
+                <strong>{session.topics || `Class ${index + 1}`}</strong>
+                <small>{session.date || 'No date'}{session.instructor ? ` - ${session.instructor}` : ''}</small>
+              </div>
+            </div>) : <p className="empty-state">No class schedule yet. Open Ground School to add your club, dates, topics, and notes.</p>}
+          </div>
+        </div> : <>
+          <p>{selectedMilestone.description}</p>
+          <div className="roadmap-requirements">
+            <h4>Requirements</h4>
+            {selectedMilestone.requirements.map((requirement) => <div key={requirement}><CheckCircle2 size={15} /><span>{requirement}</span></div>)}
+          </div>
 
-        {selectedMilestone.manual ? <div className="roadmap-evidence">
+          <div className="roadmap-next-steps">
+            <h4>Next Actions</h4>
+            {nextActions.map((action) => <div key={action}><span className="roadmap-action-number" /> <span>{action}</span></div>)}
+          </div>
+
+          <div className="roadmap-related-tools">
+            <h4>Related Tools</h4>
+            <div>
+              {relatedTools.map((tool) => <button key={`${selectedMilestone.id}-${tool.label}`} onClick={() => onViewChange(tool.view)}>
+                {tool.label === 'Open Testing' ? <FileCheck2 size={16} /> : tool.label === 'Flashcards' ? <Layers size={16} /> : tool.label === 'Weather' ? <CloudSun size={16} /> : <ShieldCheck size={16} />}
+                {tool.label}
+              </button>)}
+            </div>
+          </div>
+
+          {selectedMilestone.manual ? <div className="roadmap-evidence">
           <h4>Notes</h4>
           {selectedMilestone.hoursField ? <label>
             {selectedMilestone.hoursField.label}
@@ -371,6 +396,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
           <h4>Automatic Milestone</h4>
           <p>This milestone updates from existing app activity.</p>
         </div>}
+        </>}
       </aside> : null}
     </section>
   </div>;

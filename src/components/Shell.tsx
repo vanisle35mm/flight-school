@@ -6,7 +6,7 @@ import type { ViewId } from '../types';
 
 const groundSchoolNavItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
   { id: 'dashboard', label: 'Roadmap', icon: <Gauge size={18} /> },
-  { id: 'notes', label: 'Notes', icon: <BookOpen size={18} /> },
+  { id: 'notes', label: 'Ground School', icon: <BookOpen size={18} /> },
   { id: 'flashcards', label: 'Flashcards', icon: <Layers size={18} /> },
   { id: 'testing', label: 'Testing', icon: <GraduationCap size={18} /> },
   { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> }
@@ -105,7 +105,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
   <main className="main-area cockpit-main">
     <header className="topbar cockpit-topbar">
       <div className="topbar-title"><span className="eyebrow">Cockpit Dashboard</span><h1>{titleForView(activeView)}</h1></div>
-      {activeView !== 'dashboard' && <label className="search-box cockpit-search"><Search size={17} /><input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search notes, cards, topics" /></label>}
+      {activeView !== 'dashboard' && <label className="search-box cockpit-search"><Search size={17} /><input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search ground school, cards, topics" /></label>}
       <div className="status-cluster" aria-label="Flight status"><button className="user-pill" onClick={() => canAdmin ? onViewChange('users') : canManageAccount ? onViewChange('account') : onLogout()}><UserRound size={16} />Captain {activeUserName}</button><span className={`cloud-sync-pill ${cloudStatus}`}><CloudSun size={17} />{cloudStatusLabel[cloudStatus]}</span><span className="station-pill">{weatherSummary.station} <ChevronDown size={14} /></span><span className="weather-pill"><CloudSun size={17} />{weatherSummary.temperature}</span><button className="bell-button" aria-label="Notifications"><Bell size={18} /></button></div>
     </header>
     {children}
