@@ -9,7 +9,6 @@ const groundSchoolNavItems: Array<{ id: ViewId; label: string; icon: ReactNode }
   { id: 'notes', label: 'Notes', icon: <BookOpen size={18} /> },
   { id: 'flashcards', label: 'Flashcards', icon: <Layers size={18} /> },
   { id: 'testing', label: 'Testing', icon: <GraduationCap size={18} /> },
-  { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={18} /> },
   { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> }
 ];
 
@@ -29,7 +28,7 @@ const groundSchoolViewIds = new Set<ViewId>(groundSchoolNavItems.map((item) => i
 const flightTrainingViewIds = new Set<ViewId>(flightTrainingNavItems.map((item) => item.id));
 const testingViewIds = new Set<ViewId>(['testing', 'pstar', 'roca']);
 
-const titleForView = (view: ViewId) => testingViewIds.has(view) ? 'Testing' : view === 'import' ? 'Import' : view === 'dashboardEdit' ? 'Edit Dashboard' : view === 'users' ? 'Admin Console' : view === 'account' ? 'Account' : navItems.find((item) => item.id === view)?.label ?? 'Dashboard';
+const titleForView = (view: ViewId) => testingViewIds.has(view) ? 'Testing' : view === 'tasks' ? 'Action Items' : view === 'import' ? 'Import' : view === 'dashboardEdit' ? 'Edit Dashboard' : view === 'users' ? 'Admin Console' : view === 'account' ? 'Account' : navItems.find((item) => item.id === view)?.label ?? 'Dashboard';
 
 const cloudStatusLabel: Record<CloudSyncStatus, string> = {
   local: 'Local',

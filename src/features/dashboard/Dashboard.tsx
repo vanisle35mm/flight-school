@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { BookOpen, CalendarCheck, CheckCircle2, ClipboardCheck, FileCheck2, GraduationCap, HeartPulse, Map, RadioTower, Save, ShieldCheck, X } from 'lucide-react';
+import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, HeartPulse, Layers, Map as MapIcon, RadioTower, Save, ShieldCheck, X } from 'lucide-react';
 import { getStats } from '../../lib/stats';
 import type { GroundSchoolData, RoadmapMilestoneProgress, ViewId } from '../../types';
 
@@ -204,6 +204,15 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const selectedProgress = roadmapProgress[selectedMilestone.id] ?? {};
   const selectedPhase = phases.find((phase) => phase.id === selectedMilestone.phaseId) ?? phases[0];
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
+  const nextActions = selectedMilestone.status === 'complete'
+    ? ['Review the next milestone in this phase', 'Keep notes current for your instructor or school']
+    : selectedMilestone.requirements;
+  const relatedTools = Array.from(new Map([
+    ...(selectedMilestone.action ? [selectedMilestone.action] : []),
+    ...(selectedMilestone.id === 'study-system-ready' || selectedMilestone.id === 'pstar' || selectedMilestone.id === 'roca' ? [{ label: 'Flashcards', view: 'flashcards' as ViewId }] : []),
+    ...(selectedMilestone.phaseId === 'navigation' || selectedMilestone.id === 'first-solo' ? [{ label: 'Weather', view: 'weather' as ViewId }] : []),
+    { label: 'Notes', view: 'notes' as ViewId }
+  ].map((tool) => [tool.label, tool])).values());
 
   const selectMilestone = (milestone: RoadmapMilestone) => {
     setSelectedMilestoneId(milestone.id);
@@ -211,11 +220,11 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   };
 
   const topCards: Array<{ label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
-    { label: 'Roadmap', value: `${overallPct}%`, note: 'weighted preview', icon: <Map size={22} /> },
+    { label: 'Roadmap', value: `${overallPct}%`, note: 'weighted preview', icon: <MapIcon size={22} /> },
     { label: 'Ground School', value: `${stats.classes}`, note: 'lesson records', icon: <BookOpen size={22} />, onClick: () => onViewChange('notes') },
     { label: 'PSTAR', value: pstarComplete ? 'Ready' : '--', note: pstarLabel, icon: <GraduationCap size={22} />, onClick: () => onViewChange('testing') },
     { label: 'ROC-A', value: rocaComplete ? 'Done' : 'Testing', note: rocaComplete ? 'recorded complete' : 'available now', icon: <RadioTower size={22} />, onClick: () => onViewChange('testing') },
-    { label: 'Tasks', value: `${stats.tasksRemaining}`, note: 'open actions', icon: <ClipboardCheck size={22} />, onClick: () => onViewChange('tasks') }
+    { label: 'Weather', value: data.users[data.activeUserId]?.homeAirport || 'METAR', note: 'pilot habit tool', icon: <CloudSun size={22} />, onClick: () => onViewChange('weather') }
   ];
 
   return <div className="pilot-roadmap">
@@ -282,29 +291,41 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
           {selectedMilestone.requirements.map((requirement) => <div key={requirement}><CheckCircle2 size={15} /><span>{requirement}</span></div>)}
         </div>
 
+        <div className="roadmap-next-steps">
+          <h4>Next Actions</h4>
+          {nextActions.map((action) => <div key={action}><span className="roadmap-action-number" /> <span>{action}</span></div>)}
+        </div>
+
+        <div className="roadmap-related-tools">
+          <h4>Related Tools</h4>
+          <div>
+            {relatedTools.map((tool) => <button key={`${selectedMilestone.id}-${tool.label}`} onClick={() => onViewChange(tool.view)}>
+              {tool.label === 'Open Testing' ? <FileCheck2 size={16} /> : tool.label === 'Flashcards' ? <Layers size={16} /> : tool.label === 'Weather' ? <CloudSun size={16} /> : <ShieldCheck size={16} />}
+              {tool.label}
+            </button>)}
+          </div>
+        </div>
+
         {selectedMilestone.manual ? <div className="roadmap-evidence">
-          <h4>Evidence</h4>
-          <label>
-            Date completed
-            <input type="date" value={selectedProgress.completedDate ?? ''} onChange={(event) => updateRoadmap(selectedMilestone.id, { completedDate: event.target.value }, selectedMilestone.phaseId)} />
-          </label>
+          <h4>Notes</h4>
           <label>
             Notes
             <textarea value={selectedProgress.notes ?? ''} onChange={(event) => updateRoadmap(selectedMilestone.id, { notes: event.target.value }, selectedMilestone.phaseId)} placeholder="Add instructor notes, exam details, or what still needs to happen..." />
           </label>
-          <button className={selectedProgress.completed ? 'roadmap-complete-button complete' : 'roadmap-complete-button'} onClick={() => updateRoadmap(selectedMilestone.id, { completed: !selectedProgress.completed, completedDate: selectedProgress.completedDate || new Date().toISOString().slice(0, 10) }, selectedMilestone.phaseId)}>
-            <Save size={17} />{selectedProgress.completed ? 'Undo Completion' : 'Mark Complete'}
-          </button>
+          <div className="roadmap-completion-block">
+            <h4>Completion</h4>
+            <label>
+              Date completed
+              <input type="date" value={selectedProgress.completedDate ?? ''} onChange={(event) => updateRoadmap(selectedMilestone.id, { completedDate: event.target.value }, selectedMilestone.phaseId)} />
+            </label>
+            <button className={selectedProgress.completed ? 'roadmap-complete-button complete' : 'roadmap-complete-button'} onClick={() => updateRoadmap(selectedMilestone.id, { completed: !selectedProgress.completed, completedDate: selectedProgress.completedDate || new Date().toISOString().slice(0, 10) }, selectedMilestone.phaseId)}>
+              <Save size={17} />{selectedProgress.completed ? 'Undo Completion' : 'Mark Complete'}
+            </button>
+          </div>
         </div> : <div className="roadmap-evidence read-only">
           <h4>Automatic Milestone</h4>
           <p>This milestone updates from existing app activity.</p>
         </div>}
-
-        <div className="roadmap-next-actions">
-          {selectedMilestone.action && <button onClick={() => onViewChange(selectedMilestone.action!.view)}><FileCheck2 size={17} />{selectedMilestone.action.label}</button>}
-          <button onClick={() => onViewChange('tasks')}><CalendarCheck size={17} />Open Tasks</button>
-          <button onClick={() => onViewChange('notes')}><ShieldCheck size={17} />Record Notes</button>
-        </div>
       </aside>
     </section>
   </div>;

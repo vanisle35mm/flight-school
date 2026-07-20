@@ -2846,6 +2846,8 @@ body {
 }
 
 .roadmap-requirements,
+.roadmap-next-steps,
+.roadmap-related-tools,
 .roadmap-evidence {
   display: grid;
   gap: 10px;
@@ -2854,13 +2856,17 @@ body {
 }
 
 .roadmap-requirements h4,
+.roadmap-next-steps h4,
+.roadmap-related-tools h4,
+.roadmap-completion-block h4,
 .roadmap-evidence h4 {
   margin: 0;
   color: #f7fbff;
   font-size: 15px;
 }
 
-.roadmap-requirements div {
+.roadmap-requirements div,
+.roadmap-next-steps div {
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   gap: 8px;
@@ -2871,9 +2877,46 @@ body {
   line-height: 1.35;
 }
 
+.roadmap-action-number {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border: 2px solid var(--amber);
+  border-radius: 50%;
+}
+
 .roadmap-requirements svg {
   color: var(--green);
   margin-top: 1px;
+}
+
+.roadmap-related-tools > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.roadmap-related-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(132, 184, 220, 0.3);
+  border-radius: 8px;
+  color: #dfe8f3;
+  background: rgba(16, 48, 78, 0.72);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.roadmap-related-tools button:first-child {
+  border-color: rgba(224, 177, 88, 0.72);
+  color: #071421;
+  background: linear-gradient(180deg, #ffd36f, #e3a51f);
 }
 
 .roadmap-evidence label {
@@ -2896,6 +2939,14 @@ body {
 .roadmap-evidence textarea {
   min-height: 104px;
   resize: vertical;
+}
+
+.roadmap-completion-block {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(64, 95, 125, 0.32);
 }
 
 .roadmap-complete-button {
