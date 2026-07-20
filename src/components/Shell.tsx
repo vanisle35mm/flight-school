@@ -1,5 +1,6 @@
 import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { CelebrationOverlay } from './CelebrationOverlay';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
 import type { ViewId } from '../types';
@@ -108,6 +109,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
       {activeView !== 'dashboard' && <label className="search-box cockpit-search"><Search size={17} /><input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search ground school, cards, topics" /></label>}
       <div className="status-cluster" aria-label="Flight status"><button className="user-pill" onClick={() => canAdmin ? onViewChange('users') : canManageAccount ? onViewChange('account') : onLogout()}><UserRound size={16} />Captain {activeUserName}</button><span className={`cloud-sync-pill ${cloudStatus}`}><CloudSun size={17} />{cloudStatusLabel[cloudStatus]}</span><button className="station-pill weather-shortcut" onClick={() => changeView('weather')} aria-label="Open weather page">{weatherSummary.station} <ChevronDown size={14} /></button><button className="weather-pill weather-shortcut" onClick={() => changeView('weather')} aria-label="Open weather page"><CloudSun size={17} />{weatherSummary.temperature}</button><button className="bell-button" aria-label="Notifications"><Bell size={18} /></button></div>
     </header>
+    <CelebrationOverlay />
     {children}
   </main>
 </div>;

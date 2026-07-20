@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, Layers, Map as MapIcon, PlaneTakeoff, Plus, RadioTower, Save, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
+import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, Layers, Map as MapIcon, PlaneTakeoff, Plus, RadioTower, Save, ShieldCheck, Trash2, X } from 'lucide-react';
 import { getStats } from '../../lib/stats';
+import { emitFlightSchoolCelebration } from '../../lib/celebrations';
 import { DEFAULT_DASHBOARD_TILE_ORDER } from '../../lib/storage';
 import type { GroundSchoolData, RoadmapMilestoneProgress, ViewId } from '../../types';
 
@@ -31,43 +32,13 @@ type RoadmapPhase = {
   accent: 'amber' | 'blue' | 'green';
   milestones: RoadmapMilestone[];
 };
-type RoadmapCelebration = {
-  id: string;
-  type: 'milestone' | 'phase';
-  title: string;
-  message: string;
-};
-type RoadmapCelebrationStore = {
-  milestones: string[];
-  phases: string[];
-};
-
 const statusLabels: Record<MilestoneStatus, string> = {
   complete: 'Complete',
   'in-progress': 'In Progress',
   locked: 'Locked',
   'not-started': 'Not Started'
 };
-const milestoneCelebrationLines = [
-  'Nice work. Avionics check green.',
-  'Good job, Captain. That one is logged.',
-  'Checklist item complete. Smooth flying.',
-  'Clean pass. The panel likes what it sees.',
-  'Progress captured. Keep the prop turning.'
-];
-const phaseCelebrationLines = [
-  'Stage complete. Flight path updated.',
-  'Big checkpoint crossed. That deserves a proper radio call.',
-  'Phase complete. You are building real momentum.',
-  'Nice work, Captain. This stage is in the logbook.',
-  'Milestone stack cleared. On to the next heading.'
-];
-
 const clampPct = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
-const pickCelebrationLine = (type: RoadmapCelebration['type']) => {
-  const lines = type === 'phase' ? phaseCelebrationLines : milestoneCelebrationLines;
-  return lines[Math.floor(Math.random() * lines.length)];
-};
 const getDayPart = () => {
   const hour = new Date().getHours();
   if (hour < 12) return 'morning';
@@ -83,7 +54,6 @@ const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneSt
   return fallback;
 };
 const ROADMAP_STATE_KEY = 'flightschool_roadmap_state';
-const ROADMAP_CELEBRATION_KEY = 'flightschool_roadmap_celebrations_v3';
 const loadRoadmapState = () => {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(ROADMAP_STATE_KEY) ?? '{}') as Partial<{ selectedMilestoneId: string; isDetailOpen: boolean }>;
@@ -93,27 +63,6 @@ const loadRoadmapState = () => {
     };
   } catch {
     return { selectedMilestoneId: 'ground-school-hours', isDetailOpen: true };
-  }
-};
-const loadRoadmapCelebrations = (userId: string): RoadmapCelebrationStore => {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(ROADMAP_CELEBRATION_KEY) ?? '{}') as Record<string, Partial<RoadmapCelebrationStore>>;
-    const userCelebrations = parsed[userId] ?? {};
-    return {
-      milestones: Array.isArray(userCelebrations.milestones) ? userCelebrations.milestones : [],
-      phases: Array.isArray(userCelebrations.phases) ? userCelebrations.phases : []
-    };
-  } catch {
-    return { milestones: [], phases: [] };
-  }
-};
-const saveRoadmapCelebrations = (userId: string, store: RoadmapCelebrationStore) => {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(ROADMAP_CELEBRATION_KEY) ?? '{}') as Record<string, RoadmapCelebrationStore>;
-    parsed[userId] = store;
-    window.localStorage.setItem(ROADMAP_CELEBRATION_KEY, JSON.stringify(parsed));
-  } catch {
-    window.localStorage.setItem(ROADMAP_CELEBRATION_KEY, JSON.stringify({ [userId]: store }));
   }
 };
 const isPhaseComplete = (phase: RoadmapPhase) => {
@@ -128,8 +77,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(() => loadRoadmapState().selectedMilestoneId);
   const [isDetailOpen, setIsDetailOpen] = useState(() => loadRoadmapState().isDetailOpen);
   const [flightLogDraft, setFlightLogDraft] = useState({ date: '', hours: '', notes: '' });
-  const [celebration, setCelebration] = useState<RoadmapCelebration | null>(null);
-  const [celebrationQueue, setCelebrationQueue] = useState<RoadmapCelebration[]>([]);
+  const priorMilestoneStatuses = useRef<Record<string, MilestoneStatus> | null>(null);
+  const priorPhaseCompletion = useRef<Record<string, boolean> | null>(null);
   const roadmapProgress = data.roadmapProgress ?? {};
   const touchedPhases = data.roadmapTouchedPhases ?? [];
   const pstarComplete = stats.hasAccuracy && stats.accuracy >= 90;
@@ -353,56 +302,34 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   }, [isDetailOpen, selectedMilestone.id]);
 
   useEffect(() => {
-    const celebrationStore = loadRoadmapCelebrations(data.activeUserId);
-    const completeMilestoneIds = new Set(phases.flatMap((phase) => phase.milestones).filter((milestone) => milestone.status === 'complete').map((milestone) => milestone.id));
-    const completePhaseIds = new Set(phases.filter(isPhaseComplete).map((phase) => phase.id));
-    const seenMilestones = new Set(celebrationStore.milestones.filter((id) => completeMilestoneIds.has(id)));
-    const seenPhases = new Set(celebrationStore.phases.filter((id) => completePhaseIds.has(id)));
-    const pending: RoadmapCelebration[] = [];
+    const milestoneStatuses = Object.fromEntries(
+      phases.flatMap((phase) => phase.milestones.map((milestone) => [milestone.id, milestone.status]))
+    ) as Record<string, MilestoneStatus>;
+    const phaseCompletion = Object.fromEntries(phases.map((phase) => [phase.id, isPhaseComplete(phase)])) as Record<string, boolean>;
+    const previousMilestones = priorMilestoneStatuses.current;
+    const previousPhases = priorPhaseCompletion.current;
+
+    priorMilestoneStatuses.current = milestoneStatuses;
+    priorPhaseCompletion.current = phaseCompletion;
+
+    if (!previousMilestones || !previousPhases) return;
 
     phases.flatMap((phase) => phase.milestones).forEach((milestone) => {
-      if (milestone.status !== 'complete' || seenMilestones.has(milestone.id)) return;
-      seenMilestones.add(milestone.id);
-      pending.push({
-        id: `milestone-${milestone.id}-${Date.now()}`,
+      if (milestone.status !== 'complete' || previousMilestones[milestone.id] === 'complete') return;
+      emitFlightSchoolCelebration({
         type: 'milestone',
-        title: milestone.title,
-        message: pickCelebrationLine('milestone')
+        title: milestone.title
       });
     });
 
     phases.forEach((phase) => {
-      if (!isPhaseComplete(phase) || seenPhases.has(phase.id)) return;
-      seenPhases.add(phase.id);
-      pending.push({
-        id: `phase-${phase.id}-${Date.now()}`,
+      if (!phaseCompletion[phase.id] || previousPhases[phase.id]) return;
+      emitFlightSchoolCelebration({
         type: 'phase',
-        title: `${phase.title} Complete`,
-        message: pickCelebrationLine('phase')
+        title: `${phase.title} Complete`
       });
     });
-
-    if (pending.length) {
-      saveRoadmapCelebrations(data.activeUserId, {
-        milestones: [...seenMilestones],
-        phases: [...seenPhases]
-      });
-      setCelebrationQueue((current) => [...current, ...pending]);
-    }
-  }, [data.activeUserId, phases]);
-
-  useEffect(() => {
-    if (celebration || !celebrationQueue.length) return;
-    const [nextCelebration, ...remainingCelebrations] = celebrationQueue;
-    setCelebration(nextCelebration);
-    setCelebrationQueue(remainingCelebrations);
-  }, [celebration, celebrationQueue]);
-
-  useEffect(() => {
-    if (!celebration) return;
-    const timeout = window.setTimeout(() => setCelebration(null), celebration.type === 'phase' ? 5200 : 3800);
-    return () => window.clearTimeout(timeout);
-  }, [celebration]);
+  }, [phases]);
 
   const topCards: Array<{ id: string; label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
     { id: 'roadmap', label: 'Roadmap', value: `${overallPct}%`, note: 'overall journey', icon: <MapIcon size={22} />, onClick: () => setIsDetailOpen(false) },
@@ -425,21 +352,6 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     .filter((card): card is NonNullable<typeof card> => Boolean(card));
 
   return <div className="pilot-roadmap">
-    {celebration ? <div className={`roadmap-celebration ${celebration.type}`} role="status" aria-live="polite">
-      <span className="celebration-confetti" aria-hidden="true">
-        {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
-      </span>
-      <span className="celebration-sweep" aria-hidden="true" />
-      <span className="celebration-icon" aria-hidden="true">
-        {celebration.type === 'phase' ? <PlaneTakeoff size={34} /> : <Sparkles size={24} />}
-      </span>
-      <span className="celebration-copy">
-        <small>{celebration.type === 'phase' ? 'Stage Cleared' : 'Good Job, Captain'}</small>
-        <strong>{celebration.title}</strong>
-        <em>{celebration.type === 'phase' ? 'Flight phase complete' : 'Logbook stamp earned'}</em>
-        <span>{celebration.message}</span>
-      </span>
-    </div> : null}
     <section className="roadmap-hero">
       <div>
         <span className="eyebrow">Private Pilot Journey</span>

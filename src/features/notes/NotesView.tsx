@@ -1,5 +1,6 @@
 import { CalendarPlus, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { emitFlightSchoolCelebration } from '../../lib/celebrations';
 import type { ClassSession, GroundSchoolData } from '../../types';
 
 const currentYear = new Date().getFullYear();
@@ -49,10 +50,20 @@ export const NotesView = ({ data, onDataChange, search }: { data: GroundSchoolDa
     .filter(({ session }) => !query || session.topics.toLowerCase().includes(query) || session.notes.toLowerCase().includes(query) || (session.club ?? '').toLowerCase().includes(query) || (session.instructor ?? '').toLowerCase().includes(query)), [data.classes, query]);
 
   const updateClass = (patch: Partial<ClassSession>) => {
+    const beforeHours = data.classes.filter((session) => session.completed).length * 8;
+    const nextClasses = data.classes.map((session, index) => index === activeIndex ? { ...session, ...patch } : session);
+    const afterHours = nextClasses.filter((session) => session.completed).length * 8;
     onDataChange({
       ...data,
-      classes: data.classes.map((session, index) => index === activeIndex ? { ...session, ...patch } : session)
+      classes: nextClasses
     });
+    if (beforeHours < 40 && afterHours >= 40) {
+      emitFlightSchoolCelebration({
+        type: 'milestone',
+        title: 'Ground school hours',
+        message: 'Forty hours logged. Your classroom foundation is in the books.'
+      });
+    }
   };
 
   const addSession = () => {
