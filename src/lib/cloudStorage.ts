@@ -73,7 +73,9 @@ const securePayloadFromData = (data: GroundSchoolData) => {
       flightTraining: prepared.flightTraining,
       dashboardStatOrder: prepared.dashboardStatOrder,
       dashboardTileOrder: prepared.dashboardTileOrder,
-      dashboardHiddenTiles: prepared.dashboardHiddenTiles
+      dashboardHiddenTiles: prepared.dashboardHiddenTiles,
+      roadmapProgress: prepared.roadmapProgress,
+      roadmapTouchedPhases: prepared.roadmapTouchedPhases
     }
   };
 };
@@ -98,7 +100,9 @@ const secureUserFromRows = (profile: SecureProfileRow, row?: SecureUserDataRow):
         rocaHistory: payload.rocaHistory,
         rocaMissedIds: payload.rocaMissedIds,
         rocaFlashcardSection: payload.rocaFlashcardSection,
-        flightTraining: payload.flightTraining
+        flightTraining: payload.flightTraining,
+        roadmapProgress: payload.roadmapProgress,
+        roadmapTouchedPhases: payload.roadmapTouchedPhases
       }
     },
     tcFlashcardSection: payload.tcFlashcardSection,
@@ -154,7 +158,9 @@ export const loadSecureGroundSchoolData = async (): Promise<GroundSchoolData | n
     tcFlashcardSection: activePayload.tcFlashcardSection,
     dashboardStatOrder: activePayload.dashboardStatOrder,
     dashboardTileOrder: activePayload.dashboardTileOrder,
-    dashboardHiddenTiles: activePayload.dashboardHiddenTiles
+    dashboardHiddenTiles: activePayload.dashboardHiddenTiles,
+    roadmapProgress: activePayload.roadmapProgress,
+    roadmapTouchedPhases: activePayload.roadmapTouchedPhases
   });
 };
 

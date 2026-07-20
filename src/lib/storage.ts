@@ -1,5 +1,5 @@
 import { c172sChecklistLibrary } from '../data/c172sChecklists';
-import type { ClassSession, FlashcardReviewStatus, FlightChecklistItem, FlightChecklistTemplate, FlightChecklistTemplateItem, FlightChecklistTemplateSection, FlightScheduleEntry, FlightTrainingData, GroundSchoolData, GroundSchoolUser, TcHistoryEntry, Todo } from '../types';
+import type { ClassSession, FlashcardReviewStatus, FlightChecklistItem, FlightChecklistTemplate, FlightChecklistTemplateItem, FlightChecklistTemplateSection, FlightScheduleEntry, FlightTrainingData, GroundSchoolData, GroundSchoolUser, RoadmapMilestoneProgress, TcHistoryEntry, Todo } from '../types';
 
 export const STORAGE_KEY = 'groundschool_v496';
 export const LEGACY_STORAGE_KEY = 'groundschool_v47';
@@ -60,6 +60,25 @@ const normalizeFlashcardProgress = (value: unknown): Record<string, FlashcardRev
   }
   return progress;
 };
+
+const normalizeRoadmapProgress = (value: unknown): Record<string, RoadmapMilestoneProgress> => {
+  const progress: Record<string, RoadmapMilestoneProgress> = {};
+  if (value && typeof value === 'object') {
+    Object.entries(value as Record<string, unknown>).forEach(([key, entry]) => {
+      if (typeof key !== 'string' || !entry || typeof entry !== 'object') return;
+      const item = entry as Record<string, unknown>;
+      progress[key] = {
+        ...(typeof item.completed === 'boolean' ? { completed: item.completed } : {}),
+        ...(typeof item.completedDate === 'string' ? { completedDate: item.completedDate } : {}),
+        ...(typeof item.notes === 'string' ? { notes: item.notes } : {})
+      };
+    });
+  }
+  return progress;
+};
+
+const normalizeRoadmapTouchedPhases = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((phaseId): phaseId is string => typeof phaseId === 'string') : [];
 
 const normalizeClasses = (value: unknown): ClassSession[] => Array.isArray(value) ? value
   .map((session) => {
@@ -208,6 +227,8 @@ export const createGroundSchoolUser = (id = DEFAULT_USER_ID, firstName = 'Pilot'
   classes: [],
   todos: [],
   flashcardProgress: {},
+  roadmapProgress: {},
+  roadmapTouchedPhases: [],
   tcHistory: [],
   tcMissedIds: [],
   rocaHistory: [],
@@ -232,6 +253,8 @@ export const createEmptyGroundSchoolData = (): GroundSchoolData => {
     dashboardStatOrder: [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER],
     dashboardHiddenTiles: [],
+    roadmapProgress: {},
+    roadmapTouchedPhases: [],
     flashcardProgress: {},
     flightTraining: createDefaultFlightTrainingData()
   };
@@ -266,7 +289,9 @@ export const syncActiveUserData = (data: GroundSchoolData): GroundSchoolData => 
         flightTraining: data.flightTraining,
         dashboardStatOrder: [...data.dashboardStatOrder],
         dashboardTileOrder: [...data.dashboardTileOrder],
-        dashboardHiddenTiles: [...data.dashboardHiddenTiles]
+        dashboardHiddenTiles: [...data.dashboardHiddenTiles],
+        roadmapProgress: data.roadmapProgress,
+        roadmapTouchedPhases: [...data.roadmapTouchedPhases]
       }
     }
   };
@@ -290,7 +315,9 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
     flightTraining: nextUser.flightTraining ?? createDefaultFlightTrainingData(),
     dashboardStatOrder: nextUser.dashboardStatOrder?.length ? [...nextUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextUser.dashboardTileOrder?.length ? [...nextUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
-    dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : []
+    dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : [],
+    roadmapProgress: normalizeRoadmapProgress(nextUser.roadmapProgress),
+    roadmapTouchedPhases: normalizeRoadmapTouchedPhases(nextUser.roadmapTouchedPhases)
   };
 };
 
@@ -359,7 +386,9 @@ export const deleteGroundSchoolUser = (data: GroundSchoolData, userId: string): 
     flightTraining: nextActiveUser.flightTraining ?? createDefaultFlightTrainingData(),
     dashboardStatOrder: nextActiveUser.dashboardStatOrder?.length ? [...nextActiveUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextActiveUser.dashboardTileOrder?.length ? [...nextActiveUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
-    dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : []
+    dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : [],
+    roadmapProgress: normalizeRoadmapProgress(nextActiveUser.roadmapProgress),
+    roadmapTouchedPhases: normalizeRoadmapTouchedPhases(nextActiveUser.roadmapTouchedPhases)
   };
 };
 
@@ -405,6 +434,8 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       ...(Array.isArray(item.dashboardStatOrder) ? { dashboardStatOrder: item.dashboardStatOrder.filter((tileId): tileId is string => typeof tileId === 'string' && DEFAULT_DASHBOARD_STAT_ORDER.includes(tileId)) } : {}),
       ...(Array.isArray(item.dashboardTileOrder) ? { dashboardTileOrder: item.dashboardTileOrder.filter((tileId): tileId is string => typeof tileId === 'string' && DEFAULT_DASHBOARD_TILE_ORDER.includes(tileId)) } : {}),
       ...(Array.isArray(item.dashboardHiddenTiles) ? { dashboardHiddenTiles: item.dashboardHiddenTiles.filter((tileId): tileId is string => typeof tileId === 'string' && DEFAULT_DASHBOARD_TILE_ORDER.includes(tileId)) } : {}),
+      roadmapProgress: normalizeRoadmapProgress(item.roadmapProgress),
+      roadmapTouchedPhases: normalizeRoadmapTouchedPhases(item.roadmapTouchedPhases),
       classes: normalizeClasses(item.classes),
       todos: normalizeTodos(item.todos),
       flashcardProgress: normalizeFlashcardProgress(item.flashcardProgress),
@@ -425,6 +456,8 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
       classes: normalizeClasses(source.classes),
       todos: normalizeTodos(source.todos),
       flashcardProgress: normalizeFlashcardProgress(source.flashcardProgress),
+      roadmapProgress: normalizeRoadmapProgress(source.roadmapProgress),
+      roadmapTouchedPhases: normalizeRoadmapTouchedPhases(source.roadmapTouchedPhases),
       tcHistory: [],
       tcMissedIds: [],
       rocaHistory: [],
@@ -462,6 +495,8 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   data.dashboardTileOrder = Array.isArray(source.dashboardTileOrder) ? source.dashboardTileOrder.filter((id): id is string => DEFAULT_DASHBOARD_TILE_ORDER.includes(String(id))) : legacyTileOrder;
   DEFAULT_DASHBOARD_TILE_ORDER.forEach((id) => { if (!data.dashboardTileOrder.includes(id)) data.dashboardTileOrder.push(id); });
   data.dashboardHiddenTiles = Array.isArray(source.dashboardHiddenTiles) ? source.dashboardHiddenTiles.filter((id): id is string => DEFAULT_DASHBOARD_TILE_ORDER.includes(String(id))) : [];
+  data.roadmapProgress = normalizeRoadmapProgress(activeUser.roadmapProgress ?? source.roadmapProgress);
+  data.roadmapTouchedPhases = normalizeRoadmapTouchedPhases(activeUser.roadmapTouchedPhases ?? source.roadmapTouchedPhases);
   return data;
 };
 

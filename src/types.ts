@@ -32,6 +32,11 @@ export type FlightTrainingData = {
     fuelPumpOn: boolean;
   };
 };
+export type RoadmapMilestoneProgress = {
+  completed?: boolean;
+  completedDate?: string;
+  notes?: string;
+};
 export type GroundSchoolUser = {
   id: string;
   firstName: string;
@@ -43,6 +48,8 @@ export type GroundSchoolUser = {
   dashboardStatOrder?: string[];
   dashboardTileOrder?: string[];
   dashboardHiddenTiles?: string[];
+  roadmapProgress?: Record<string, RoadmapMilestoneProgress>;
+  roadmapTouchedPhases?: string[];
   classes: ClassSession[];
   todos: Todo[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
@@ -77,6 +84,8 @@ export type GroundSchoolData = {
   dashboardStatOrder: string[];
   dashboardTileOrder: string[];
   dashboardHiddenTiles: string[];
+  roadmapProgress: Record<string, RoadmapMilestoneProgress>;
+  roadmapTouchedPhases: string[];
   flashcardProgress: Record<string, FlashcardReviewStatus>;
   flightTraining: FlightTrainingData;
 };
