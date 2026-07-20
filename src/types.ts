@@ -41,6 +41,9 @@ export type FlightTrainingData = {
   };
 };
 export type RoadmapMilestoneProgress = {
+  booked?: boolean;
+  bookedDate?: string;
+  category?: string;
   completed?: boolean;
   completedDate?: string;
   hours?: number;

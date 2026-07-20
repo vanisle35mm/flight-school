@@ -47,7 +47,7 @@ const getDayPart = () => {
 };
 
 const milestoneIcon = (status: MilestoneStatus) => status === 'complete' ? <CheckCircle2 size={17} /> : <span className="roadmap-dot" aria-hidden="true" />;
-const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
+const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.booked || progress?.bookedDate || progress?.category || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
 const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneStatus = 'not-started'): MilestoneStatus => {
   if (progress?.completed) return 'complete';
   if (hasProgressStarted(progress)) return 'in-progress';
@@ -65,7 +65,9 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const pstarComplete = stats.hasAccuracy && stats.accuracy >= 90;
   const pstarStatus: MilestoneStatus = pstarComplete ? 'complete' : stats.latestPstarAttemptTotal ? 'in-progress' : 'not-started';
   const pstarLabel = pstarComplete ? `${stats.accuracy}% complete` : stats.latestPstarAttemptTotal ? `${stats.accuracy}% best score` : 'Study and write the 50-question test';
-  const medicalComplete = roadmapProgress.medical?.completed === true;
+  const medicalProgress = roadmapProgress.medical ?? {};
+  const medicalBooked = medicalProgress.booked === true || Boolean(medicalProgress.bookedDate);
+  const medicalComplete = medicalProgress.completed === true;
   const rocaComplete = roadmapProgress.roca?.completed === true;
   const sppComplete = roadmapProgress.spp?.completed === true;
   const sppReady = medicalComplete && pstarComplete;
@@ -106,8 +108,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: 'medical',
         phaseId: 'foundation',
         title: 'Medical certificate',
-        status: manualStatus(roadmapProgress.medical),
-        helper: medicalComplete ? roadmapProgress.medical?.completedDate || 'Complete' : 'Book Category 1 or 3 medical',
+        status: medicalComplete ? 'complete' : medicalBooked ? 'in-progress' : 'not-started',
+        helper: medicalComplete ? medicalProgress.category || medicalProgress.completedDate || 'Passed' : medicalBooked ? medicalProgress.bookedDate || 'Booked' : 'Book your medical',
         description: 'Your medical is one of the main blockers before permit/licence paperwork can move forward.',
         requirements: ['Book with a Transport Canada Civil Aviation Medical Examiner', 'Complete Category 1 or 3 medical for the PPL path', 'Record the completion date when received'],
         manual: true
@@ -233,6 +235,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     return a.date.localeCompare(b.date);
   });
   const isGroundSchoolDetail = selectedMilestone.id === 'ground-school-hours';
+  const isMedicalDetail = selectedMilestone.id === 'medical';
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
   const nextActions = selectedMilestone.status === 'complete'
     ? ['Review the next milestone in this phase', 'Keep notes current for your instructor or school']
@@ -338,6 +341,46 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
                 <small>{session.date || 'No date'}{session.instructor ? ` - ${session.instructor}` : ''}</small>
               </div>
             </div>) : <p className="empty-state">No class schedule yet. Open Ground School to add your club, dates, topics, and notes.</p>}
+          </div>
+        </div> : isMedicalDetail ? <div className="medical-detail-card">
+          <div className={selectedProgress.booked || selectedProgress.bookedDate ? 'medical-step complete' : 'medical-step'}>
+            <span className="medical-step-icon">{selectedProgress.booked || selectedProgress.bookedDate ? <CheckCircle2 size={17} /> : '1'}</span>
+            <div className="medical-step-content">
+              <h4>Book the medical</h4>
+              <p>Book with a Transport Canada Civil Aviation Medical Examiner.</p>
+              <label>
+                Appointment date
+                <input type="date" value={selectedProgress.bookedDate ?? ''} onChange={(event) => updateRoadmap('medical', { booked: Boolean(event.target.value) || selectedProgress.booked, bookedDate: event.target.value }, 'foundation')} />
+              </label>
+              <button className={selectedProgress.booked ? 'medical-action-button complete' : 'medical-action-button'} onClick={() => updateRoadmap('medical', { booked: !selectedProgress.booked, bookedDate: selectedProgress.booked ? '' : selectedProgress.bookedDate }, 'foundation')}>
+                {selectedProgress.booked ? 'Booked' : 'Mark Booked'}
+              </button>
+            </div>
+          </div>
+
+          <div className={selectedProgress.completed ? 'medical-step complete' : 'medical-step'}>
+            <span className="medical-step-icon">{selectedProgress.completed ? <CheckCircle2 size={17} /> : '2'}</span>
+            <div className="medical-step-content">
+              <h4>Acknowledge pass</h4>
+              <p>Record the pass and the medical category issued.</p>
+              <label>
+                Category
+                <select value={selectedProgress.category ?? ''} onChange={(event) => updateRoadmap('medical', { category: event.target.value }, 'foundation')}>
+                  <option value="">Select category</option>
+                  <option value="Category 1">Category 1</option>
+                  <option value="Category 3">Category 3</option>
+                  <option value="Category 4">Category 4</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+              <label>
+                Pass date
+                <input type="date" value={selectedProgress.completedDate ?? ''} onChange={(event) => updateRoadmap('medical', { completedDate: event.target.value }, 'foundation')} />
+              </label>
+              <button className={selectedProgress.completed ? 'medical-action-button complete' : 'medical-action-button'} onClick={() => updateRoadmap('medical', selectedProgress.completed ? { completed: false } : { completed: true, completedDate: selectedProgress.completedDate || new Date().toISOString().slice(0, 10), category: selectedProgress.category || 'Category 3' }, 'foundation')}>
+                {selectedProgress.completed ? 'Undo Pass' : 'Mark Passed'}
+              </button>
+            </div>
           </div>
         </div> : <>
           <p>{selectedMilestone.description}</p>

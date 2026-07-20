@@ -3088,6 +3088,96 @@ body {
   line-height: 1.25;
 }
 
+.medical-detail-card {
+  display: grid;
+  gap: 12px;
+}
+
+.medical-step {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(64, 95, 125, 0.62);
+  border-radius: 8px;
+  background: rgba(3, 12, 21, 0.32);
+}
+
+.medical-step.complete {
+  border-color: rgba(92, 196, 142, 0.45);
+  background: rgba(29, 94, 61, 0.18);
+}
+
+.medical-step-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(224, 177, 88, 0.7);
+  border-radius: 50%;
+  color: var(--amber);
+  background: rgba(224, 177, 88, 0.1);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.medical-step.complete .medical-step-icon {
+  border-color: rgba(92, 196, 142, 0.76);
+  color: #bff2d5;
+  background: rgba(29, 94, 61, 0.46);
+}
+
+.medical-step-content {
+  display: grid;
+  gap: 10px;
+}
+
+.medical-step-content h4 {
+  margin: 0;
+  color: #f7fbff;
+  font-size: 16px;
+}
+
+.medical-step-content p {
+  margin: -4px 0 0;
+  color: #aab8c7;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.medical-step-content label {
+  display: grid;
+  gap: 6px;
+  color: #c9d5e3;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.medical-step-content input,
+.medical-step-content select {
+  width: 100%;
+  border-color: rgba(75, 105, 136, 0.78);
+  border-radius: 8px;
+  color: #f7fbff;
+  background: rgba(3, 12, 21, 0.72);
+}
+
+.medical-action-button {
+  min-height: 38px;
+  border: 1px solid rgba(224, 177, 88, 0.72);
+  border-radius: 8px;
+  color: #071421;
+  background: linear-gradient(180deg, #ffd36f, #e3a51f);
+  font-weight: 950;
+}
+
+.medical-action-button.complete {
+  border-color: rgba(92, 196, 142, 0.55);
+  color: #d8f9e6;
+  background: rgba(29, 94, 61, 0.4);
+}
+
 .roadmap-evidence label {
   display: grid;
   gap: 6px;

@@ -68,6 +68,9 @@ const normalizeRoadmapProgress = (value: unknown): Record<string, RoadmapMilesto
       if (typeof key !== 'string' || !entry || typeof entry !== 'object') return;
       const item = entry as Record<string, unknown>;
       progress[key] = {
+        ...(typeof item.booked === 'boolean' ? { booked: item.booked } : {}),
+        ...(typeof item.bookedDate === 'string' ? { bookedDate: item.bookedDate } : {}),
+        ...(typeof item.category === 'string' ? { category: item.category } : {}),
         ...(typeof item.completed === 'boolean' ? { completed: item.completed } : {}),
         ...(typeof item.completedDate === 'string' ? { completedDate: item.completedDate } : {}),
         ...(typeof item.hours === 'number' && Number.isFinite(item.hours) ? { hours: Math.max(0, item.hours) } : {}),
