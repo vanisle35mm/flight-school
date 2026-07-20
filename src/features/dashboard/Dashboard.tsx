@@ -85,8 +85,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const pstarStatus: MilestoneStatus = pstarComplete ? 'complete' : stats.latestPstarAttemptTotal ? 'in-progress' : 'not-started';
   const pstarLabel = pstarComplete ? `${stats.accuracy}% complete` : stats.latestPstarAttemptTotal ? `${stats.accuracy}% best score` : 'Study and write the 50-question test';
   const medicalProgress = roadmapProgress.medical ?? {};
-  const medicalBooked = medicalProgress.booked === true || Boolean(medicalProgress.bookedDate);
-  const medicalComplete = medicalProgress.completed === true;
+  const medicalBooked = medicalProgress.booked === true && Boolean(medicalProgress.bookedDate);
+  const medicalComplete = medicalProgress.completed === true && Boolean(medicalProgress.completedDate);
   const rocaComplete = roadmapProgress.roca?.completed === true;
   const sppComplete = roadmapProgress.spp?.completed === true;
   const sppReady = medicalComplete && pstarComplete;
@@ -350,6 +350,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     .filter((tileId) => !data.dashboardHiddenTiles.includes(tileId))
     .map((tileId) => topCards.find((card) => card.id === tileId))
     .filter((card): card is NonNullable<typeof card> => Boolean(card));
+  const selectedMedicalBooked = selectedProgress.booked === true && Boolean(selectedProgress.bookedDate);
+  const selectedMedicalPassed = selectedProgress.completed === true && Boolean(selectedProgress.completedDate);
 
   return <div className="pilot-roadmap">
     <section className="roadmap-hero">
@@ -427,23 +429,23 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
             </div>) : <p className="empty-state">No class schedule yet. Open Ground School to add your club, dates, topics, and notes.</p>}
           </div>
         </div> : isMedicalDetail ? <div className="medical-detail-card">
-          <div className={selectedProgress.booked || selectedProgress.bookedDate ? 'medical-step complete' : 'medical-step'}>
-            <span className="medical-step-icon">{selectedProgress.booked || selectedProgress.bookedDate ? <CheckCircle2 size={17} /> : '1'}</span>
+          <div className={selectedMedicalBooked ? 'medical-step complete' : 'medical-step'}>
+            <span className="medical-step-icon">{selectedMedicalBooked ? <CheckCircle2 size={17} /> : '1'}</span>
             <div className="medical-step-content">
               <h4>Book the medical</h4>
               <p>Book with a Transport Canada Civil Aviation Medical Examiner.</p>
               <label>
                 Appointment date
-                <input type="date" value={selectedProgress.bookedDate ?? ''} onChange={(event) => updateRoadmap('medical', { booked: Boolean(event.target.value) || selectedProgress.booked, bookedDate: event.target.value }, 'foundation')} />
+                <input type="date" value={selectedProgress.bookedDate ?? ''} onChange={(event) => updateRoadmap('medical', { booked: event.target.value ? selectedProgress.booked : false, bookedDate: event.target.value }, 'foundation')} />
               </label>
-              <button className={selectedProgress.booked ? 'medical-action-button complete' : 'medical-action-button'} onClick={() => updateRoadmap('medical', { booked: !selectedProgress.booked, bookedDate: selectedProgress.booked ? '' : selectedProgress.bookedDate }, 'foundation')}>
-                {selectedProgress.booked ? 'Booked' : 'Mark Booked'}
+              <button className={selectedMedicalBooked ? 'medical-action-button complete' : 'medical-action-button'} disabled={!selectedMedicalBooked && !selectedProgress.bookedDate} onClick={() => updateRoadmap('medical', selectedMedicalBooked ? { booked: false, bookedDate: '' } : { booked: true }, 'foundation')}>
+                {selectedMedicalBooked ? 'Booked' : 'Mark Booked'}
               </button>
             </div>
           </div>
 
-          <div className={selectedProgress.completed ? 'medical-step complete' : 'medical-step'}>
-            <span className="medical-step-icon">{selectedProgress.completed ? <CheckCircle2 size={17} /> : '2'}</span>
+          <div className={selectedMedicalPassed ? 'medical-step complete' : 'medical-step'}>
+            <span className="medical-step-icon">{selectedMedicalPassed ? <CheckCircle2 size={17} /> : '2'}</span>
             <div className="medical-step-content">
               <h4>Acknowledge pass</h4>
               <p>Record the pass and the medical category issued.</p>
@@ -459,10 +461,10 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
               </label>
               <label>
                 Pass date
-                <input type="date" value={selectedProgress.completedDate ?? ''} onChange={(event) => updateRoadmap('medical', { completedDate: event.target.value }, 'foundation')} />
+                <input type="date" value={selectedProgress.completedDate ?? ''} onChange={(event) => updateRoadmap('medical', { completed: event.target.value ? selectedProgress.completed : false, completedDate: event.target.value }, 'foundation')} />
               </label>
-              <button className={selectedProgress.completed ? 'medical-action-button complete' : 'medical-action-button'} onClick={() => updateRoadmap('medical', selectedProgress.completed ? { completed: false } : { completed: true, completedDate: selectedProgress.completedDate || new Date().toISOString().slice(0, 10), category: selectedProgress.category || 'Category 3' }, 'foundation')}>
-                {selectedProgress.completed ? 'Undo Pass' : 'Mark Passed'}
+              <button className={selectedMedicalPassed ? 'medical-action-button complete' : 'medical-action-button'} disabled={!selectedMedicalPassed && !selectedProgress.completedDate} onClick={() => updateRoadmap('medical', selectedMedicalPassed ? { completed: false } : { completed: true, category: selectedProgress.category || 'Category 3' }, 'foundation')}>
+                {selectedMedicalPassed ? 'Undo Pass' : 'Mark Passed'}
               </button>
             </div>
           </div>
