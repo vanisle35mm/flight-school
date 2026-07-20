@@ -186,8 +186,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     const nextPhases = [
       { id: 'foundation', number: 1, title: 'Foundation', subtitle: 'Ground school, medical, first lessons', accent: 'amber' as const, milestones: foundationMilestones },
       { id: 'pre-solo', number: 2, title: 'Pre-Solo', subtitle: 'PSTAR, ROC-A, SPP, first solo', accent: 'blue' as const, milestones: preSoloMilestones },
-      { id: 'navigation', number: 3, title: 'Navigation', subtitle: 'Cross-country, instrument basics, solo XC', accent: 'blue' as const, milestones: navigationMilestones },
-      { id: 'final-licence', number: 4, title: 'Final Licence', subtitle: 'PPAER, flight test, licence application', accent: 'green' as const, milestones: finalMilestones }
+      { id: 'navigation', number: 3, title: 'Advanced Flight Training', subtitle: 'Cross-country, instrument basics, solo XC', accent: 'blue' as const, milestones: navigationMilestones },
+      { id: 'final-licence', number: 4, title: 'Final Testing and Licensing', subtitle: 'PPAER, flight test, licence application', accent: 'green' as const, milestones: finalMilestones }
     ];
 
     return nextPhases.map((phase) => {
