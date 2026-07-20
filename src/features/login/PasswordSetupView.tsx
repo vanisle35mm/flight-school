@@ -1,5 +1,6 @@
-import { KeyRound, LoaderCircle, LogOut, Plane } from 'lucide-react';
+import { KeyRound, LoaderCircle, LogOut } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
+import { FlightSchoolLogo } from '../../components/FlightSchoolLogo';
 import { completeSecurePasswordSetup } from '../../lib/secureAuth';
 
 type PasswordSetupViewProps = {
@@ -31,7 +32,7 @@ export const PasswordSetupView = ({ firstName, recoveryMode, onComplete, onLogou
 
   return <main className="login-screen">
     <section className="login-panel password-setup-panel">
-      <div className="login-brand"><Plane size={30} /><span>Flight School</span></div>
+      <div className="login-brand"><FlightSchoolLogo /></div>
       <div className="login-heading">
         <span className="eyebrow">Secure account</span>
         <h1>{recoveryMode ? 'Choose a new password' : `Welcome, Captain ${firstName}`}</h1>

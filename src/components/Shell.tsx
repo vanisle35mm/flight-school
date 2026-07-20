@@ -1,6 +1,7 @@
-import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, PlaneTakeoff, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CelebrationOverlay } from './CelebrationOverlay';
+import { FlightSchoolLogo } from './FlightSchoolLogo';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
 import type { ViewId } from '../types';
@@ -81,9 +82,9 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
   };
   return <div className="app-shell cockpit-shell">
   <aside className="sidebar cockpit-sidebar">
-    <div className="brand cockpit-brand"><span className="brand-mark"><Plane size={21} /></span><strong>Flight School</strong></div>
+    <div className="brand cockpit-brand"><FlightSchoolLogo compact /></div>
     <nav className="nav-list" aria-label="Primary">
-      <button className="nav-module-toggle" onClick={() => setGroundSchoolOpen((open) => !open)} aria-expanded={groundSchoolOpen} aria-controls="ground-school-navigation"><span>Ground School</span><ChevronDown className={groundSchoolOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
+      <button className="nav-module-toggle" onClick={() => setGroundSchoolOpen((open) => !open)} aria-expanded={groundSchoolOpen} aria-controls="ground-school-navigation"><span>Private Pilot</span><ChevronDown className={groundSchoolOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
       {groundSchoolOpen && <div className="nav-module-group" id="ground-school-navigation">{groundSchoolNavItems.map((item) => <button className={item.id === activeView || (item.id === 'testing' && testingViewIds.has(activeView)) ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}
       {FLIGHT_TRAINING_NAV_ENABLED && <>
         <button className="nav-module-toggle" onClick={() => setFlightTrainingOpen((open) => !open)} aria-expanded={flightTrainingOpen} aria-controls="flight-training-navigation"><span>Flight Training</span><ChevronDown className={flightTrainingOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>

@@ -1,5 +1,6 @@
-import { Check, LoaderCircle, MapPin, Plane } from 'lucide-react';
+import { Check, LoaderCircle, MapPin } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
+import { FlightSchoolLogo } from '../../components/FlightSchoolLogo';
 import { getDashboardWeatherSnapshot, saveWeatherSummary } from '../weather/weather';
 import type { GroundSchoolUser } from '../../types';
 
@@ -48,7 +49,7 @@ export const AirportOnboarding = ({ user, onComplete }: AirportOnboardingProps) 
 
   return <main className="airport-setup-screen">
     <section className="airport-setup-panel">
-      <div className="login-brand"><Plane size={30} /><span>Flight School</span></div>
+      <div className="login-brand"><FlightSchoolLogo /></div>
       <div className="airport-setup-heading">
         <span className="eyebrow">Welcome aboard</span>
         <h1>Good to have you here, Captain {user.firstName}.</h1>

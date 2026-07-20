@@ -1,5 +1,6 @@
-import { KeyRound, LoaderCircle, LogIn, Mail, Plane, UserRound } from 'lucide-react';
+import { KeyRound, LoaderCircle, LogIn, Mail, UserRound } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
+import { FlightSchoolLogo } from '../../components/FlightSchoolLogo';
 import { isAdminPasswordConfigured, verifyAdminPassword } from '../../lib/adminAuth';
 import { recoverAdminAccount, requestSecurePasswordReset, signInSecurely, signInWithEmail } from '../../lib/secureAuth';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
@@ -130,8 +131,8 @@ export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data
 
   return <main className="login-screen">
     <section className="login-panel standard-login-panel">
-      <div className="login-brand"><Plane size={30} /><span>Flight School</span></div>
-      <div className="login-heading"><span className="eyebrow">Ground School</span><h1>Welcome aboard</h1><p>Sign in to continue your training.</p></div>
+      <div className="login-brand"><FlightSchoolLogo /></div>
+      <div className="login-heading"><span className="eyebrow">Private Pilot Training</span><h1>Welcome aboard</h1><p>Sign in to continue your training.</p></div>
 
       {isSupabaseConfigured && <div className="standard-login-form">
         <label>Email address<div className="login-input-with-icon"><Mail size={18} /><input value={email} onChange={(event) => { setEmail(event.target.value); setMessage(''); }} onKeyDown={emailOnEnter} type="email" autoComplete="email" placeholder="captain@example.com" autoFocus /></div></label>

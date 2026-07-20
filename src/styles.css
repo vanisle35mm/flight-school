@@ -139,6 +139,81 @@ button:disabled {
   font-size: 13px;
 }
 
+.flight-school-logo {
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  color: var(--amber);
+}
+
+.flight-school-emblem {
+  position: relative;
+  display: grid !important;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(224, 177, 88, 0.5);
+  border-radius: 50%;
+  color: var(--amber) !important;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 217, 134, 0.2), transparent 36%),
+    linear-gradient(180deg, rgba(224, 177, 88, 0.12), rgba(11, 24, 37, 0.4));
+  box-shadow: 0 0 0 5px rgba(224, 177, 88, 0.06), 0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+.flight-school-emblem svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 8px rgba(224, 177, 88, 0.32));
+}
+
+.emblem-wing {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.emblem-wing.left {
+  left: -9px;
+  transform: translateY(-50%);
+}
+
+.emblem-wing.right {
+  right: -9px;
+  transform: translateY(-50%);
+}
+
+.flight-school-wordmark {
+  color: #f8fbff !important;
+  font-size: 19px !important;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: none;
+}
+
+.flight-school-logo.compact {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 8px;
+}
+
+.flight-school-logo.compact .flight-school-emblem {
+  width: 46px;
+  height: 46px;
+}
+
+.flight-school-logo.compact .flight-school-wordmark {
+  color: var(--amber) !important;
+  font-size: 11px !important;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
 .nav-list {
   display: grid;
   gap: 9px;
