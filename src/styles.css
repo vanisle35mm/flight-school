@@ -1011,6 +1011,83 @@ label {
   background: var(--sky);
 }
 
+.testing-page {
+  display: grid;
+  gap: 16px;
+}
+
+.testing-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0 4px;
+}
+
+.testing-header h2 {
+  margin: 2px 0 4px;
+  color: #f6fbff;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1;
+}
+
+.testing-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.testing-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 760px;
+}
+
+.testing-tab {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+  min-height: 74px;
+  padding: 13px 14px;
+  border: 1px solid rgba(58, 75, 93, 0.85);
+  border-radius: 8px;
+  color: #dce7f2;
+  background: linear-gradient(180deg, rgba(17, 31, 45, 0.95), rgba(7, 14, 22, 0.95));
+  box-shadow: none;
+  text-align: left;
+}
+
+.testing-tab svg {
+  grid-row: span 2;
+  color: var(--blue);
+}
+
+.testing-tab span {
+  color: #f6fbff;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.testing-tab small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.testing-tab.active {
+  border-color: rgba(143, 194, 228, 0.85);
+  background: linear-gradient(180deg, rgba(25, 87, 149, 0.82), rgba(12, 44, 82, 0.9));
+  box-shadow: inset 3px 0 0 var(--amber), 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.testing-tab.active svg {
+  color: var(--amber);
+}
+
 .field-card span,
 .result-box .empty-state {
   color: var(--muted);
@@ -1097,6 +1174,10 @@ label {
 }
 
 @media (max-width: 640px) {
+  .testing-tabs {
+    grid-template-columns: 1fr;
+  }
+
   .pstar-history-heading,
   .pstar-clear-confirm {
     align-items: stretch;

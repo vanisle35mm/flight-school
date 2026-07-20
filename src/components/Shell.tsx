@@ -1,4 +1,4 @@
-import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, RadioTower, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, Plane, PlaneTakeoff, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getStoredWeatherSummary, WEATHER_SUMMARY_EVENT, type WeatherSummary } from '../features/weather/weather';
 import type { CloudSyncStatus } from '../lib/cloudStorage';
@@ -8,8 +8,7 @@ const groundSchoolNavItems: Array<{ id: ViewId; label: string; icon: ReactNode }
   { id: 'dashboard', label: 'Dashboard', icon: <Gauge size={18} /> },
   { id: 'notes', label: 'Notes', icon: <BookOpen size={18} /> },
   { id: 'flashcards', label: 'Flashcards', icon: <Layers size={18} /> },
-  { id: 'pstar', label: 'PSTAR', icon: <GraduationCap size={18} /> },
-  { id: 'roca', label: 'ROC-A', icon: <RadioTower size={18} /> },
+  { id: 'testing', label: 'Testing', icon: <GraduationCap size={18} /> },
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={18} /> },
   { id: 'weather', label: 'Weather', icon: <CloudSun size={18} /> }
 ];
@@ -28,8 +27,9 @@ const navItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
 ];
 const groundSchoolViewIds = new Set<ViewId>(groundSchoolNavItems.map((item) => item.id));
 const flightTrainingViewIds = new Set<ViewId>(flightTrainingNavItems.map((item) => item.id));
+const testingViewIds = new Set<ViewId>(['testing', 'pstar', 'roca']);
 
-const titleForView = (view: ViewId) => view === 'import' ? 'Import' : view === 'dashboardEdit' ? 'Edit Dashboard' : view === 'users' ? 'Admin Console' : view === 'account' ? 'Account' : navItems.find((item) => item.id === view)?.label ?? 'Dashboard';
+const titleForView = (view: ViewId) => testingViewIds.has(view) ? 'Testing' : view === 'import' ? 'Import' : view === 'dashboardEdit' ? 'Edit Dashboard' : view === 'users' ? 'Admin Console' : view === 'account' ? 'Account' : navItems.find((item) => item.id === view)?.label ?? 'Dashboard';
 
 const cloudStatusLabel: Record<CloudSyncStatus, string> = {
   local: 'Local',
@@ -69,7 +69,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
       firstActiveViewSync.current = false;
       return;
     }
-    if (groundSchoolViewIds.has(activeView)) setGroundSchoolOpen(true);
+    if (groundSchoolViewIds.has(activeView) || testingViewIds.has(activeView)) setGroundSchoolOpen(true);
     if (FLIGHT_TRAINING_NAV_ENABLED && flightTrainingViewIds.has(activeView)) setFlightTrainingOpen(true);
   }, [activeView]);
   useEffect(() => {
@@ -84,7 +84,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
     <div className="brand cockpit-brand"><span className="brand-mark"><Plane size={21} /></span><strong>Flight School</strong></div>
     <nav className="nav-list" aria-label="Primary">
       <button className="nav-module-toggle" onClick={() => setGroundSchoolOpen((open) => !open)} aria-expanded={groundSchoolOpen} aria-controls="ground-school-navigation"><span>Ground School</span><ChevronDown className={groundSchoolOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
-      {groundSchoolOpen && <div className="nav-module-group" id="ground-school-navigation">{groundSchoolNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}
+      {groundSchoolOpen && <div className="nav-module-group" id="ground-school-navigation">{groundSchoolNavItems.map((item) => <button className={item.id === activeView || (item.id === 'testing' && testingViewIds.has(activeView)) ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}
       {FLIGHT_TRAINING_NAV_ENABLED && <>
         <button className="nav-module-toggle" onClick={() => setFlightTrainingOpen((open) => !open)} aria-expanded={flightTrainingOpen} aria-controls="flight-training-navigation"><span>Flight Training</span><ChevronDown className={flightTrainingOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
         {flightTrainingOpen && <div className="nav-module-group" id="flight-training-navigation">{flightTrainingNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}

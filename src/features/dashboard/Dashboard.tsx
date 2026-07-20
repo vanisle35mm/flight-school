@@ -12,7 +12,7 @@ type TileId = StatId | 'taskList' | 'weather' | 'progress' | 'quickActions';
 const statTargets: Record<StatId, ViewId> = {
   classes: 'notes',
   cards: 'flashcards',
-  accuracy: 'pstar',
+  accuracy: 'testing',
   tasks: 'tasks'
 };
 
@@ -133,7 +133,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       <div className="quick-action-grid">
         <button className="quick-action" onClick={() => onViewChange('notes')}><CirclePlus size={26} /><span>New Note</span></button>
         <button className="quick-action" onClick={() => onViewChange('flashcards')}><Layers size={26} /><span>Study Flashcards</span></button>
-        <button className="quick-action" onClick={() => onViewChange('pstar')}><GraduationCap size={26} /><span>PSTAR Practice</span></button>
+        <button className="quick-action" onClick={() => onViewChange('testing')}><GraduationCap size={26} /><span>Testing</span></button>
         <button className="quick-action" onClick={() => onViewChange('tasks')}><ClipboardCheck size={26} /><span>View Tasks</span></button>
       </div>
     </section>;

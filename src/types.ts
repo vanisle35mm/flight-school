@@ -80,6 +80,6 @@ export type GroundSchoolData = {
   flashcardProgress: Record<string, FlashcardReviewStatus>;
   flightTraining: FlightTrainingData;
 };
-export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'pstar' | 'roca' | 'weather' | 'flightChecklist' | 'flightPanel' | 'outsideChecks' | 'flightSchedule' | 'import' | 'dashboardEdit' | 'users' | 'account';
+export type ViewId = 'dashboard' | 'notes' | 'flashcards' | 'tasks' | 'testing' | 'pstar' | 'roca' | 'weather' | 'flightChecklist' | 'flightPanel' | 'outsideChecks' | 'flightSchedule' | 'import' | 'dashboardEdit' | 'users' | 'account';
 export type PracticeQuestion = { id: string; section: string; q: string; options: string[]; correct: string };
 export type PstarQuestion = PracticeQuestion;

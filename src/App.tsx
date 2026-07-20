@@ -7,8 +7,7 @@ import { DashboardEditView } from './features/dashboard/DashboardEditView';
 import { FlashcardsView } from './features/flashcards/FlashcardsView';
 import { FlightTrainingView } from './features/flightTraining/FlightTrainingView';
 import { NotesView } from './features/notes/NotesView';
-import { PstarView } from './features/pstar/PstarView';
-import { RocaView } from './features/roca/RocaView';
+import { TestingView } from './features/testing/TestingView';
 import { TasksView } from './features/tasks/TasksView';
 import { LegacyImportView } from './features/import/LegacyImportView';
 import { LoginView } from './features/login/LoginView';
@@ -229,8 +228,9 @@ export const App = () => {
     {activeView === 'notes' && <NotesView data={data} onDataChange={setData} search={search} />}
     {activeView === 'flashcards' && <FlashcardsView data={data} onDataChange={setData} search={search} />}
     {activeView === 'tasks' && <TasksView data={data} onDataChange={setData} />}
-    {activeView === 'pstar' && <PstarView data={data} onDataChange={setData} />}
-    {activeView === 'roca' && <RocaView data={data} onDataChange={setData} />}
+    {activeView === 'testing' && <TestingView data={data} onDataChange={setData} />}
+    {activeView === 'pstar' && <TestingView data={data} onDataChange={setData} initialMode="pstar" />}
+    {activeView === 'roca' && <TestingView data={data} onDataChange={setData} initialMode="roca" />}
     {activeView === 'weather' && <WeatherPanel />}
     {FLIGHT_TRAINING_ENABLED && activeView === 'flightChecklist' && <FlightTrainingView data={data} onDataChange={setData} page="checklist" />}
     {FLIGHT_TRAINING_ENABLED && activeView === 'flightPanel' && <FlightTrainingView data={data} onDataChange={setData} page="panel" />}
