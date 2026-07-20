@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, Layers, Map as MapIcon, PlaneTakeoff, Plus, RadioTower, Save, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
 import { getStats } from '../../lib/stats';
+import { DEFAULT_DASHBOARD_TILE_ORDER } from '../../lib/storage';
 import type { GroundSchoolData, RoadmapMilestoneProgress, ViewId } from '../../types';
 
 type MilestoneStatus = 'complete' | 'in-progress' | 'locked' | 'not-started';
@@ -403,13 +404,25 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     return () => window.clearTimeout(timeout);
   }, [celebration]);
 
-  const topCards: Array<{ label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
-    { label: 'Roadmap', value: `${overallPct}%`, note: 'weighted preview', icon: <MapIcon size={22} /> },
-    { label: 'Ground School', value: `${groundSchoolHours}`, note: 'hours logged', icon: <BookOpen size={22} />, onClick: () => onViewChange('notes') },
-    { label: 'PSTAR', value: pstarComplete ? 'Ready' : '--', note: pstarLabel, icon: <GraduationCap size={22} />, onClick: () => onViewChange('testing') },
-    { label: 'ROC-A', value: rocaComplete ? 'Done' : 'Testing', note: rocaComplete ? 'recorded complete' : 'available now', icon: <RadioTower size={22} />, onClick: () => onViewChange('testing') },
-    { label: 'Weather', value: data.users[data.activeUserId]?.homeAirport || 'METAR', note: 'pilot habit tool', icon: <CloudSun size={22} />, onClick: () => onViewChange('weather') }
+  const topCards: Array<{ id: string; label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
+    { id: 'roadmap', label: 'Roadmap', value: `${overallPct}%`, note: 'overall journey', icon: <MapIcon size={22} />, onClick: () => setIsDetailOpen(false) },
+    { id: 'foundation', label: 'Foundation', value: `${phases[0]?.percent ?? 0}%`, note: 'phase 1 progress', icon: <ShieldCheck size={22} />, onClick: () => selectMilestone(phases[0].milestones[0]) },
+    { id: 'preSolo', label: 'Pre-Solo', value: `${phases[1]?.percent ?? 0}%`, note: 'PSTAR, ROC-A, SPP', icon: <PlaneTakeoff size={22} />, onClick: () => selectMilestone(phases[1].milestones[0]) },
+    { id: 'advancedTraining', label: 'Advanced Training', value: `${phases[2]?.percent ?? 0}%`, note: 'XC and instrument basics', icon: <MapIcon size={22} />, onClick: () => selectMilestone(phases[2].milestones[0]) },
+    { id: 'finalTesting', label: 'Final Testing', value: `${phases[3]?.percent ?? 0}%`, note: 'PPAER to licence', icon: <FileCheck2 size={22} />, onClick: () => selectMilestone(phases[3].milestones[0]) },
+    { id: 'groundSchool', label: 'Ground School', value: `${groundSchoolHours}`, note: 'hours logged', icon: <BookOpen size={22} />, onClick: () => onViewChange('notes') },
+    { id: 'pstar', label: 'PSTAR', value: pstarComplete ? 'Ready' : '--', note: pstarLabel, icon: <GraduationCap size={22} />, onClick: () => onViewChange('testing') },
+    { id: 'roca', label: 'ROC-A', value: rocaComplete ? 'Done' : 'Testing', note: rocaComplete ? 'recorded complete' : 'available now', icon: <RadioTower size={22} />, onClick: () => onViewChange('testing') },
+    { id: 'weather', label: 'Weather', value: data.users[data.activeUserId]?.homeAirport || 'METAR', note: 'pilot habit tool', icon: <CloudSun size={22} />, onClick: () => onViewChange('weather') }
   ];
+  const dashboardTileOrder = [
+    ...data.dashboardTileOrder.filter((tileId) => DEFAULT_DASHBOARD_TILE_ORDER.includes(tileId)),
+    ...DEFAULT_DASHBOARD_TILE_ORDER.filter((tileId) => !data.dashboardTileOrder.includes(tileId))
+  ];
+  const visibleTopCards = dashboardTileOrder
+    .filter((tileId) => !data.dashboardHiddenTiles.includes(tileId))
+    .map((tileId) => topCards.find((card) => card.id === tileId))
+    .filter((card): card is NonNullable<typeof card> => Boolean(card));
 
   return <div className="pilot-roadmap">
     {celebration ? <div className={`roadmap-celebration ${celebration.type}`} role="status" aria-live="polite">
@@ -434,14 +447,17 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       </div>
     </section>
 
-    <section className="roadmap-summary" aria-label="Private pilot progress summary">
-      {topCards.map((card) => <button className="roadmap-summary-card" key={card.label} onClick={card.onClick}>
+    {visibleTopCards.length ? <section className="roadmap-summary" aria-label="Private pilot progress summary">
+      {visibleTopCards.map((card) => <button className="roadmap-summary-card" key={card.id} onClick={card.onClick}>
         {card.icon}
         <span>{card.label}</span>
         <strong>{card.value}</strong>
         <small>{card.note}</small>
       </button>)}
-    </section>
+    </section> : <section className="roadmap-summary-empty">
+      <strong>No dashboard tiles visible</strong>
+      <button onClick={() => onViewChange('dashboardEdit')}>Add Tiles</button>
+    </section>}
 
     <section className={isDetailOpen ? 'roadmap-workspace' : 'roadmap-workspace detail-closed'}>
       <div className="roadmap-board" aria-label="Private pilot phases">

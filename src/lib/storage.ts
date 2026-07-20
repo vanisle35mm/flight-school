@@ -7,7 +7,7 @@ export const THEME_KEY = 'flightschool_theme';
 export const RESTORE_KEY = 'groundschool_restore_payload';
 export const DEFAULT_USER_ID = 'user_default';
 export const DEFAULT_DASHBOARD_STAT_ORDER = ['classes', 'cards', 'accuracy', 'tasks'];
-export const DEFAULT_DASHBOARD_TILE_ORDER = ['classes', 'cards', 'accuracy', 'tasks', 'taskList', 'weather', 'progress', 'quickActions'];
+export const DEFAULT_DASHBOARD_TILE_ORDER = ['roadmap', 'foundation', 'preSolo', 'advancedTraining', 'finalTesting', 'groundSchool', 'pstar', 'roca', 'weather'];
 
 const cloneChecklistLibrary = (library: FlightChecklistTemplate[]): FlightChecklistTemplate[] =>
   library.map((template) => ({
