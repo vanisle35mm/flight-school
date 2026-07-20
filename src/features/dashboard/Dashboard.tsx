@@ -14,6 +14,11 @@ type RoadmapMilestone = {
   description: string;
   requirements: string[];
   manual?: boolean;
+  countsTowardProgress?: boolean;
+  hoursField?: {
+    label: string;
+    helper: string;
+  };
   action?: { label: string; view: ViewId };
 };
 type RoadmapPhase = {
@@ -42,7 +47,7 @@ const getDayPart = () => {
 };
 
 const milestoneIcon = (status: MilestoneStatus) => status === 'complete' ? <CheckCircle2 size={17} /> : <span className="roadmap-dot" aria-hidden="true" />;
-const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.notes?.trim());
+const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
 const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneStatus = 'not-started'): MilestoneStatus => {
   if (progress?.completed) return 'complete';
   if (hasProgressStarted(progress)) return 'in-progress';
@@ -63,6 +68,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const rocaComplete = roadmapProgress.roca?.completed === true;
   const sppComplete = roadmapProgress.spp?.completed === true;
   const sppReady = medicalComplete && pstarComplete;
+  const groundSchoolHours = data.classes.length * 8;
+  const dualFlightHours = roadmapProgress['begin-flight-instruction']?.hours ?? 0;
 
   const updateRoadmap = (milestoneId: string, patch: RoadmapMilestoneProgress, phaseId?: string) => {
     const nextProgress = {
@@ -84,13 +91,13 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const phases: RoadmapPhase[] = useMemo(() => {
     const foundationMilestones: RoadmapMilestone[] = [
       {
-        id: 'ground-school-started',
+        id: 'ground-school-hours',
         phaseId: 'foundation',
-        title: 'Ground school started',
-        status: stats.classes ? 'in-progress' : 'not-started',
-        helper: `${stats.classes} lesson records`,
-        description: 'Build your classroom foundation: air law, navigation, meteorology, aircraft systems, and human factors.',
-        requirements: ['Attend ground school lessons', 'Record lesson notes', 'Build study tasks and flashcards'],
+        title: 'Ground school hours',
+        status: groundSchoolHours >= 40 ? 'complete' : groundSchoolHours > 0 ? 'in-progress' : 'not-started',
+        helper: `${groundSchoolHours} / 40 hours`,
+        description: 'Record each classroom lesson by title or subject. For now, each lesson record counts as 8 ground-school hours.',
+        requirements: ['Record the lesson title or subject', 'Keep a short note for what was covered', 'Reach the ground-school hour target your school uses'],
         action: { label: 'Open Notes', view: 'notes' }
       },
       {
@@ -104,24 +111,36 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         manual: true
       },
       {
-        id: 'basic-flight-handling',
+        id: 'begin-flight-instruction',
         phaseId: 'foundation',
-        title: 'Basic flight handling',
-        status: manualStatus(roadmapProgress['basic-flight-handling']),
-        helper: 'Turns, climbs, descents, stalls',
-        description: 'Track the early flight-training basics that make the aircraft feel familiar.',
-        requirements: ['Straight-and-level flight', 'Climbs and descents', 'Turns', 'Slow flight and stalls with instructor'],
-        manual: true
+        title: 'Begin flight instruction',
+        status: manualStatus(roadmapProgress['begin-flight-instruction']),
+        helper: `${dualFlightHours} dual hours logged`,
+        description: 'Track the start of dual flight instruction. Many students solo around 10-20 dual hours, but instructor readiness matters more than the number.',
+        requirements: ['Begin dual flight lessons with an instructor', 'Record dual flight hours as a baseline', 'Use instructor guidance before treating solo as a target'],
+        manual: true,
+        hoursField: { label: 'Dual flight training hours', helper: 'Use this as a baseline, not a solo countdown.' }
       },
       {
-        id: 'study-system-ready',
+        id: 'foundation-study-reminder',
         phaseId: 'foundation',
-        title: 'Study system ready',
-        status: stats.cards ? 'in-progress' : 'not-started',
-        helper: `${stats.cards} official flashcards`,
-        description: 'Use the built-in official study cards to keep PSTAR and ROC-A material warm.',
-        requirements: ['Review official flashcards', 'Mark unknown cards', 'Use missed questions after practice sessions'],
+        title: 'Study reminders',
+        status: 'not-started',
+        helper: 'Flashcards and Testing stay available',
+        description: 'Use study tools to stay warm, but do not treat studying alone as a completed milestone. Exam milestones complete when the real exam is passed.',
+        requirements: ['Use flashcards to keep weak areas visible', 'Use Testing when preparing for PSTAR or ROC-A', 'Mark exam milestones complete only when they are actually passed'],
+        countsTowardProgress: false,
         action: { label: 'Flashcards', view: 'flashcards' }
+      },
+      {
+        id: 'foundation-phase-signoff',
+        phaseId: 'foundation',
+        title: 'Phase 2 sign-off',
+        status: manualStatus(roadmapProgress['foundation-phase-signoff']),
+        helper: roadmapProgress['foundation-phase-signoff']?.completedDate || 'Instructor/school sign-off',
+        description: 'Record when your instructor or school agrees you are ready to move from Foundation into Pre-Solo work.',
+        requirements: ['Ground school foundation underway', 'Medical plan understood', 'Dual flight instruction started', 'Instructor or school confirms you can focus on Pre-Solo milestones'],
+        manual: true
       }
     ];
 
@@ -191,14 +210,15 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     ];
 
     return nextPhases.map((phase) => {
-      const completeCount = phase.milestones.filter((item) => item.status === 'complete').length;
-      const inProgressCount = phase.milestones.filter((item) => item.status === 'in-progress').length;
+      const progressMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
+      const completeCount = progressMilestones.filter((item) => item.status === 'complete').length;
+      const inProgressCount = progressMilestones.filter((item) => item.status === 'in-progress').length;
       return {
         ...phase,
-        percent: clampPct(((completeCount + inProgressCount * 0.35) / phase.milestones.length) * 100)
+        percent: progressMilestones.length ? clampPct(((completeCount + inProgressCount * 0.35) / progressMilestones.length) * 100) : 0
       };
     });
-  }, [medicalComplete, pstarComplete, pstarLabel, pstarStatus, roadmapProgress, rocaComplete, sppComplete, sppReady, stats.cards, stats.classes]);
+  }, [dualFlightHours, groundSchoolHours, medicalComplete, pstarComplete, pstarLabel, pstarStatus, roadmapProgress, rocaComplete, sppComplete, sppReady]);
 
   const selectedMilestone = phases.flatMap((phase) => phase.milestones).find((milestone) => milestone.id === selectedMilestoneId) ?? phases[0].milestones[1];
   const selectedProgress = roadmapProgress[selectedMilestone.id] ?? {};
@@ -209,7 +229,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     : selectedMilestone.requirements;
   const relatedTools = Array.from(new Map([
     ...(selectedMilestone.action ? [selectedMilestone.action] : []),
-    ...(selectedMilestone.id === 'study-system-ready' || selectedMilestone.id === 'pstar' || selectedMilestone.id === 'roca' ? [{ label: 'Flashcards', view: 'flashcards' as ViewId }] : []),
+    ...(selectedMilestone.id === 'foundation-study-reminder' || selectedMilestone.id === 'pstar' || selectedMilestone.id === 'roca' ? [{ label: 'Flashcards', view: 'flashcards' as ViewId }] : []),
     ...(selectedMilestone.phaseId === 'navigation' || selectedMilestone.id === 'first-solo' ? [{ label: 'Weather', view: 'weather' as ViewId }] : []),
     { label: 'Notes', view: 'notes' as ViewId }
   ].map((tool) => [tool.label, tool])).values());
@@ -221,7 +241,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   const topCards: Array<{ label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
     { label: 'Roadmap', value: `${overallPct}%`, note: 'weighted preview', icon: <MapIcon size={22} /> },
-    { label: 'Ground School', value: `${stats.classes}`, note: 'lesson records', icon: <BookOpen size={22} />, onClick: () => onViewChange('notes') },
+    { label: 'Ground School', value: `${groundSchoolHours}`, note: 'hours logged', icon: <BookOpen size={22} />, onClick: () => onViewChange('notes') },
     { label: 'PSTAR', value: pstarComplete ? 'Ready' : '--', note: pstarLabel, icon: <GraduationCap size={22} />, onClick: () => onViewChange('testing') },
     { label: 'ROC-A', value: rocaComplete ? 'Done' : 'Testing', note: rocaComplete ? 'recorded complete' : 'available now', icon: <RadioTower size={22} />, onClick: () => onViewChange('testing') },
     { label: 'Weather', value: data.users[data.activeUserId]?.homeAirport || 'METAR', note: 'pilot habit tool', icon: <CloudSun size={22} />, onClick: () => onViewChange('weather') }
@@ -253,6 +273,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       <div className="roadmap-board" aria-label="Private pilot phases">
         {phases.map((phase) => {
           const isQuiet = phase.number > 1 && !touchedPhases.includes(phase.id);
+          const progressMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
           return <article className={`roadmap-phase ${phase.accent}${isQuiet ? ' quiet' : ''}`} key={phase.id}>
             <div className="roadmap-phase-head">
               <span className="phase-number">{phase.number}</span>
@@ -263,7 +284,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
             </div>
             <div className="phase-progress">
               <div className="phase-ring" style={{ '--pct': phase.percent } as CSSProperties}><strong>{phase.percent}%</strong></div>
-              <span>{phase.milestones.filter((item) => item.status === 'complete').length} / {phase.milestones.length} complete</span>
+              <span>{progressMilestones.filter((item) => item.status === 'complete').length} / {progressMilestones.length} complete</span>
             </div>
             <div className="roadmap-milestones">
               {phase.milestones.map((milestone) => <button className={selectedMilestone.id === milestone.id ? `roadmap-milestone ${milestone.status} active` : `roadmap-milestone ${milestone.status}`} key={milestone.id} onClick={() => selectMilestone(milestone)}>
@@ -308,6 +329,21 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
         {selectedMilestone.manual ? <div className="roadmap-evidence">
           <h4>Notes</h4>
+          {selectedMilestone.hoursField ? <label>
+            {selectedMilestone.hoursField.label}
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              value={selectedProgress.hours ?? ''}
+              onChange={(event) => {
+                const parsed = Number(event.target.value);
+                updateRoadmap(selectedMilestone.id, { hours: event.target.value === '' || Number.isNaN(parsed) ? undefined : Math.max(0, parsed) }, selectedMilestone.phaseId);
+              }}
+              placeholder="0"
+            />
+            <small>{selectedMilestone.hoursField.helper}</small>
+          </label> : null}
           <label>
             Notes
             <textarea value={selectedProgress.notes ?? ''} onChange={(event) => updateRoadmap(selectedMilestone.id, { notes: event.target.value }, selectedMilestone.phaseId)} placeholder="Add instructor notes, exam details, or what still needs to happen..." />

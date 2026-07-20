@@ -70,6 +70,7 @@ const normalizeRoadmapProgress = (value: unknown): Record<string, RoadmapMilesto
       progress[key] = {
         ...(typeof item.completed === 'boolean' ? { completed: item.completed } : {}),
         ...(typeof item.completedDate === 'string' ? { completedDate: item.completedDate } : {}),
+        ...(typeof item.hours === 'number' && Number.isFinite(item.hours) ? { hours: Math.max(0, item.hours) } : {}),
         ...(typeof item.notes === 'string' ? { notes: item.notes } : {})
       };
     });

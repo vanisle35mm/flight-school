@@ -35,6 +35,7 @@ export type FlightTrainingData = {
 export type RoadmapMilestoneProgress = {
   completed?: boolean;
   completedDate?: string;
+  hours?: number;
   notes?: string;
 };
 export type GroundSchoolUser = {
