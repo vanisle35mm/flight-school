@@ -3340,6 +3340,68 @@ body {
   line-height: 1.25;
 }
 
+.study-reminder-card {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(64, 95, 125, 0.62);
+  border-radius: 8px;
+  background: rgba(3, 12, 21, 0.32);
+}
+
+.study-reminder-copy {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.study-reminder-copy > svg {
+  color: var(--amber);
+  margin-top: 2px;
+}
+
+.study-reminder-copy h4 {
+  margin: 0;
+  color: #f7fbff;
+  font-size: 16px;
+}
+
+.study-reminder-copy p {
+  margin: 6px 0 0;
+  color: #aab8c7;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.study-reminder-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.study-reminder-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid rgba(132, 184, 220, 0.3);
+  border-radius: 8px;
+  color: #dfe8f3;
+  background: rgba(16, 48, 78, 0.72);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.study-reminder-actions button:first-child {
+  border-color: rgba(224, 177, 88, 0.72);
+  color: #071421;
+  background: linear-gradient(180deg, #ffd36f, #e3a51f);
+}
+
 .roadmap-evidence label {
   display: grid;
   gap: 6px;

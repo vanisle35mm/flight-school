@@ -138,11 +138,11 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       {
         id: 'foundation-study-reminder',
         phaseId: 'foundation',
-        title: 'Study reminders',
+        title: 'Start Studying',
         status: 'not-started',
-        helper: 'Flashcards and Testing stay available',
-        description: 'Use study tools to stay warm, but do not treat studying alone as a completed milestone. Exam milestones complete when the real exam is passed.',
-        requirements: ['Use flashcards to keep weak areas visible', 'Use Testing when preparing for PSTAR or ROC-A', 'Mark exam milestones complete only when they are actually passed'],
+        helper: 'Review ground school with flashcards and mock tests',
+        description: 'Start studying the sections you are learning in ground school with flashcards and mock tests.',
+        requirements: ['Review flashcards from ground school topics', 'Try mock tests when you are ready', 'Use missed questions to guide the next study session'],
         countsTowardProgress: false,
         action: { label: 'Flashcards', view: 'flashcards' }
       },
@@ -247,6 +247,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const isGroundSchoolDetail = selectedMilestone.id === 'ground-school-hours';
   const isMedicalDetail = selectedMilestone.id === 'medical';
   const isFlightInstructionDetail = selectedMilestone.id === 'begin-flight-instruction';
+  const isStudyDetail = selectedMilestone.id === 'foundation-study-reminder';
   const selectedFlightLogs = selectedProgress.flightLogs ?? [];
   const selectedFlightHours = selectedFlightLogs.reduce((sum, log) => sum + log.hours, 0) || selectedProgress.hours || 0;
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
@@ -467,6 +468,18 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
               <h4>Hour minimums come later</h4>
               <p>The PPL hour rules include dual, solo, cross-country, and instrument requirements. They depend on training progress, so Foundation only tracks getting an instructor and starting lessons.</p>
             </div>
+          </div>
+        </div> : isStudyDetail ? <div className="study-reminder-card">
+          <div className="study-reminder-copy">
+            <Layers size={24} />
+            <div>
+              <h4>Start studying from ground school</h4>
+              <p>Use flashcards and mock tests to review the sections you are learning in class. This is a reminder, not a completion milestone.</p>
+            </div>
+          </div>
+          <div className="study-reminder-actions">
+            <button onClick={() => onViewChange('flashcards')}><Layers size={16} />Open Flashcards</button>
+            <button onClick={() => onViewChange('testing')}><FileCheck2 size={16} />Open Mock Tests</button>
           </div>
         </div> : <>
           <p>{selectedMilestone.description}</p>
