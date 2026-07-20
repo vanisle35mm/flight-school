@@ -157,16 +157,6 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         requirements: ['Review flashcards from ground school topics', 'Try mock tests when you are ready', 'Use missed questions to guide the next study session'],
         manual: true,
         action: { label: 'Flashcards', view: 'flashcards' }
-      },
-      {
-        id: 'foundation-phase-signoff',
-        phaseId: 'foundation',
-        title: 'Phase 2 sign-off',
-        status: manualStatus(roadmapProgress['foundation-phase-signoff']),
-        helper: roadmapProgress['foundation-phase-signoff']?.completedDate || 'Instructor/school sign-off',
-        description: 'Record when your instructor or school agrees you are ready to move from Foundation into Pre-Solo work.',
-        requirements: ['Ground school foundation underway', 'Medical plan understood', 'Dual flight instruction started', 'Instructor or school confirms you can focus on Pre-Solo milestones'],
-        manual: true
       }
     ];
 
