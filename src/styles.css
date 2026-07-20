@@ -448,6 +448,13 @@ button:disabled {
   font-size: 25px;
 }
 
+.panel-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -706,11 +713,50 @@ label {
   line-height: 1.22;
 }
 
+.lesson-row small {
+  color: rgba(17, 34, 52, 0.72);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.lesson-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #174f36;
+}
+
 .form-grid,
 .setup-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.completion-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, auto) minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(92, 196, 142, 0.38);
+  border-radius: 8px;
+  color: #dff5ea;
+  background: rgba(29, 94, 61, 0.22);
+  font-weight: 900;
+}
+
+.completion-toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+.completion-toggle small {
+  color: #aab8c7;
+  font-size: 12px;
+  font-weight: 750;
 }
 
 .form-grid label,

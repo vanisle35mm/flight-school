@@ -69,7 +69,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const rocaComplete = roadmapProgress.roca?.completed === true;
   const sppComplete = roadmapProgress.spp?.completed === true;
   const sppReady = medicalComplete && pstarComplete;
-  const groundSchoolHours = data.classes.length * 8;
+  const completedClassCount = data.classes.filter((session) => session.completed).length;
+  const groundSchoolHours = completedClassCount * 8;
   const dualFlightHours = roadmapProgress['begin-flight-instruction']?.hours ?? 0;
 
   const updateRoadmap = (milestoneId: string, patch: RoadmapMilestoneProgress, phaseId?: string) => {

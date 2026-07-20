@@ -1,6 +1,14 @@
 export type Flashcard = { question: string; answer: string };
 export type FlashcardReviewStatus = 'known' | 'unknown';
-export type ClassSession = { date: string; topics: string; notes: string; flashcards: Flashcard[] };
+export type ClassSession = {
+  date: string;
+  topics: string;
+  instructor?: string;
+  club?: string;
+  completed?: boolean;
+  notes: string;
+  flashcards: Flashcard[];
+};
 export type Todo = { text: string; done: boolean; dueDate: string };
 export type FlightChecklistItem = { id: string; label: string; checked: boolean };
 export type FlightChecklistTemplateItem = { id: string; text: string };

@@ -93,6 +93,9 @@ const normalizeClasses = (value: unknown): ClassSession[] => Array.isArray(value
     return {
       date: typeof item.date === 'string' ? item.date : '',
       topics: typeof item.topics === 'string' ? item.topics : '',
+      instructor: typeof item.instructor === 'string' ? item.instructor : '',
+      club: typeof item.club === 'string' ? item.club : '',
+      completed: typeof item.completed === 'boolean' ? item.completed : Boolean(typeof item.notes === 'string' && item.notes.trim()),
       notes: typeof item.notes === 'string' ? item.notes : '',
       flashcards
     };
