@@ -67,13 +67,27 @@ const normalizeRoadmapProgress = (value: unknown): Record<string, RoadmapMilesto
     Object.entries(value as Record<string, unknown>).forEach(([key, entry]) => {
       if (typeof key !== 'string' || !entry || typeof entry !== 'object') return;
       const item = entry as Record<string, unknown>;
+      const flightLogs = Array.isArray(item.flightLogs) ? item.flightLogs
+        .map((log, index) => {
+          const parsed = log && typeof log === 'object' ? log as Record<string, unknown> : {};
+          return {
+            id: typeof parsed.id === 'string' && parsed.id ? parsed.id : `flight-log-${index}`,
+            date: typeof parsed.date === 'string' ? parsed.date : '',
+            hours: typeof parsed.hours === 'number' && Number.isFinite(parsed.hours) ? Math.max(0, parsed.hours) : 0,
+            notes: typeof parsed.notes === 'string' ? parsed.notes : ''
+          };
+        })
+        .filter((log) => log.date.trim() || log.hours > 0 || log.notes.trim()) : [];
       progress[key] = {
         ...(typeof item.booked === 'boolean' ? { booked: item.booked } : {}),
         ...(typeof item.bookedDate === 'string' ? { bookedDate: item.bookedDate } : {}),
         ...(typeof item.category === 'string' ? { category: item.category } : {}),
         ...(typeof item.completed === 'boolean' ? { completed: item.completed } : {}),
         ...(typeof item.completedDate === 'string' ? { completedDate: item.completedDate } : {}),
+        ...(flightLogs.length ? { flightLogs } : {}),
         ...(typeof item.hours === 'number' && Number.isFinite(item.hours) ? { hours: Math.max(0, item.hours) } : {}),
+        ...(typeof item.instructorConfirmed === 'boolean' ? { instructorConfirmed: item.instructorConfirmed } : {}),
+        ...(typeof item.instructorName === 'string' ? { instructorName: item.instructorName } : {}),
         ...(typeof item.notes === 'string' ? { notes: item.notes } : {})
       };
     });

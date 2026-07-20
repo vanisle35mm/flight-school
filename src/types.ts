@@ -40,13 +40,22 @@ export type FlightTrainingData = {
     fuelPumpOn: boolean;
   };
 };
+export type RoadmapFlightLog = {
+  id: string;
+  date: string;
+  hours: number;
+  notes: string;
+};
 export type RoadmapMilestoneProgress = {
   booked?: boolean;
   bookedDate?: string;
   category?: string;
   completed?: boolean;
   completedDate?: string;
+  flightLogs?: RoadmapFlightLog[];
   hours?: number;
+  instructorConfirmed?: boolean;
+  instructorName?: string;
   notes?: string;
 };
 export type GroundSchoolUser = {

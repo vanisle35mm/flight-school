@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, HeartPulse, Layers, Map as MapIcon, RadioTower, Save, ShieldCheck, X } from 'lucide-react';
+import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, HeartPulse, Layers, Map as MapIcon, Plus, RadioTower, Save, ShieldCheck, Trash2, X } from 'lucide-react';
 import { getStats } from '../../lib/stats';
 import type { GroundSchoolData, RoadmapMilestoneProgress, ViewId } from '../../types';
 
@@ -47,7 +47,7 @@ const getDayPart = () => {
 };
 
 const milestoneIcon = (status: MilestoneStatus) => status === 'complete' ? <CheckCircle2 size={17} /> : <span className="roadmap-dot" aria-hidden="true" />;
-const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.booked || progress?.bookedDate || progress?.category || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
+const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.booked || progress?.bookedDate || progress?.category || progress?.instructorConfirmed || progress?.instructorName?.trim() || progress?.flightLogs?.length || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
 const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneStatus = 'not-started'): MilestoneStatus => {
   if (progress?.completed) return 'complete';
   if (hasProgressStarted(progress)) return 'in-progress';
@@ -60,6 +60,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const stats = getStats(data);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState('ground-school-hours');
   const [isDetailOpen, setIsDetailOpen] = useState(true);
+  const [flightLogDraft, setFlightLogDraft] = useState({ date: '', hours: '', notes: '' });
   const roadmapProgress = data.roadmapProgress ?? {};
   const touchedPhases = data.roadmapTouchedPhases ?? [];
   const pstarComplete = stats.hasAccuracy && stats.accuracy >= 90;
@@ -73,7 +74,17 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const sppReady = medicalComplete && pstarComplete;
   const completedClassCount = data.classes.filter((session) => session.completed).length;
   const groundSchoolHours = completedClassCount * 8;
-  const dualFlightHours = roadmapProgress['begin-flight-instruction']?.hours ?? 0;
+  const flightInstructionProgress = roadmapProgress['begin-flight-instruction'] ?? {};
+  const flightInstructionLogs = flightInstructionProgress.flightLogs ?? [];
+  const loggedFlightHours = flightInstructionLogs.reduce((sum, log) => sum + log.hours, 0) || flightInstructionProgress.hours || 0;
+  const instructorConfirmed = flightInstructionProgress.instructorConfirmed === true && Boolean(flightInstructionProgress.instructorName?.trim());
+  const flightLessonsStarted = flightInstructionLogs.length > 0 || loggedFlightHours > 0;
+  const flightInstructionStatus: MilestoneStatus = instructorConfirmed && flightLessonsStarted ? 'complete' : hasProgressStarted(flightInstructionProgress) ? 'in-progress' : 'not-started';
+  const flightInstructionHelper = instructorConfirmed && flightLessonsStarted
+    ? `Started with ${flightInstructionProgress.instructorName}`
+    : flightInstructionProgress.instructorName?.trim()
+      ? `${flightInstructionProgress.instructorName} confirmed`
+      : 'Confirm instructor and start lessons';
 
   const updateRoadmap = (milestoneId: string, patch: RoadmapMilestoneProgress, phaseId?: string) => {
     const nextProgress = {
@@ -118,12 +129,11 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: 'begin-flight-instruction',
         phaseId: 'foundation',
         title: 'Begin flight instruction',
-        status: manualStatus(roadmapProgress['begin-flight-instruction']),
-        helper: `${dualFlightHours} dual hours logged`,
-        description: 'Track the start of dual flight instruction. Many students solo around 10-20 dual hours, but instructor readiness matters more than the number.',
-        requirements: ['Begin dual flight lessons with an instructor', 'Record dual flight hours as a baseline', 'Use instructor guidance before treating solo as a target'],
-        manual: true,
-        hoursField: { label: 'Dual flight training hours', helper: 'Use this as a baseline, not a solo countdown.' }
+        status: flightInstructionStatus,
+        helper: flightInstructionHelper,
+        description: 'Foundation only needs to confirm the instructor relationship and that lessons have started. The detailed hour minimums belong later in training.',
+        requirements: ['Confirm your instructor', 'Log your first flight lesson', 'Use the log as a baseline, not a licensing total'],
+        manual: true
       },
       {
         id: 'foundation-study-reminder',
@@ -222,7 +232,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         percent: progressMilestones.length ? clampPct(((completeCount + inProgressCount * 0.35) / progressMilestones.length) * 100) : 0
       };
     });
-  }, [dualFlightHours, groundSchoolHours, medicalComplete, pstarComplete, pstarLabel, pstarStatus, roadmapProgress, rocaComplete, sppComplete, sppReady]);
+  }, [flightInstructionHelper, flightInstructionStatus, groundSchoolHours, medicalComplete, pstarComplete, pstarLabel, pstarStatus, roadmapProgress, rocaComplete, sppComplete, sppReady]);
 
   const selectedMilestone = phases.flatMap((phase) => phase.milestones).find((milestone) => milestone.id === selectedMilestoneId) ?? phases[0].milestones[1];
   const selectedProgress = roadmapProgress[selectedMilestone.id] ?? {};
@@ -236,6 +246,9 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   });
   const isGroundSchoolDetail = selectedMilestone.id === 'ground-school-hours';
   const isMedicalDetail = selectedMilestone.id === 'medical';
+  const isFlightInstructionDetail = selectedMilestone.id === 'begin-flight-instruction';
+  const selectedFlightLogs = selectedProgress.flightLogs ?? [];
+  const selectedFlightHours = selectedFlightLogs.reduce((sum, log) => sum + log.hours, 0) || selectedProgress.hours || 0;
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
   const nextActions = selectedMilestone.status === 'complete'
     ? ['Review the next milestone in this phase', 'Keep notes current for your instructor or school']
@@ -256,6 +269,23 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     setSelectedMilestoneId(milestone.id);
     setIsDetailOpen(true);
     touchPhase(milestone.phaseId);
+  };
+
+  const addFlightLog = () => {
+    const hours = Number(flightLogDraft.hours);
+    if (!flightLogDraft.date && !flightLogDraft.notes.trim() && (!Number.isFinite(hours) || hours <= 0)) return;
+    const nextLog = {
+      id: `flight-log-${Date.now()}`,
+      date: flightLogDraft.date,
+      hours: Number.isFinite(hours) ? Math.max(0, hours) : 0,
+      notes: flightLogDraft.notes.trim()
+    };
+    updateRoadmap('begin-flight-instruction', { flightLogs: [...selectedFlightLogs, nextLog] }, 'foundation');
+    setFlightLogDraft({ date: '', hours: '', notes: '' });
+  };
+
+  const deleteFlightLog = (logId: string) => {
+    updateRoadmap('begin-flight-instruction', { flightLogs: selectedFlightLogs.filter((log) => log.id !== logId) }, 'foundation');
   };
 
   const topCards: Array<{ label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
@@ -380,6 +410,62 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
               <button className={selectedProgress.completed ? 'medical-action-button complete' : 'medical-action-button'} onClick={() => updateRoadmap('medical', selectedProgress.completed ? { completed: false } : { completed: true, completedDate: selectedProgress.completedDate || new Date().toISOString().slice(0, 10), category: selectedProgress.category || 'Category 3' }, 'foundation')}>
                 {selectedProgress.completed ? 'Undo Pass' : 'Mark Passed'}
               </button>
+            </div>
+          </div>
+        </div> : isFlightInstructionDetail ? <div className="flight-instruction-detail-card">
+          <div className={selectedProgress.instructorConfirmed && selectedProgress.instructorName?.trim() ? 'flight-step complete' : 'flight-step'}>
+            <span className="flight-step-icon">{selectedProgress.instructorConfirmed && selectedProgress.instructorName?.trim() ? <CheckCircle2 size={17} /> : '1'}</span>
+            <div className="flight-step-content">
+              <h4>Confirm instructor</h4>
+              <p>Add the instructor you are starting lessons with.</p>
+              <label>
+                Instructor name
+                <input value={selectedProgress.instructorName ?? ''} onChange={(event) => updateRoadmap('begin-flight-instruction', { instructorName: event.target.value }, 'foundation')} placeholder="Instructor name" />
+              </label>
+              <button className={selectedProgress.instructorConfirmed ? 'flight-action-button complete' : 'flight-action-button'} onClick={() => updateRoadmap('begin-flight-instruction', { instructorConfirmed: !selectedProgress.instructorConfirmed }, 'foundation')}>
+                {selectedProgress.instructorConfirmed ? 'Instructor Confirmed' : 'Confirm Instructor'}
+              </button>
+            </div>
+          </div>
+
+          <div className={selectedFlightLogs.length ? 'flight-step complete' : 'flight-step'}>
+            <span className="flight-step-icon">{selectedFlightLogs.length ? <CheckCircle2 size={17} /> : '2'}</span>
+            <div className="flight-step-content">
+              <h4>Basic flight log</h4>
+              <p>Record the first lessons here as a simple baseline.</p>
+              <div className="flight-log-form">
+                <label>
+                  Day
+                  <input type="date" value={flightLogDraft.date} onChange={(event) => setFlightLogDraft({ ...flightLogDraft, date: event.target.value })} />
+                </label>
+                <label>
+                  Hours in the air
+                  <input type="number" min="0" step="0.1" value={flightLogDraft.hours} onChange={(event) => setFlightLogDraft({ ...flightLogDraft, hours: event.target.value })} placeholder="0.0" />
+                </label>
+                <label className="flight-log-notes">
+                  Lesson notes
+                  <textarea value={flightLogDraft.notes} onChange={(event) => setFlightLogDraft({ ...flightLogDraft, notes: event.target.value })} placeholder="Turns, climbs, radio work, circuit intro..." />
+                </label>
+                <button className="flight-action-button" onClick={addFlightLog}><Plus size={16} />Add Lesson</button>
+              </div>
+              {selectedFlightLogs.length ? <div className="flight-log-list">
+                <div className="flight-log-total"><strong>{selectedFlightHours.toFixed(1)}</strong><span>hours logged here</span></div>
+                {selectedFlightLogs.map((log) => <div className="flight-log-row" key={log.id}>
+                  <div>
+                    <strong>{log.date || 'No date'} - {log.hours.toFixed(1)} hr</strong>
+                    <small>{log.notes || 'No lesson notes yet'}</small>
+                  </div>
+                  <button className="icon-button" onClick={() => deleteFlightLog(log.id)} aria-label="Delete flight lesson"><Trash2 size={15} /></button>
+                </div>)}
+              </div> : null}
+            </div>
+          </div>
+
+          <div className="flight-minimum-note">
+            <span className="flight-step-icon">3</span>
+            <div>
+              <h4>Hour minimums come later</h4>
+              <p>The PPL hour rules include dual, solo, cross-country, and instrument requirements. They depend on training progress, so Foundation only tracks getting an instructor and starting lessons.</p>
             </div>
           </div>
         </div> : <>
