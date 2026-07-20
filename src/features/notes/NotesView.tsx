@@ -102,7 +102,7 @@ export const NotesView = ({ data, onDataChange, search }: { data: GroundSchoolDa
           </div>
           <div className="button-row">
             <button onClick={addVfcSchedule}><CalendarPlus size={17} /> VFC</button>
-            <button onClick={addSession}><Plus size={17} /> Add</button>
+            {!data.classes.length && <button onClick={addSession}><Plus size={17} /> Add</button>}
           </div>
         </div>
         <div className="stack-list">
