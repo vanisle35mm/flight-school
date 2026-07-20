@@ -2243,7 +2243,27 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 34px;
+  padding: 0;
+  border: 0;
+  color: #cfd8e3;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
   white-space: nowrap;
+}
+
+.weather-shortcut {
+  cursor: pointer;
+}
+
+.weather-shortcut:hover {
+  color: #f7fbff;
+}
+
+.weather-shortcut:focus-visible {
+  outline: 2px solid rgba(79, 164, 255, 0.86);
+  outline-offset: 4px;
 }
 
 .cloud-sync-pill {

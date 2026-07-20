@@ -31,11 +31,11 @@ const testingViewIds = new Set<ViewId>(['testing', 'pstar', 'roca']);
 const titleForView = (view: ViewId) => testingViewIds.has(view) ? 'Testing' : view === 'tasks' ? 'Action Items' : view === 'import' ? 'Import' : view === 'dashboardEdit' ? 'Edit Dashboard' : view === 'users' ? 'Admin Console' : view === 'account' ? 'Account' : navItems.find((item) => item.id === view)?.label ?? 'Dashboard';
 
 const cloudStatusLabel: Record<CloudSyncStatus, string> = {
-  local: 'Local',
-  loading: 'Cloud loading',
-  online: 'Cloud online',
-  syncing: 'Cloud syncing',
-  error: 'Cloud error'
+  local: 'Local only',
+  loading: 'Loading data',
+  online: 'Saved online',
+  syncing: 'Saving',
+  error: 'Save error'
 };
 const NAV_STATE_KEY = 'flightschool_nav_modules';
 const loadNavModuleState = () => {
@@ -106,7 +106,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
     <header className="topbar cockpit-topbar">
       <div className="topbar-title"><span className="eyebrow">Cockpit Dashboard</span><h1>{titleForView(activeView)}</h1></div>
       {activeView !== 'dashboard' && <label className="search-box cockpit-search"><Search size={17} /><input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search ground school, cards, topics" /></label>}
-      <div className="status-cluster" aria-label="Flight status"><button className="user-pill" onClick={() => canAdmin ? onViewChange('users') : canManageAccount ? onViewChange('account') : onLogout()}><UserRound size={16} />Captain {activeUserName}</button><span className={`cloud-sync-pill ${cloudStatus}`}><CloudSun size={17} />{cloudStatusLabel[cloudStatus]}</span><span className="station-pill">{weatherSummary.station} <ChevronDown size={14} /></span><span className="weather-pill"><CloudSun size={17} />{weatherSummary.temperature}</span><button className="bell-button" aria-label="Notifications"><Bell size={18} /></button></div>
+      <div className="status-cluster" aria-label="Flight status"><button className="user-pill" onClick={() => canAdmin ? onViewChange('users') : canManageAccount ? onViewChange('account') : onLogout()}><UserRound size={16} />Captain {activeUserName}</button><span className={`cloud-sync-pill ${cloudStatus}`}><CloudSun size={17} />{cloudStatusLabel[cloudStatus]}</span><button className="station-pill weather-shortcut" onClick={() => changeView('weather')} aria-label="Open weather page">{weatherSummary.station} <ChevronDown size={14} /></button><button className="weather-pill weather-shortcut" onClick={() => changeView('weather')} aria-label="Open weather page"><CloudSun size={17} />{weatherSummary.temperature}</button><button className="bell-button" aria-label="Notifications"><Bell size={18} /></button></div>
     </header>
     {children}
   </main>

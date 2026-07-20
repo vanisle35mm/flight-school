@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, HeartPulse, Layers, Map as MapIcon, PlaneTakeoff, Plus, RadioTower, Save, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
+import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, Layers, Map as MapIcon, PlaneTakeoff, Plus, RadioTower, Save, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
 import { getStats } from '../../lib/stats';
 import type { GroundSchoolData, RoadmapMilestoneProgress, ViewId } from '../../types';
 
@@ -408,10 +408,6 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         <span className="eyebrow">Private Pilot Journey</span>
         <h2>Good {getDayPart()}, Captain {firstName}.</h2>
         <p>Your path from first ground lesson to Private Pilot Licence.</p>
-      </div>
-      <div className="roadmap-hero-actions">
-        <button onClick={() => onViewChange('testing')}><GraduationCap size={17} />Testing</button>
-        <button onClick={() => selectMilestone(phases[0].milestones[1])}><HeartPulse size={17} />Medical</button>
       </div>
     </section>
 
