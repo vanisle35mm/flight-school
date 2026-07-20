@@ -83,7 +83,7 @@ const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneSt
   return fallback;
 };
 const ROADMAP_STATE_KEY = 'flightschool_roadmap_state';
-const ROADMAP_CELEBRATION_KEY = 'flightschool_roadmap_celebrations_v2';
+const ROADMAP_CELEBRATION_KEY = 'flightschool_roadmap_celebrations_v3';
 const loadRoadmapState = () => {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(ROADMAP_STATE_KEY) ?? '{}') as Partial<{ selectedMilestoneId: string; isDetailOpen: boolean }>;
@@ -400,7 +400,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   useEffect(() => {
     if (!celebration) return;
-    const timeout = window.setTimeout(() => setCelebration(null), celebration.type === 'phase' ? 4300 : 2800);
+    const timeout = window.setTimeout(() => setCelebration(null), celebration.type === 'phase' ? 5200 : 3800);
     return () => window.clearTimeout(timeout);
   }, [celebration]);
 
@@ -434,8 +434,9 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         {celebration.type === 'phase' ? <PlaneTakeoff size={34} /> : <Sparkles size={24} />}
       </span>
       <span className="celebration-copy">
-        <small>{celebration.type === 'phase' ? 'Stage Complete' : 'Milestone Complete'}</small>
+        <small>{celebration.type === 'phase' ? 'Stage Cleared' : 'Good Job, Captain'}</small>
         <strong>{celebration.title}</strong>
+        <em>{celebration.type === 'phase' ? 'Flight phase complete' : 'Logbook stamp earned'}</em>
         <span>{celebration.message}</span>
       </span>
     </div> : null}
