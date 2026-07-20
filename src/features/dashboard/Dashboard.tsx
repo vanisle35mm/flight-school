@@ -47,8 +47,26 @@ const statusLabels: Record<MilestoneStatus, string> = {
   locked: 'Locked',
   'not-started': 'Not Started'
 };
+const milestoneCelebrationLines = [
+  'Nice work. Avionics check green.',
+  'Good job, Captain. That one is logged.',
+  'Checklist item complete. Smooth flying.',
+  'Clean pass. The panel likes what it sees.',
+  'Progress captured. Keep the prop turning.'
+];
+const phaseCelebrationLines = [
+  'Stage complete. Flight path updated.',
+  'Big checkpoint crossed. That deserves a proper radio call.',
+  'Phase complete. You are building real momentum.',
+  'Nice work, Captain. This stage is in the logbook.',
+  'Milestone stack cleared. On to the next heading.'
+];
 
 const clampPct = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+const pickCelebrationLine = (type: RoadmapCelebration['type']) => {
+  const lines = type === 'phase' ? phaseCelebrationLines : milestoneCelebrationLines;
+  return lines[Math.floor(Math.random() * lines.length)];
+};
 const getDayPart = () => {
   const hour = new Date().getHours();
   if (hour < 12) return 'morning';
@@ -346,7 +364,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: `milestone-${milestone.id}-${Date.now()}`,
         type: 'milestone',
         title: milestone.title,
-        message: 'Milestone complete. Avionics check green.'
+        message: pickCelebrationLine('milestone')
       });
     });
 
@@ -357,7 +375,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: `phase-${phase.id}-${Date.now()}`,
         type: 'phase',
         title: `${phase.title} Complete`,
-        message: 'Stage complete. Flight path updated.'
+        message: pickCelebrationLine('phase')
       });
     });
 
@@ -393,6 +411,9 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   return <div className="pilot-roadmap">
     {celebration ? <div className={`roadmap-celebration ${celebration.type}`} role="status" aria-live="polite">
+      <span className="celebration-confetti" aria-hidden="true">
+        {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+      </span>
       <span className="celebration-sweep" aria-hidden="true" />
       <span className="celebration-icon" aria-hidden="true">
         {celebration.type === 'phase' ? <PlaneTakeoff size={34} /> : <Sparkles size={24} />}
