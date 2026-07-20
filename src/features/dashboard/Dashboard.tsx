@@ -236,6 +236,11 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   ].map((tool) => [tool.label, tool])).values());
 
   const selectMilestone = (milestone: RoadmapMilestone) => {
+    if (isDetailOpen && selectedMilestoneId === milestone.id) {
+      setIsDetailOpen(false);
+      touchPhase(milestone.phaseId);
+      return;
+    }
     setSelectedMilestoneId(milestone.id);
     setIsDetailOpen(true);
     touchPhase(milestone.phaseId);
@@ -289,7 +294,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
               <span>{progressMilestones.filter((item) => item.status === 'complete').length} / {progressMilestones.length} complete</span>
             </div>
             <div className="roadmap-milestones">
-              {phase.milestones.map((milestone) => <button className={selectedMilestone.id === milestone.id ? `roadmap-milestone ${milestone.status} active` : `roadmap-milestone ${milestone.status}`} key={milestone.id} onClick={() => selectMilestone(milestone)}>
+              {phase.milestones.map((milestone) => <button className={isDetailOpen && selectedMilestone.id === milestone.id ? `roadmap-milestone ${milestone.status} active` : `roadmap-milestone ${milestone.status}`} key={milestone.id} onClick={() => selectMilestone(milestone)}>
                 <span className="milestone-icon">{milestoneIcon(milestone.status)}</span>
                 <span className="milestone-copy"><strong>{milestone.title}</strong><small>{milestone.helper}</small></span>
                 <span className={`status-chip ${milestone.status}`}>{statusLabels[milestone.status]}</span>
