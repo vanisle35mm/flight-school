@@ -59,6 +59,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const firstName = activeUser?.firstName || 'Pilot';
   const stats = getStats(data);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState('medical');
+  const [isDetailOpen, setIsDetailOpen] = useState(true);
   const roadmapProgress = data.roadmapProgress ?? {};
   const touchedPhases = data.roadmapTouchedPhases ?? [];
   const pstarComplete = stats.hasAccuracy && stats.accuracy >= 90;
@@ -236,6 +237,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   const selectMilestone = (milestone: RoadmapMilestone) => {
     setSelectedMilestoneId(milestone.id);
+    setIsDetailOpen(true);
     touchPhase(milestone.phaseId);
   };
 
@@ -269,7 +271,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       </button>)}
     </section>
 
-    <section className="roadmap-workspace">
+    <section className={isDetailOpen ? 'roadmap-workspace' : 'roadmap-workspace detail-closed'}>
       <div className="roadmap-board" aria-label="Private pilot phases">
         {phases.map((phase) => {
           const isQuiet = phase.number > 1 && !touchedPhases.includes(phase.id);
@@ -297,13 +299,13 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         })}
       </div>
 
-      <aside className="roadmap-detail-drawer" aria-label="Milestone details">
+      {isDetailOpen ? <aside className="roadmap-detail-drawer" aria-label="Milestone details">
         <div className="roadmap-detail-head">
           <div>
             <span className="eyebrow">{selectedPhase.title}</span>
             <h3>{selectedMilestone.title}</h3>
           </div>
-          <button className="icon-button" onClick={() => setSelectedMilestoneId('medical')} aria-label="Reset selected milestone"><X size={17} /></button>
+          <button className="icon-button" onClick={() => setIsDetailOpen(false)} aria-label="Close milestone details"><X size={17} /></button>
         </div>
         <span className={`status-chip ${selectedMilestone.status}`}>{statusLabels[selectedMilestone.status]}</span>
         <p>{selectedMilestone.description}</p>
@@ -362,7 +364,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
           <h4>Automatic Milestone</h4>
           <p>This milestone updates from existing app activity.</p>
         </div>}
-      </aside>
+      </aside> : null}
     </section>
   </div>;
 };

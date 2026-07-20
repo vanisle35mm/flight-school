@@ -2566,6 +2566,14 @@ body {
   gap: 12px;
 }
 
+.roadmap-workspace.detail-closed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.roadmap-workspace.detail-closed .roadmap-board {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .roadmap-phase {
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -3981,6 +3989,10 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .roadmap-workspace.detail-closed .roadmap-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .roadmap-workspace {
     grid-template-columns: 1fr;
   }
@@ -4077,6 +4089,10 @@ body {
   .roadmap-board {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .roadmap-workspace.detail-closed .roadmap-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -4109,6 +4125,10 @@ body {
   .roadmap-summary,
   .roadmap-workspace,
   .roadmap-board {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-workspace.detail-closed .roadmap-board {
     grid-template-columns: 1fr;
   }
 
