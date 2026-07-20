@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { BookOpen, CheckCircle2, CloudSun, FileCheck2, GraduationCap, HeartPulse, Layers, Map as MapIcon, Plus, RadioTower, Save, ShieldCheck, Trash2, X } from 'lucide-react';
 import { getStats } from '../../lib/stats';
@@ -53,13 +53,25 @@ const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneSt
   if (hasProgressStarted(progress)) return 'in-progress';
   return fallback;
 };
+const ROADMAP_STATE_KEY = 'flightschool_roadmap_state';
+const loadRoadmapState = () => {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(ROADMAP_STATE_KEY) ?? '{}') as Partial<{ selectedMilestoneId: string; isDetailOpen: boolean }>;
+    return {
+      selectedMilestoneId: typeof parsed.selectedMilestoneId === 'string' ? parsed.selectedMilestoneId : 'ground-school-hours',
+      isDetailOpen: typeof parsed.isDetailOpen === 'boolean' ? parsed.isDetailOpen : true
+    };
+  } catch {
+    return { selectedMilestoneId: 'ground-school-hours', isDetailOpen: true };
+  }
+};
 
 export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onViewChange: (view: ViewId) => void }) => {
   const activeUser = data.users[data.activeUserId];
   const firstName = activeUser?.firstName || 'Pilot';
   const stats = getStats(data);
-  const [selectedMilestoneId, setSelectedMilestoneId] = useState('ground-school-hours');
-  const [isDetailOpen, setIsDetailOpen] = useState(true);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState(() => loadRoadmapState().selectedMilestoneId);
+  const [isDetailOpen, setIsDetailOpen] = useState(() => loadRoadmapState().isDetailOpen);
   const [flightLogDraft, setFlightLogDraft] = useState({ date: '', hours: '', notes: '' });
   const roadmapProgress = data.roadmapProgress ?? {};
   const touchedPhases = data.roadmapTouchedPhases ?? [];
@@ -288,6 +300,10 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const deleteFlightLog = (logId: string) => {
     updateRoadmap('begin-flight-instruction', { flightLogs: selectedFlightLogs.filter((log) => log.id !== logId) }, 'foundation');
   };
+
+  useEffect(() => {
+    window.localStorage.setItem(ROADMAP_STATE_KEY, JSON.stringify({ selectedMilestoneId: selectedMilestone.id, isDetailOpen }));
+  }, [isDetailOpen, selectedMilestone.id]);
 
   const topCards: Array<{ label: string; value: string; note: string; icon: ReactNode; onClick?: () => void }> = [
     { label: 'Roadmap', value: `${overallPct}%`, note: 'weighted preview', icon: <MapIcon size={22} /> },

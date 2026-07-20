@@ -23,6 +23,20 @@ import type { GroundSchoolData, ViewId } from './types';
 
 const FLIGHT_TRAINING_ENABLED = false;
 const flightTrainingViews: ViewId[] = ['flightChecklist', 'flightPanel', 'outsideChecks', 'flightSchedule'];
+const APP_VIEW_KEY = 'flightschool_active_view';
+const allViews: ViewId[] = ['dashboard', 'notes', 'flashcards', 'tasks', 'testing', 'pstar', 'roca', 'weather', 'flightChecklist', 'flightPanel', 'outsideChecks', 'flightSchedule', 'import', 'dashboardEdit', 'users', 'account'];
+
+const isViewId = (value: unknown): value is ViewId =>
+  typeof value === 'string' && allViews.includes(value as ViewId);
+
+const loadStoredView = (): ViewId => {
+  try {
+    const stored = window.localStorage.getItem(APP_VIEW_KEY);
+    return isViewId(stored) ? stored : 'dashboard';
+  } catch {
+    return 'dashboard';
+  }
+};
 
 const getDataWeight = (data: GroundSchoolData) => {
   const users = Object.values(data.users);
@@ -35,7 +49,7 @@ const getDataWeight = (data: GroundSchoolData) => {
 };
 
 export const App = () => {
-  const [activeView, setActiveView] = useState<ViewId>('dashboard');
+  const [activeView, setActiveView] = useState<ViewId>(() => loadStoredView());
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [search, setSearch] = useState('');
   const [data, setData] = useState<GroundSchoolData>(() => loadGroundSchoolData());
@@ -47,6 +61,10 @@ export const App = () => {
   const [passwordRecoveryMode, setPasswordRecoveryMode] = useState(false);
   const lastSavedCloudPayload = useRef('');
   const authenticatedHomeAirport = secureAuthUserId ? data.users[secureAuthUserId]?.homeAirport : undefined;
+
+  useEffect(() => {
+    window.localStorage.setItem(APP_VIEW_KEY, activeView);
+  }, [activeView]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -188,6 +206,12 @@ export const App = () => {
     && (activeUser?.requiresPasswordReset === true || passwordRecoveryMode);
   const adminViews: ViewId[] = ['users', 'import'];
   const isFlightTrainingView = flightTrainingViews.includes(activeView);
+  useEffect(() => {
+    if (adminViews.includes(activeView) && !isAdmin) setActiveView('dashboard');
+    if (activeView === 'account' && !canManageAccount) setActiveView('dashboard');
+    if (!FLIGHT_TRAINING_ENABLED && flightTrainingViews.includes(activeView)) setActiveView('dashboard');
+  }, [activeView, canManageAccount, isAdmin]);
+
   const changeView = (view: ViewId) => {
     if (adminViews.includes(view) && !isAdmin) {
       setActiveView('dashboard');
