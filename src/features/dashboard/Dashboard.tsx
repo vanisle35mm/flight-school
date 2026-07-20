@@ -82,7 +82,7 @@ const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneSt
   return fallback;
 };
 const ROADMAP_STATE_KEY = 'flightschool_roadmap_state';
-const ROADMAP_CELEBRATION_KEY = 'flightschool_roadmap_celebrations';
+const ROADMAP_CELEBRATION_KEY = 'flightschool_roadmap_celebrations_v2';
 const loadRoadmapState = () => {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(ROADMAP_STATE_KEY) ?? '{}') as Partial<{ selectedMilestoneId: string; isDetailOpen: boolean }>;
@@ -353,8 +353,10 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   useEffect(() => {
     const celebrationStore = loadRoadmapCelebrations(data.activeUserId);
-    const seenMilestones = new Set(celebrationStore.milestones);
-    const seenPhases = new Set(celebrationStore.phases);
+    const completeMilestoneIds = new Set(phases.flatMap((phase) => phase.milestones).filter((milestone) => milestone.status === 'complete').map((milestone) => milestone.id));
+    const completePhaseIds = new Set(phases.filter(isPhaseComplete).map((phase) => phase.id));
+    const seenMilestones = new Set(celebrationStore.milestones.filter((id) => completeMilestoneIds.has(id)));
+    const seenPhases = new Set(celebrationStore.phases.filter((id) => completePhaseIds.has(id)));
     const pending: RoadmapCelebration[] = [];
 
     phases.flatMap((phase) => phase.milestones).forEach((milestone) => {
