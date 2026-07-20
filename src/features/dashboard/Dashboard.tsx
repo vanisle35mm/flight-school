@@ -139,11 +139,11 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: 'foundation-study-reminder',
         phaseId: 'foundation',
         title: 'Start Studying',
-        status: 'not-started',
-        helper: 'Review ground school with flashcards and mock tests',
+        status: manualStatus(roadmapProgress['foundation-study-reminder']),
+        helper: roadmapProgress['foundation-study-reminder']?.completed ? 'Started studying' : 'Review ground school with flashcards and mock tests',
         description: 'Start studying the sections you are learning in ground school with flashcards and mock tests.',
         requirements: ['Review flashcards from ground school topics', 'Try mock tests when you are ready', 'Use missed questions to guide the next study session'],
-        countsTowardProgress: false,
+        manual: true,
         action: { label: 'Flashcards', view: 'flashcards' }
       },
       {
@@ -474,9 +474,12 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
             <Layers size={24} />
             <div>
               <h4>Start studying from ground school</h4>
-              <p>Use flashcards and mock tests to review the sections you are learning in class. This is a reminder, not a completion milestone.</p>
+              <p>Use flashcards and mock tests to review the sections you are learning in class. Check this off once you have started studying.</p>
             </div>
           </div>
+          <button className={selectedProgress.completed ? 'study-started-button complete' : 'study-started-button'} onClick={() => updateRoadmap('foundation-study-reminder', { completed: !selectedProgress.completed, completedDate: selectedProgress.completedDate || new Date().toISOString().slice(0, 10) }, 'foundation')}>
+            <CheckCircle2 size={17} />{selectedProgress.completed ? 'Started Studying' : 'Mark Started Studying'}
+          </button>
           <div className="study-reminder-actions">
             <button onClick={() => onViewChange('flashcards')}><Layers size={16} />Open Flashcards</button>
             <button onClick={() => onViewChange('testing')}><FileCheck2 size={16} />Open Mock Tests</button>

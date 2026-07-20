@@ -3381,6 +3381,25 @@ body {
   gap: 8px;
 }
 
+.study-started-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid rgba(224, 177, 88, 0.72);
+  border-radius: 8px;
+  color: #071421;
+  background: linear-gradient(180deg, #ffd36f, #e3a51f);
+  font-weight: 950;
+}
+
+.study-started-button.complete {
+  border-color: rgba(92, 196, 142, 0.55);
+  color: #d8f9e6;
+  background: rgba(29, 94, 61, 0.4);
+}
+
 .study-reminder-actions button {
   display: inline-flex;
   align-items: center;
