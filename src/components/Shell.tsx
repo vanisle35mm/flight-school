@@ -20,10 +20,11 @@ const flightTrainingNavItems: Array<{ id: ViewId; label: string; icon: ReactNode
   { id: 'outsideChecks', label: 'Outside Checks', icon: <PlaneTakeoff size={18} /> },
   { id: 'flightSchedule', label: 'Flight Schedule', icon: <CalendarPlus size={18} /> }
 ];
+const FLIGHT_TRAINING_NAV_ENABLED = false;
 
 const navItems: Array<{ id: ViewId; label: string; icon: ReactNode }> = [
   ...groundSchoolNavItems,
-  ...flightTrainingNavItems
+  ...(FLIGHT_TRAINING_NAV_ENABLED ? flightTrainingNavItems : [])
 ];
 const groundSchoolViewIds = new Set<ViewId>(groundSchoolNavItems.map((item) => item.id));
 const flightTrainingViewIds = new Set<ViewId>(flightTrainingNavItems.map((item) => item.id));
@@ -69,7 +70,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
       return;
     }
     if (groundSchoolViewIds.has(activeView)) setGroundSchoolOpen(true);
-    if (flightTrainingViewIds.has(activeView)) setFlightTrainingOpen(true);
+    if (FLIGHT_TRAINING_NAV_ENABLED && flightTrainingViewIds.has(activeView)) setFlightTrainingOpen(true);
   }, [activeView]);
   useEffect(() => {
     window.localStorage.setItem(NAV_STATE_KEY, JSON.stringify({ groundSchoolOpen, flightTrainingOpen }));
@@ -84,8 +85,10 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
     <nav className="nav-list" aria-label="Primary">
       <button className="nav-module-toggle" onClick={() => setGroundSchoolOpen((open) => !open)} aria-expanded={groundSchoolOpen} aria-controls="ground-school-navigation"><span>Ground School</span><ChevronDown className={groundSchoolOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
       {groundSchoolOpen && <div className="nav-module-group" id="ground-school-navigation">{groundSchoolNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}
-      <button className="nav-module-toggle" onClick={() => setFlightTrainingOpen((open) => !open)} aria-expanded={flightTrainingOpen} aria-controls="flight-training-navigation"><span>Flight Training</span><ChevronDown className={flightTrainingOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
-      {flightTrainingOpen && <div className="nav-module-group" id="flight-training-navigation">{flightTrainingNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}
+      {FLIGHT_TRAINING_NAV_ENABLED && <>
+        <button className="nav-module-toggle" onClick={() => setFlightTrainingOpen((open) => !open)} aria-expanded={flightTrainingOpen} aria-controls="flight-training-navigation"><span>Flight Training</span><ChevronDown className={flightTrainingOpen ? 'menu-chevron open' : 'menu-chevron'} size={15} /></button>
+        {flightTrainingOpen && <div className="nav-module-group" id="flight-training-navigation">{flightTrainingNavItems.map((item) => <button className={item.id === activeView ? 'nav-item active' : 'nav-item'} key={item.id} onClick={() => changeView(item.id)}>{item.icon}<span>{item.label}</span></button>)}</div>}
+      </>}
     </nav>
     <div className="sidebar-footer">
       {canAdmin && <div className="admin-nav-group">

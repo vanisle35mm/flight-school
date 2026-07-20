@@ -22,6 +22,9 @@ import { supabase } from './lib/supabaseClient';
 import { activateUserData, createEmptyGroundSchoolData, loadGroundSchoolData, saveGroundSchoolData, STORAGE_KEY } from './lib/storage';
 import type { GroundSchoolData, ViewId } from './types';
 
+const FLIGHT_TRAINING_ENABLED = false;
+const flightTrainingViews: ViewId[] = ['flightChecklist', 'flightPanel', 'outsideChecks', 'flightSchedule'];
+
 const getDataWeight = (data: GroundSchoolData) => {
   const users = Object.values(data.users);
   const classCount = users.reduce((sum, user) => sum + user.classes.length, 0);
@@ -185,7 +188,18 @@ export const App = () => {
     && activeUser?.id === secureAuthUserId
     && (activeUser?.requiresPasswordReset === true || passwordRecoveryMode);
   const adminViews: ViewId[] = ['users', 'import'];
-  const changeView = (view: ViewId) => setActiveView(adminViews.includes(view) && !isAdmin ? 'dashboard' : view);
+  const isFlightTrainingView = flightTrainingViews.includes(activeView);
+  const changeView = (view: ViewId) => {
+    if (adminViews.includes(view) && !isAdmin) {
+      setActiveView('dashboard');
+      return;
+    }
+    if (!FLIGHT_TRAINING_ENABLED && flightTrainingViews.includes(view)) {
+      setActiveView('dashboard');
+      return;
+    }
+    setActiveView(view);
+  };
   if (!isLoggedIn) return <LoginView data={data} onDataChange={setData} onLogin={() => setIsLoggedIn(true)} onSecureLogin={finishSecureLogin} />;
   if (needsPasswordSetup) return <PasswordSetupView firstName={activeUser?.firstName ?? 'Pilot'} recoveryMode={passwordRecoveryMode} onLogout={logout} onComplete={() => {
     setPasswordRecoveryMode(false);
@@ -211,17 +225,17 @@ export const App = () => {
     setActiveView('dashboard');
   }} />;
   return <Shell activeView={activeView} onViewChange={changeView} search={search} onSearchChange={setSearch} activeUserName={activeUser?.firstName ?? 'Pilot'} canAdmin={isAdmin} canManageAccount={canManageAccount} cloudStatus={cloudStatus} onLogout={logout}>
-    {activeView === 'dashboard' && <Dashboard data={data} onDataChange={setData} onViewChange={setActiveView} />}
+    {(activeView === 'dashboard' || (!FLIGHT_TRAINING_ENABLED && isFlightTrainingView)) && <Dashboard data={data} onDataChange={setData} onViewChange={changeView} />}
     {activeView === 'notes' && <NotesView data={data} onDataChange={setData} search={search} />}
     {activeView === 'flashcards' && <FlashcardsView data={data} onDataChange={setData} search={search} />}
     {activeView === 'tasks' && <TasksView data={data} onDataChange={setData} />}
     {activeView === 'pstar' && <PstarView data={data} onDataChange={setData} />}
     {activeView === 'roca' && <RocaView data={data} onDataChange={setData} />}
     {activeView === 'weather' && <WeatherPanel />}
-    {activeView === 'flightChecklist' && <FlightTrainingView data={data} onDataChange={setData} page="checklist" />}
-    {activeView === 'flightPanel' && <FlightTrainingView data={data} onDataChange={setData} page="panel" />}
-    {activeView === 'outsideChecks' && <FlightTrainingView data={data} onDataChange={setData} page="outside" />}
-    {activeView === 'flightSchedule' && <FlightTrainingView data={data} onDataChange={setData} page="schedule" />}
+    {FLIGHT_TRAINING_ENABLED && activeView === 'flightChecklist' && <FlightTrainingView data={data} onDataChange={setData} page="checklist" />}
+    {FLIGHT_TRAINING_ENABLED && activeView === 'flightPanel' && <FlightTrainingView data={data} onDataChange={setData} page="panel" />}
+    {FLIGHT_TRAINING_ENABLED && activeView === 'outsideChecks' && <FlightTrainingView data={data} onDataChange={setData} page="outside" />}
+    {FLIGHT_TRAINING_ENABLED && activeView === 'flightSchedule' && <FlightTrainingView data={data} onDataChange={setData} page="schedule" />}
     {activeView === 'account' && canManageAccount && <AccountView firstName={activeUser?.firstName ?? 'Pilot'} />}
     {activeView === 'import' && isAdmin && <LegacyImportView data={data} onDataChange={setData} onViewChange={setActiveView} />}
     {activeView === 'dashboardEdit' && <DashboardEditView data={data} onDataChange={setData} />}
