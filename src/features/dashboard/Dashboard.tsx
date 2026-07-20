@@ -225,6 +225,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const selectedMilestone = phases.flatMap((phase) => phase.milestones).find((milestone) => milestone.id === selectedMilestoneId) ?? phases[0].milestones[1];
   const selectedProgress = roadmapProgress[selectedMilestone.id] ?? {};
   const selectedPhase = phases.find((phase) => phase.id === selectedMilestone.phaseId) ?? phases[0];
+  const visiblePhases = isDetailOpen ? phases.filter((phase) => phase.id === selectedPhase.id) : phases;
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
   const nextActions = selectedMilestone.status === 'complete'
     ? ['Review the next milestone in this phase', 'Keep notes current for your instructor or school']
@@ -279,7 +280,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
     <section className={isDetailOpen ? 'roadmap-workspace' : 'roadmap-workspace detail-closed'}>
       <div className="roadmap-board" aria-label="Private pilot phases">
-        {phases.map((phase) => {
+        {visiblePhases.map((phase) => {
           const isQuiet = phase.number > 1 && !touchedPhases.includes(phase.id);
           const progressMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
           return <article className={`roadmap-phase ${phase.accent}${isQuiet ? ' quiet' : ''}`} key={phase.id}>
