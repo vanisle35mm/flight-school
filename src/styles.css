@@ -2675,32 +2675,44 @@ body {
   position: absolute;
   top: -8%;
   left: 0;
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-  background: #ffd36f;
-  box-shadow: 0 0 10px rgba(245, 184, 61, 0.38);
-  animation: reward-confetti-fall 2.7s ease-in forwards;
-}
-
-.celebration-confetti i:nth-child(2n) {
-  width: 10px;
-  height: 18px;
-  border-radius: 999px;
-  background: #8fc2e4;
-  box-shadow: 0 0 12px rgba(64, 153, 229, 0.42);
-}
-
-.celebration-confetti i:nth-child(3n) {
-  width: 12px;
-  height: 12px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
-  background: #6bd191;
+  background: radial-gradient(circle, #fff8f2 0 18%, #ffd36f 19% 42%, rgba(255, 211, 111, 0) 43%);
+  filter: drop-shadow(0 0 8px rgba(245, 184, 61, 0.45));
+  animation: reward-propeller-fall 2.9s ease-in forwards;
 }
 
-.celebration-confetti i:nth-child(4n) {
-  border-radius: 2px;
-  background: #e96773;
+.celebration-confetti i::before,
+.celebration-confetti i::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 248, 242, 0), #ffd36f 18%, #e3a51f 50%, #ffd36f 82%, rgba(255, 248, 242, 0));
+  transform: translate(-50%, -50%);
+}
+
+.celebration-confetti i::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.celebration-confetti i:nth-child(2n)::before,
+.celebration-confetti i:nth-child(2n)::after {
+  background: linear-gradient(90deg, rgba(255, 248, 242, 0), #8fc2e4 18%, #4099e5 50%, #8fc2e4 82%, rgba(255, 248, 242, 0));
+}
+
+.celebration-confetti i:nth-child(3n)::before,
+.celebration-confetti i:nth-child(3n)::after {
+  background: linear-gradient(90deg, rgba(255, 248, 242, 0), #77bd91 18%, #2f8f5a 50%, #77bd91 82%, rgba(255, 248, 242, 0));
+}
+
+.celebration-confetti i:nth-child(4n)::before,
+.celebration-confetti i:nth-child(4n)::after {
+  background: linear-gradient(90deg, rgba(255, 248, 242, 0), #e96773 18%, #b84138 50%, #e96773 82%, rgba(255, 248, 242, 0));
 }
 
 .celebration-confetti i:nth-child(1) { left: 4%; animation-delay: 0s; }
@@ -2870,10 +2882,10 @@ body {
   }
 }
 
-@keyframes reward-confetti-fall {
+@keyframes reward-propeller-fall {
   0% {
     opacity: 0;
-    transform: translateY(0) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.65);
   }
 
   14%,
@@ -2883,7 +2895,7 @@ body {
 
   100% {
     opacity: 0;
-    transform: translateY(112vh) rotate(260deg);
+    transform: translate3d(24px, 112vh, 0) rotate(1080deg) scale(1);
   }
 }
 
