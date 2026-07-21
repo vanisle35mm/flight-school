@@ -110,7 +110,7 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
             <h2>Practice Test</h2>
           </div>
         </div>
-        <p className="status">Simulated PSTAR questions based on Transport Canada TP 11919. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
+        <p className="status">Official-source PSTAR bank from Transport Canada TP 11919. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
         <div className="setup-grid">
           <label className="field-card">
             Section

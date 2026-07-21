@@ -17,8 +17,8 @@ type StudyCard = {
 
 const modes: Array<{ id: StudyMode; label: string; hint: string }> = [
   { id: 'all', label: 'All Cards', hint: 'Everything' },
-  { id: 'tc', label: 'PSTAR', hint: 'Built-in' },
-  { id: 'roca', label: 'ROC-A', hint: 'Built-in' },
+  { id: 'tc', label: 'PSTAR', hint: 'TP 11919' },
+  { id: 'roca', label: 'ROC-A', hint: 'RIC-21' },
   { id: 'missed', label: 'Missed Cards', hint: 'Weak areas' },
   { id: 'unknown', label: 'Needs Review', hint: 'Marked hard' },
   { id: 'known', label: 'Mastered', hint: 'Marked known' }
@@ -144,7 +144,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
         </div>
         <button onClick={shuffleCurrentView}><Shuffle size={17} />Shuffle</button>
       </div>
-      <p className="status">These cards are built from the same PSTAR and ROC-A question banks used on the Testing page, so every card behaves like a short multiple-choice practice question.</p>
+      <p className="status">These cards are built from the same question banks used on the Testing page. PSTAR uses the Transport Canada TP 11919 bank; ROC-A is simulated from the official RIC-21 study guide.</p>
 
       <div className="deck-summary">
         <div><strong>{pstarCount}</strong><span>PSTAR cards</span></div>
