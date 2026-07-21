@@ -1,6 +1,6 @@
 import { CloudSun, Compass, Droplets, ExternalLink, Eye, Gauge, Layers3, MapPin, Maximize2, Navigation, PlaneLanding, RefreshCw, Search, Wind } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
-import { getRunwayWind } from './runways';
+import { getRunwayWind, type RunwayWind } from './runways';
 import { getDashboardWeatherSnapshot, getStoredWeatherSummary, saveWeatherSummary, WEATHER_STATION, type WeatherSnapshot } from './weather';
 
 type WeatherPanelProps = {
@@ -9,6 +9,64 @@ type WeatherPanelProps = {
 };
 
 const getCategoryClass = (category: string) => `flight-category flight-category-${category.toLowerCase().replace(/[^a-z]/g, '') || 'na'}`;
+
+const runwayPoint = (heading: number, distance: number) => {
+  const radians = heading * Math.PI / 180;
+  return {
+    x: 210 + Math.sin(radians) * distance,
+    y: 135 - Math.cos(radians) * distance
+  };
+};
+
+const RunwayLayoutMap = ({ runways, bestRunway, windDirection, windSpeed }: { runways: RunwayWind[]; bestRunway?: RunwayWind; windDirection: number | null; windSpeed: string }) => {
+  const maxLength = Math.max(...runways.map((runway) => runway.lengthFt), 1);
+  const windStart = windDirection === null ? null : runwayPoint(windDirection, 170);
+  const windEnd = windDirection === null ? null : runwayPoint(windDirection, 98);
+  const windLabelAnchor = windStart && windStart.x > 210 ? 'end' : 'start';
+
+  return <div className="runway-layout-briefing">
+    <div className="runway-airport-map">
+      <svg viewBox="0 0 420 270" role="img" aria-label="Airport runway layout with wind-favoured runway end highlighted">
+        <defs>
+          <marker id="runway-layout-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" />
+          </marker>
+        </defs>
+        <g className="runway-map-grid" aria-hidden="true">
+          {[60, 120, 180, 240, 300, 360].map((x) => <line key={`v-${x}`} x1={x} y1="18" x2={x} y2="252" />)}
+          {[45, 90, 135, 180, 225].map((y) => <line key={`h-${y}`} x1="24" y1={y} x2="396" y2={y} />)}
+        </g>
+        {runways.map((runway) => {
+          const halfLength = 48 + (runway.lengthFt / maxLength) * 104;
+          const start = runwayPoint(runway.ends[0].heading, halfLength);
+          const end = runwayPoint(runway.ends[1].heading, halfLength);
+          const firstLabel = runwayPoint(runway.ends[0].heading, halfLength + 19);
+          const secondLabel = runwayPoint(runway.ends[1].heading, halfLength + 19);
+          const preferred = runway.preferredEnd ? runway.ends.find((candidate) => candidate.id === runway.preferredEnd) : null;
+          const preferredPoint = preferred ? runwayPoint(preferred.heading, halfLength - 10) : null;
+          const isBest = bestRunway?.id === runway.id;
+          return <g className={isBest ? 'runway-map-pair best' : 'runway-map-pair'} key={runway.id}>
+            <line className="runway-map-outline" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />
+            <line className={runway.primary ? 'runway-map-strip primary' : 'runway-map-strip'} x1={start.x} y1={start.y} x2={end.x} y2={end.y} />
+            <line className="runway-map-centerline" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />
+            <text x={firstLabel.x} y={firstLabel.y}>{runway.ends[0].id}</text>
+            <text x={secondLabel.x} y={secondLabel.y}>{runway.ends[1].id}</text>
+            {preferredPoint && <circle className={isBest ? 'runway-map-end best' : 'runway-map-end'} cx={preferredPoint.x} cy={preferredPoint.y} r={isBest ? 13 : 9} />}
+          </g>;
+        })}
+        {windStart && windEnd && <g className="runway-map-wind">
+          <line x1={windStart.x} y1={windStart.y} x2={windEnd.x} y2={windEnd.y} markerEnd="url(#runway-layout-arrow)" />
+          <text x={windStart.x} y={Math.max(22, windStart.y - 10)} textAnchor={windLabelAnchor}>{windDirection === null ? 'VRB' : String(Math.round(windDirection)).padStart(3, '0')} at {windSpeed}</text>
+        </g>}
+      </svg>
+    </div>
+    <div className="runway-layout-summary">
+      <span>Schematic airport layout</span>
+      <strong>{bestRunway?.preferredEnd ? `RWY ${bestRunway.preferredEnd}` : 'Runway unavailable'}</strong>
+      <small>{bestRunway?.preferredEnd ? `Best wind alignment on runway ${bestRunway.id}` : 'Runway wind estimate needs wind and runway data'}</small>
+    </div>
+  </div>;
+};
 
 export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelProps) => {
   const initialStation = getStoredWeatherSummary().station;
@@ -133,6 +191,7 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
         <div><PlaneLanding size={20} /><h3>Runway wind check</h3></div>
         <span>{snapshot.windDirection === null ? 'Variable wind' : `${String(Math.round(snapshot.windDirection)).padStart(3, '0')} deg at ${snapshot.windSpeed}`}</span>
       </div>
+      <RunwayLayoutMap runways={runwayWinds} bestRunway={bestRunway} windDirection={snapshot.windDirection} windSpeed={snapshot.windSpeed} />
       <div className="runway-list">
         {runwayWinds.map((runway) => {
           const isBest = bestRunway?.id === runway.id;
