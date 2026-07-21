@@ -12,6 +12,7 @@ type StudyCard = {
   section: string;
   question: string;
   answer: string;
+  options: string[];
 };
 
 const modes: Array<{ id: StudyMode; label: string; hint: string }> = [
@@ -49,7 +50,8 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
       label: question.id,
       section: question.section,
       question: question.q,
-      answer: question.correct
+      answer: question.correct,
+      options: question.options
     }));
     const rocaCards = ROCA_QUESTIONS.map((question) => ({
       key: `roca:${question.id}`,
@@ -57,7 +59,8 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
       label: question.id,
       section: question.section,
       question: question.q,
-      answer: question.correct
+      answer: question.correct,
+      options: question.options
     }));
     return [...pstarCards, ...rocaCards];
   }, []);
@@ -156,7 +159,13 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
           <div className="flashcard-big">
             <span>{card.label} {card.section}</span>
             <strong>{card.question}</strong>
-            {showAnswer ? <p>{card.answer}</p> : <button onClick={() => setShowAnswer(true)}>Show Answer</button>}
+            <div className="flashcard-options" aria-label="Answer options">
+              {card.options.map((option, index) => <div className={showAnswer && option === card.answer ? 'flashcard-option correct' : 'flashcard-option'} key={`${card.key}-${option}`}>
+                <span>{String.fromCharCode(65 + index)}</span>
+                <p>{option}</p>
+              </div>)}
+            </div>
+            {showAnswer ? <p className="flashcard-answer"><span>Correct selection</span>{card.answer}</p> : <button onClick={() => setShowAnswer(true)}>Show Answer</button>}
           </div>
           <div className="flash-actions flash-study-actions">
             <button onClick={() => { setCardIndex(Math.max(0, activeCardIndex - 1)); setShowAnswer(false); }}>Prev</button>
