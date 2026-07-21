@@ -110,7 +110,7 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
             <h2>ROC-A Practice</h2>
           </div>
         </div>
-        <p className="status">Practice questions written from the official RIC-21 study guide. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
+        <p className="status">Simulated ROC-A questions written from the official RIC-21 study guide. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
         <div className="setup-grid">
           <label className="field-card">
             Section

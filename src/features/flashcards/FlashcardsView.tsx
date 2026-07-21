@@ -31,6 +31,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
   const [mode, setMode] = useState<StudyMode>('all');
   const [cardIndex, setCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState('');
   const [section, setSection] = useState('all');
   const [shuffleToken, setShuffleToken] = useState(0);
   const [isShuffled, setIsShuffled] = useState(false);
@@ -97,12 +98,14 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
     setSection('all');
     setCardIndex(0);
     setShowAnswer(false);
+    setSelectedAnswer('');
   };
 
   const setCardStatus = (status: FlashcardReviewStatus) => {
     if (!card) return;
     onDataChange({ ...data, flashcardProgress: { ...data.flashcardProgress, [card.key]: status } });
     setShowAnswer(false);
+    setSelectedAnswer('');
     setCardIndex(Math.min(filteredCards.length - 1, activeCardIndex + 1));
   };
 
@@ -118,17 +121,30 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
     setShuffleToken((value) => value + 1);
     setCardIndex(0);
     setShowAnswer(false);
+    setSelectedAnswer('');
+  };
+
+  const moveToCard = (nextIndex: number) => {
+    setCardIndex(nextIndex);
+    setShowAnswer(false);
+    setSelectedAnswer('');
+  };
+
+  const checkAnswer = () => {
+    if (!selectedAnswer) return;
+    setShowAnswer(true);
   };
 
   return (
     <section className="panel flashcards-panel">
       <div className="panel-heading">
         <div>
-          <span className="eyebrow">Study Decks</span>
+          <span className="eyebrow">Exam Question Cards</span>
           <h2>Flashcards</h2>
         </div>
         <button onClick={shuffleCurrentView}><Shuffle size={17} />Shuffle</button>
       </div>
+      <p className="status">These cards are built from the same PSTAR and ROC-A question banks used on the Testing page, so every card behaves like a short multiple-choice practice question.</p>
 
       <div className="deck-summary">
         <div><strong>{pstarCount}</strong><span>PSTAR cards</span></div>
@@ -144,7 +160,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
       <div className="flashcard-toolbar">
         <label>
           {mode === 'roca' ? 'ROC-A Section' : mode === 'tc' ? 'PSTAR Section' : 'Section'}
-          <select value={section} onChange={(event) => { setSection(event.target.value); setCardIndex(0); setShowAnswer(false); }}>
+          <select value={section} onChange={(event) => { setSection(event.target.value); setCardIndex(0); setShowAnswer(false); setSelectedAnswer(''); }}>
             <option value="all">All sections</option>
             {sections.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
@@ -157,23 +173,28 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
           <div className="practice-header"><strong>Card {activeCardIndex + 1} / {filteredCards.length}</strong><span>{data.flashcardProgress[card.key] ?? 'unmarked'}</span></div>
           <div className="progress"><div className="bar" style={{ width: `${Math.round(((activeCardIndex + 1) / filteredCards.length) * 100)}%` }} /></div>
           <div className="flashcard-big">
-            <span>{card.label} {card.section}</span>
+            <span>{card.source === 'tc' ? 'PSTAR' : 'ROC-A'} / {card.label} / {card.section}</span>
             <strong>{card.question}</strong>
             <div className="flashcard-options" aria-label="Answer options">
-              {card.options.map((option, index) => <div className={showAnswer && option === card.answer ? 'flashcard-option correct' : 'flashcard-option'} key={`${card.key}-${option}`}>
+              {card.options.map((option, index) => <button className={[
+                'flashcard-option',
+                selectedAnswer === option ? 'selected' : '',
+                showAnswer && option === card.answer ? 'correct' : '',
+                showAnswer && selectedAnswer === option && option !== card.answer ? 'incorrect' : ''
+              ].filter(Boolean).join(' ')} disabled={showAnswer} key={`${card.key}-${option}`} onClick={() => setSelectedAnswer(option)} type="button">
                 <span>{String.fromCharCode(65 + index)}</span>
                 <p>{option}</p>
-              </div>)}
+              </button>)}
             </div>
-            {showAnswer ? <p className="flashcard-answer"><span>Correct selection</span>{card.answer}</p> : <button onClick={() => setShowAnswer(true)}>Show Answer</button>}
+            {showAnswer ? <p className={selectedAnswer === card.answer ? 'flashcard-answer correct' : 'flashcard-answer incorrect'}><span>{selectedAnswer === card.answer ? 'Correct' : 'Review this one'}</span>Correct answer: {card.answer}</p> : <button disabled={!selectedAnswer} onClick={checkAnswer}>Check Answer</button>}
           </div>
           <div className="flash-actions flash-study-actions">
-            <button onClick={() => { setCardIndex(Math.max(0, activeCardIndex - 1)); setShowAnswer(false); }}>Prev</button>
-            <button onClick={() => setShowAnswer(!showAnswer)}>Flip</button>
+            <button onClick={() => moveToCard(Math.max(0, activeCardIndex - 1))}>Prev</button>
+            <button disabled={!selectedAnswer} onClick={checkAnswer}>Reveal</button>
             <button onClick={() => setCardStatus('known')}><CheckCircle2 size={17} />Known</button>
             <button onClick={() => setCardStatus('unknown')}><CircleAlert size={17} />Needs Review</button>
             <button onClick={clearCurrentStatus}><RotateCcw size={17} />Clear</button>
-            <button onClick={() => { setCardIndex(Math.min(filteredCards.length - 1, activeCardIndex + 1)); setShowAnswer(false); }}>Next</button>
+            <button onClick={() => moveToCard(Math.min(filteredCards.length - 1, activeCardIndex + 1))}>Next</button>
           </div>
         </>
       ) : <div className="empty-workspace"><p className="empty-state">No cards match this view yet.</p><div className="button-row"><button onClick={() => switchMode('all')}><Layers size={17} />All Cards</button><button onClick={() => switchMode('unknown')}><XCircle size={17} />Needs Review</button></div></div>}

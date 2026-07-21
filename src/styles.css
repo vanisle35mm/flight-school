@@ -415,7 +415,7 @@ button:disabled {
 }
 
 .hero-band button,
-.panel button:not(.answer, .task-row, .icon-button, .lesson-row, .summary-button),
+.panel button:not(.answer, .task-row, .icon-button, .lesson-row, .summary-button, .flashcard-option),
 .icon-button {
   display: inline-flex;
   align-items: center;
@@ -441,7 +441,7 @@ button:disabled {
 }
 
 .hero-band button:hover,
-.panel button:not(.answer, .task-row, .icon-button, .lesson-row, .summary-button):hover,
+.panel button:not(.answer, .task-row, .icon-button, .lesson-row, .summary-button, .flashcard-option):hover,
 .icon-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 13px 24px rgba(37, 74, 105, 0.2);
@@ -1115,6 +1115,25 @@ label {
   border: 1px solid rgba(72, 103, 134, 0.54);
   border-radius: 8px;
   background: rgba(7, 20, 34, 0.42);
+  box-shadow: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel .flashcard-option {
+  justify-content: initial;
+  color: #dce8f2;
+}
+
+.flashcard-option:hover:not(:disabled),
+.flashcard-option.selected {
+  border-color: rgba(69, 157, 238, 0.86);
+  background: rgba(26, 91, 162, 0.34);
+}
+
+.flashcard-option:disabled {
+  cursor: default;
+  opacity: 1;
 }
 
 .flashcard-option > span {
@@ -1145,6 +1164,16 @@ label {
   background: var(--green);
 }
 
+.flashcard-option.incorrect {
+  border-color: rgba(229, 100, 94, 0.75);
+  background: rgba(120, 37, 32, 0.3);
+  box-shadow: inset 3px 0 0 #e5645e;
+}
+
+.flashcard-option.incorrect > span {
+  background: #e5645e;
+}
+
 .flashcard-answer {
   display: grid;
   gap: 5px;
@@ -1155,11 +1184,20 @@ label {
   font-weight: 900;
 }
 
+.flashcard-answer.incorrect {
+  border-color: rgba(229, 100, 94, 0.65);
+  background: rgba(120, 37, 32, 0.26);
+}
+
 .flashcard-answer span {
   color: #77bd91;
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.flashcard-answer.incorrect span {
+  color: #ff9f9b;
 }
 
 .flash-actions {
