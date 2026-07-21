@@ -12,6 +12,9 @@ type PracticeReview = {
   correct: boolean;
 };
 
+const PRACTICE_QUESTION_COUNT = 20;
+const EXAM_QUESTION_COUNT = 50;
+const PASS_MARK = 90;
 const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
 const buildPracticeQuestion = (question: PstarQuestion): PstarQuestion => ({ ...question, options: shuffle(question.options) });
 
@@ -36,9 +39,11 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
   const startPractice = (nextMode: 'practice' | 'exam', missedOnly = false) => {
     const pool = missedOnly
       ? data.tcMissedIds.map((id) => PSTAR_QUESTIONS.find((item) => item.id === id)).filter((item): item is PstarQuestion => Boolean(item))
-      : PSTAR_QUESTIONS.filter((item) => section === 'all' || item.section === section);
+      : nextMode === 'exam'
+        ? PSTAR_QUESTIONS
+        : PSTAR_QUESTIONS.filter((item) => section === 'all' || item.section === section);
     if (!pool.length) return;
-    const count = nextMode === 'exam' ? Math.min(50, pool.length) : Math.min(20, pool.length);
+    const count = nextMode === 'exam' ? Math.min(EXAM_QUESTION_COUNT, pool.length) : Math.min(PRACTICE_QUESTION_COUNT, pool.length);
     setQuestions(shuffle(pool).slice(0, count).map(buildPracticeQuestion));
     setIndex(0);
     setScore(0);
@@ -61,7 +66,7 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
       tcHistory: [{
         date: new Date().toISOString(),
         title: mode === 'exam' ? 'TC PSTAR Exam Mode' : 'TC PSTAR Practice',
-        source: `Transport Canada TP 11919 - ${section === 'all' ? 'All Sections' : section}`,
+        source: `Transport Canada TP 11919 - ${mode === 'exam' || section === 'all' ? 'All Sections' : section}`,
         score: finalScore,
         total: questions.length,
         percent,
@@ -105,7 +110,7 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
             <h2>Practice Test</h2>
           </div>
         </div>
-        <p className="status">Based on Transport Canada TP 11919. Exam mode uses up to 50 questions with a 90% pass mark.</p>
+        <p className="status">Based on Transport Canada TP 11919. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
         <div className="setup-grid">
           <label className="field-card">
             Section
@@ -113,7 +118,7 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
               <option value="all">All available sections</option>
               {sections.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
-            <span>{PSTAR_QUESTIONS.length} built-in questions available.</span>
+            <span>Used for Practice Mode and Missed Only. Exam Mode uses all areas.</span>
           </label>
           <div className="field-card">
             <span>Mode</span>
@@ -152,8 +157,8 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
       <section className="panel practice-panel">
         <div className="result-box">
           <h3>Score: {score}/{questions.length} ({percent}%)</h3>
-          <h2>{percent >= 90 ? 'PASS' : 'REVIEW'}</h2>
-          <p className="status">PSTAR pass mark: 90%.</p>
+          <h2>{percent >= PASS_MARK ? 'PASS' : 'REVIEW'}</h2>
+          <p className="status">PSTAR pass mark: {PASS_MARK}%.</p>
         </div>
         <div className="button-row">
           <button onClick={() => setMode('setup')}><RotateCcw size={17} /> Back to Setup</button>

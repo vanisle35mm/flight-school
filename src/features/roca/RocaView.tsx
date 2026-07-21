@@ -13,6 +13,8 @@ type PracticeReview = {
 };
 
 const PASS_MARK = 70;
+const PRACTICE_QUESTION_COUNT = 20;
+const EXAM_QUESTION_COUNT = 25;
 const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
 const buildPracticeQuestion = (question: PracticeQuestion): PracticeQuestion => ({ ...question, options: shuffle(question.options) });
 
@@ -37,9 +39,11 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
   const startPractice = (nextMode: 'practice' | 'exam', missedOnly = false) => {
     const pool = missedOnly
       ? data.rocaMissedIds.map((id) => ROCA_QUESTIONS.find((item) => item.id === id)).filter((item): item is PracticeQuestion => Boolean(item))
-      : ROCA_QUESTIONS.filter((item) => section === 'all' || item.section === section);
+      : nextMode === 'exam'
+        ? ROCA_QUESTIONS
+        : ROCA_QUESTIONS.filter((item) => section === 'all' || item.section === section);
     if (!pool.length) return;
-    const count = nextMode === 'exam' ? Math.min(25, pool.length) : Math.min(20, pool.length);
+    const count = nextMode === 'exam' ? Math.min(EXAM_QUESTION_COUNT, pool.length) : Math.min(PRACTICE_QUESTION_COUNT, pool.length);
     setQuestions(shuffle(pool).slice(0, count).map(buildPracticeQuestion));
     setIndex(0);
     setScore(0);
@@ -62,7 +66,7 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
       rocaHistory: [{
         date: new Date().toISOString(),
         title: mode === 'exam' ? 'ROC-A Exam Mode' : 'ROC-A Practice',
-        source: `ISED RIC-21 - ${section === 'all' ? 'All Sections' : section}`,
+        source: `ISED RIC-21 - ${mode === 'exam' || section === 'all' ? 'All Sections' : section}`,
         score: finalScore,
         total: questions.length,
         percent,
@@ -106,7 +110,7 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
             <h2>ROC-A Practice</h2>
           </div>
         </div>
-        <p className="status">Practice questions written from the official RIC-21 study guide. Exam mode uses 25 questions with a 70% pass mark.</p>
+        <p className="status">Practice questions written from the official RIC-21 study guide. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
         <div className="setup-grid">
           <label className="field-card">
             Section
@@ -114,7 +118,7 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
               <option value="all">All available sections</option>
               {sections.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
-            <span>{ROCA_QUESTIONS.length} built-in questions available.</span>
+            <span>Used for Practice Mode and Missed Only. Exam Mode uses all areas.</span>
           </label>
           <div className="field-card">
             <span>Mode</span>
