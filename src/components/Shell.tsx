@@ -1,4 +1,4 @@
-import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, KeyRound, Layers, LogOut, PlaneTakeoff, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CalendarPlus, CheckSquare, ChevronDown, CloudSun, Gauge, GraduationCap, Info, KeyRound, Layers, LogOut, PlaneTakeoff, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CelebrationOverlay } from './CelebrationOverlay';
 import { FlightSchoolLogo } from './FlightSchoolLogo';
@@ -52,7 +52,7 @@ const loadNavModuleState = () => {
   }
 };
 
-export const Shell = ({ children, activeView, onViewChange, search, onSearchChange, activeUserName, canAdmin, canManageAccount, cloudStatus, onLogout }: { children: ReactNode; activeView: ViewId; onViewChange: (view: ViewId) => void; search: string; onSearchChange: (value: string) => void; activeUserName: string; canAdmin: boolean; canManageAccount: boolean; cloudStatus: CloudSyncStatus; onLogout: () => void }) => {
+export const Shell = ({ children, activeView, onViewChange, search, onSearchChange, activeUserName, canAdmin, canManageAccount, cloudStatus, onLogout, onShowIntro }: { children: ReactNode; activeView: ViewId; onViewChange: (view: ViewId) => void; search: string; onSearchChange: (value: string) => void; activeUserName: string; canAdmin: boolean; canManageAccount: boolean; cloudStatus: CloudSyncStatus; onLogout: () => void; onShowIntro?: () => void }) => {
   const [weatherSummary, setWeatherSummary] = useState(getStoredWeatherSummary);
   const adminViews: ViewId[] = ['users', 'import'];
   const isAdminView = adminViews.includes(activeView);
@@ -97,6 +97,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
         {adminMenuOpen && <div className="admin-submenu" id="admin-navigation">
           <button className={activeView === 'users' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('users')}><ShieldCheck size={16} /><span>Users</span></button>
           <button className={activeView === 'import' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('import')}><Settings size={16} /><span>Import / Export</span></button>
+          <button className="nav-item" onClick={() => { onShowIntro?.(); setAdminMenuOpen(false); }}><Info size={16} /><span>Training Intro</span></button>
         </div>}
       </div>}
       <button className={activeView === 'dashboardEdit' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('dashboardEdit')}><SlidersHorizontal size={19} /><span>Edit Dashboard</span></button>

@@ -2613,6 +2613,191 @@ body {
   padding: 18px;
 }
 
+.first-login-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(3, 12, 21, 0.78);
+  backdrop-filter: blur(7px);
+}
+
+.first-login-card {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  width: min(620px, calc(100vw - 36px));
+  padding: 30px;
+  border: 1px solid rgba(104, 147, 185, 0.56);
+  border-radius: 12px;
+  color: #f8fbff;
+  background:
+    radial-gradient(circle at 86% 14%, rgba(224, 177, 88, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(16, 39, 65, 0.98), rgba(5, 16, 28, 0.99));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.first-login-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--amber), #8fc2e4);
+}
+
+.first-login-skip {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  color: #b9c5d3;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.first-login-progress {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(224, 177, 88, 0.32);
+  border-radius: 999px;
+  color: var(--amber);
+  background: rgba(224, 177, 88, 0.08);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.first-login-progress em {
+  color: #9dafc1;
+  font-style: normal;
+}
+
+.first-login-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 108px;
+  border: 1px solid rgba(143, 194, 228, 0.36);
+  border-radius: 50%;
+  color: var(--amber);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(224, 177, 88, 0.16), transparent 43%),
+    rgba(8, 24, 40, 0.62);
+  box-shadow: 0 0 0 9px rgba(143, 194, 228, 0.04);
+}
+
+.first-login-orbit {
+  position: absolute;
+  inset: 13px;
+  border: 1px dashed rgba(143, 194, 228, 0.42);
+  border-radius: 50%;
+}
+
+.first-login-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.first-login-copy h2 {
+  margin: 0;
+  font-size: 38px;
+  line-height: 1.04;
+}
+
+.first-login-copy p {
+  max-width: 58ch;
+  margin: 0;
+  color: #b9c5d3;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.first-login-points {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.first-login-points span {
+  min-height: 46px;
+  padding: 12px;
+  border: 1px solid rgba(64, 95, 125, 0.74);
+  border-radius: 8px;
+  color: #dce8f2;
+  background: rgba(7, 20, 34, 0.56);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.first-login-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.first-login-dots {
+  display: flex;
+  gap: 7px;
+}
+
+.first-login-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(143, 194, 228, 0.28);
+  transition: width 0.16s ease, background 0.16s ease;
+}
+
+.first-login-dots span.active {
+  width: 28px;
+  background: var(--amber);
+}
+
+.first-login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.first-login-primary,
+.first-login-secondary {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  font-weight: 900;
+}
+
+.first-login-primary {
+  border: 1px solid rgba(224, 177, 88, 0.72);
+  color: #071421;
+  background: linear-gradient(180deg, #ffd36f, #e3a51f);
+  padding: 0 18px;
+}
+
+.first-login-secondary {
+  border: 1px solid rgba(143, 194, 228, 0.36);
+  color: #dce8f2;
+  background: rgba(8, 24, 40, 0.62);
+  padding: 0 14px;
+}
+
 .roadmap-celebration {
   position: fixed;
   inset: 0;
@@ -5059,6 +5244,41 @@ body {
 
   .pilot-roadmap {
     padding: 14px;
+  }
+
+  .first-login-guide {
+    padding: 12px;
+  }
+
+  .first-login-card {
+    gap: 14px;
+    padding: 22px 18px 18px;
+  }
+
+  .first-login-visual {
+    width: 86px;
+    height: 86px;
+  }
+
+  .first-login-copy h2 {
+    font-size: 28px;
+  }
+
+  .first-login-points {
+    grid-template-columns: 1fr;
+  }
+
+  .first-login-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .first-login-actions {
+    justify-content: stretch;
+  }
+
+  .first-login-actions button {
+    flex: 1 1 0;
   }
 
   .roadmap-celebration {

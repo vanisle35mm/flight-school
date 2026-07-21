@@ -66,6 +66,7 @@ export type GroundSchoolUser = {
   requiresPasswordReset?: boolean;
   homeAirport?: string;
   airportSetupRequired?: boolean;
+  introGuideSeen?: boolean;
   dashboardStatOrder?: string[];
   dashboardTileOrder?: string[];
   dashboardHiddenTiles?: string[];

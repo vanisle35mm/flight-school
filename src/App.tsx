@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Shell } from './components/Shell';
+import { FirstLoginGuide } from './components/FirstLoginGuide';
 import { AccountView } from './features/account/AccountView';
 import { AdminConsoleView } from './features/admin/AdminConsoleView';
 import { Dashboard } from './features/dashboard/Dashboard';
@@ -59,6 +60,8 @@ export const App = () => {
   const [storageMode, setStorageMode] = useState<'detecting' | 'legacy' | 'secure'>(() => isCloudStorageConfigured() ? 'detecting' : 'legacy');
   const [secureAuthUserId, setSecureAuthUserId] = useState('');
   const [passwordRecoveryMode, setPasswordRecoveryMode] = useState(false);
+  const [introGuideOpen, setIntroGuideOpen] = useState(false);
+  const introPromptedUserId = useRef('');
   const lastSavedCloudPayload = useRef('');
   const authenticatedHomeAirport = secureAuthUserId ? data.users[secureAuthUserId]?.homeAirport : undefined;
 
@@ -206,11 +209,34 @@ export const App = () => {
     && (activeUser?.requiresPasswordReset === true || passwordRecoveryMode);
   const adminViews: ViewId[] = ['users', 'import'];
   const isFlightTrainingView = flightTrainingViews.includes(activeView);
+
+  useEffect(() => {
+    if (!isLoggedIn || needsPasswordSetup || needsAirportSetup || !activeUser) return;
+    if (activeUser.introGuideSeen === true || introPromptedUserId.current === activeUser.id) return;
+    introPromptedUserId.current = activeUser.id;
+    setIntroGuideOpen(true);
+  }, [activeUser, isLoggedIn, needsAirportSetup, needsPasswordSetup]);
+
   useEffect(() => {
     if (adminViews.includes(activeView) && !isAdmin) setActiveView('dashboard');
     if (activeView === 'account' && !canManageAccount) setActiveView('dashboard');
     if (!FLIGHT_TRAINING_ENABLED && flightTrainingViews.includes(activeView)) setActiveView('dashboard');
   }, [activeView, canManageAccount, isAdmin]);
+
+  const closeIntroGuide = () => {
+    setIntroGuideOpen(false);
+    setData((current) => {
+      const currentUser = current.users[current.activeUserId];
+      if (!currentUser || currentUser.introGuideSeen === true) return current;
+      return {
+        ...current,
+        users: {
+          ...current.users,
+          [currentUser.id]: { ...currentUser, introGuideSeen: true }
+        }
+      };
+    });
+  };
 
   const changeView = (view: ViewId) => {
     if (adminViews.includes(view) && !isAdmin) {
@@ -247,7 +273,7 @@ export const App = () => {
     });
     setActiveView('dashboard');
   }} />;
-  return <Shell activeView={activeView} onViewChange={changeView} search={search} onSearchChange={setSearch} activeUserName={activeUser?.firstName ?? 'Pilot'} canAdmin={isAdmin} canManageAccount={canManageAccount} cloudStatus={cloudStatus} onLogout={logout}>
+  return <Shell activeView={activeView} onViewChange={changeView} search={search} onSearchChange={setSearch} activeUserName={activeUser?.firstName ?? 'Pilot'} canAdmin={isAdmin} canManageAccount={canManageAccount} cloudStatus={cloudStatus} onLogout={logout} onShowIntro={isAdmin ? () => setIntroGuideOpen(true) : undefined}>
     {(activeView === 'dashboard' || (!FLIGHT_TRAINING_ENABLED && isFlightTrainingView)) && <Dashboard data={data} onDataChange={setData} onViewChange={changeView} />}
     {activeView === 'notes' && <NotesView data={data} onDataChange={setData} search={search} />}
     {activeView === 'flashcards' && <FlashcardsView data={data} onDataChange={setData} search={search} />}
@@ -267,5 +293,6 @@ export const App = () => {
       setData(activateUserData(data, userId));
       setActiveView('dashboard');
     }} />}
+    {introGuideOpen && <FirstLoginGuide onClose={closeIntroGuide} />}
   </Shell>;
 };
