@@ -1536,12 +1536,26 @@ label {
 .missed-item {
   display: grid;
   gap: 8px;
+  text-align: left;
 }
 
 .missed-item span,
 .missed-item p {
   color: var(--muted);
   margin: 0;
+  text-align: left;
+}
+
+.missed-item strong {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+  white-space: normal;
+}
+
+.missed-item p {
+  overflow-wrap: anywhere;
 }
 
 .file-button {

@@ -37,10 +37,8 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
   const [isShuffled, setIsShuffled] = useState(false);
   const missedIds = useMemo(() => new Set([
     ...data.tcMissedIds.map((id) => `tc:${id}`),
-    ...data.tcHistory.flatMap((entry) => entry.missed ?? []).map((id) => `tc:${id}`),
-    ...data.rocaMissedIds.map((id) => `roca:${id}`),
-    ...data.rocaHistory.flatMap((entry) => entry.missed ?? []).map((id) => `roca:${id}`)
-  ]), [data.rocaHistory, data.rocaMissedIds, data.tcHistory, data.tcMissedIds]);
+    ...data.rocaMissedIds.map((id) => `roca:${id}`)
+  ]), [data.rocaMissedIds, data.tcMissedIds]);
   const query = search.trim().toLowerCase();
   const selectedSource = sourceForMode(mode);
 
