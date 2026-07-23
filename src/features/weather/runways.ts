@@ -19,7 +19,7 @@ export type RunwayWind = Runway & {
 export const CYYJ_RUNWAYS: Runway[] = [
   { id: '09/27', ends: [{ id: '09', heading: 106 }, { id: '27', heading: 286 }], lengthFt: 6998, widthFt: 200, surface: 'Grooved asphalt', primary: true },
   { id: '03/21', ends: [{ id: '03', heading: 44 }, { id: '21', heading: 224 }], lengthFt: 5027, widthFt: 200, surface: 'Asphalt' },
-  { id: '14/32', ends: [{ id: '14', heading: 152 }, { id: '32', heading: 332 }], lengthFt: 5001, widthFt: 200, surface: 'Grooved asphalt' }
+  { id: '13/31', ends: [{ id: '13', heading: 152 }, { id: '31', heading: 332 }], lengthFt: 5001, widthFt: 200, surface: 'Grooved asphalt' }
 ];
 
 const SURFACE_LABELS: Record<string, string> = {
