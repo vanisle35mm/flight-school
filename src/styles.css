@@ -4713,7 +4713,7 @@ body {
 .runway-selector-card {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(130px, 0.65fr) minmax(130px, 0.55fr) auto;
+  grid-template-columns: minmax(130px, 0.65fr) minmax(130px, 0.55fr);
   align-items: center;
   gap: 14px;
   min-height: 126px;
@@ -4724,6 +4724,7 @@ body {
 }
 
 .runway-selector-card.best-runway {
+  grid-template-columns: minmax(130px, 0.65fr) minmax(130px, 0.55fr) auto;
   border-color: rgba(224, 177, 88, 0.9);
   background:
     linear-gradient(90deg, rgba(224, 177, 88, 0.13), transparent 72%),
@@ -5760,6 +5761,10 @@ body {
   }
 
   .runway-selector-card {
+    grid-template-columns: minmax(130px, 0.6fr) minmax(130px, 0.4fr);
+  }
+
+  .runway-selector-card.best-runway {
     grid-template-columns: minmax(130px, 0.6fr) minmax(130px, 0.4fr) auto;
   }
 
