@@ -137,10 +137,6 @@ export const WeatherPanel = ({ compact = false, onOpenWeather }: WeatherPanelPro
                 <div><span>Crosswind</span><strong>{runway.crosswindKt === null ? '--' : `${runway.crosswindKt} kt`}</strong></div>
                 <div><span>Angle</span><strong>{runway.alignment === null ? '--' : `${runway.alignment} deg`}</strong></div>
               </div>
-              {isBest && <div className="runway-selector-badge best">
-                <PlaneLanding size={14} />
-                Best
-              </div>}
             </article>;
           })}
         </div>
