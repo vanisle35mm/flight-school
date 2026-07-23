@@ -1,6 +1,6 @@
-import { RotateCcw, Trash2, X } from 'lucide-react';
+import { ExternalLink, RadioTower, RotateCcw, Trash2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { ROCA_QUESTIONS } from '../../data/rocaQuestions';
+import { ROCA_EXAMINER_GUIDE_URL, ROCA_QUESTIONS, ROCA_SOURCE_URL } from '../../data/rocaQuestions';
 import type { GroundSchoolData, PracticeQuestion } from '../../types';
 
 type PracticeReview = {
@@ -111,6 +111,26 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
           </div>
         </div>
         <p className="status">Simulated ROC-A questions written from the official RIC-21 study guide. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
+        <div className="source-strip" aria-label="ROC-A source and exam details">
+          <div className="source-card simulated">
+            <RadioTower size={18} />
+            <div><span>Source</span><strong>RIC-21 simulation</strong></div>
+          </div>
+          <div className="source-card">
+            <div><span>Question bank</span><strong>{ROCA_QUESTIONS.length} practice prompts</strong></div>
+          </div>
+          <div className="source-card">
+            <div><span>Exam simulator</span><strong>{EXAM_QUESTION_COUNT} questions / {PASS_MARK}% target</strong></div>
+          </div>
+          <a className="source-card source-link" href={ROCA_SOURCE_URL} target="_blank" rel="noreferrer">
+            <ExternalLink size={17} />
+            <div><span>Reference</span><strong>Open RIC-21</strong></div>
+          </a>
+          <a className="source-card source-link" href={ROCA_EXAMINER_GUIDE_URL} target="_blank" rel="noreferrer">
+            <ExternalLink size={17} />
+            <div><span>Exam context</span><strong>Open RIC-20</strong></div>
+          </a>
+        </div>
         <div className="setup-grid">
           <label className="field-card">
             Section
@@ -122,9 +142,9 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
           </label>
           <div className="field-card">
             <span>Mode</span>
-            <button onClick={() => startPractice('practice')}>Practice Mode</button>
-            <button onClick={() => startPractice('exam')}>Exam Mode</button>
-            <button disabled={!data.rocaMissedIds.length} onClick={() => startPractice('practice', true)}>Missed Only ({data.rocaMissedIds.length})</button>
+            <button className="mode-choice-button" onClick={() => startPractice('practice')}><strong>Practice Mode</strong><small>20 questions from the selected topic, with instant feedback.</small></button>
+            <button className="mode-choice-button primary" onClick={() => startPractice('exam')}><strong>Exam Mode</strong><small>25 random questions from all ROC-A topics, scored at the end.</small></button>
+            <button className="mode-choice-button" disabled={!data.rocaMissedIds.length} onClick={() => startPractice('practice', true)}><strong>Missed Only ({data.rocaMissedIds.length})</strong><small>Drill questions missed in previous attempts.</small></button>
           </div>
         </div>
         <div className="result-box">
@@ -192,7 +212,7 @@ export const RocaView = ({ data, onDataChange }: { data: GroundSchoolData; onDat
         <div className="question-card">
           <div className="practice-header">
             <span>Question {index + 1}/{questions.length}</span>
-            <span>Score: {score}/{mode === 'exam' ? index : index + (selected ? 1 : 0)}</span>
+            <span>{mode === 'exam' ? `Answered: ${index}/${questions.length}` : `Score: ${score}/${index + (selected ? 1 : 0)}`}</span>
           </div>
           <div className="progress"><div className="bar" style={{ width: `${Math.round((index / questions.length) * 100)}%` }} /></div>
           <span>{question.id} / {question.section}</span>

@@ -1,7 +1,7 @@
-import { CheckCircle2, CircleAlert, Layers, RotateCcw, Shuffle, XCircle } from 'lucide-react';
+import { CheckCircle2, CircleAlert, ExternalLink, Layers, RadioTower, RotateCcw, ShieldCheck, Shuffle, XCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { PSTAR_QUESTIONS } from '../../data/pstarQuestions';
-import { ROCA_QUESTIONS } from '../../data/rocaQuestions';
+import { PSTAR_QUESTIONS, PSTAR_SOURCE_URL } from '../../data/pstarQuestions';
+import { ROCA_QUESTIONS, ROCA_SOURCE_URL } from '../../data/rocaQuestions';
 import type { FlashcardReviewStatus, GroundSchoolData } from '../../types';
 
 type StudyMode = 'all' | 'tc' | 'roca' | 'missed' | 'unknown' | 'known';
@@ -145,6 +145,18 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
         <button onClick={shuffleCurrentView}><Shuffle size={17} />Shuffle</button>
       </div>
       <p className="status">These cards are built from the same question banks used on the Testing page. PSTAR uses the Transport Canada TP 11919 bank; ROC-A is simulated from the official RIC-21 study guide.</p>
+      <div className="source-strip compact" aria-label="Flashcard source details">
+        <a className="source-card verified source-link" href={PSTAR_SOURCE_URL} target="_blank" rel="noreferrer">
+          <ShieldCheck size={18} />
+          <div><span>PSTAR</span><strong>Official-source TP 11919</strong></div>
+          <ExternalLink size={15} />
+        </a>
+        <a className="source-card simulated source-link" href={ROCA_SOURCE_URL} target="_blank" rel="noreferrer">
+          <RadioTower size={18} />
+          <div><span>ROC-A</span><strong>RIC-21 simulation</strong></div>
+          <ExternalLink size={15} />
+        </a>
+      </div>
 
       <div className="deck-summary">
         <div><strong>{pstarCount}</strong><span>PSTAR cards</span></div>

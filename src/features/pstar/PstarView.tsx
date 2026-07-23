@@ -1,6 +1,6 @@
-import { RotateCcw, Trash2, X } from 'lucide-react';
+import { ExternalLink, RotateCcw, ShieldCheck, Trash2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { PSTAR_QUESTIONS } from '../../data/pstarQuestions';
+import { PSTAR_QUESTIONS, PSTAR_SOURCE_URL } from '../../data/pstarQuestions';
 import type { GroundSchoolData, PstarQuestion } from '../../types';
 
 type PracticeReview = {
@@ -111,6 +111,22 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
           </div>
         </div>
         <p className="status">Official-source PSTAR bank from Transport Canada TP 11919. Practice mode can drill one section. Exam mode draws {EXAM_QUESTION_COUNT} random questions from all areas with a {PASS_MARK}% pass mark.</p>
+        <div className="source-strip" aria-label="PSTAR source and exam details">
+          <div className="source-card verified">
+            <ShieldCheck size={18} />
+            <div><span>Source</span><strong>Official-source TP 11919</strong></div>
+          </div>
+          <div className="source-card">
+            <div><span>Question bank</span><strong>{PSTAR_QUESTIONS.length} active questions</strong></div>
+          </div>
+          <div className="source-card">
+            <div><span>Exam simulator</span><strong>{EXAM_QUESTION_COUNT} questions / {PASS_MARK}% pass</strong></div>
+          </div>
+          <a className="source-card source-link" href={PSTAR_SOURCE_URL} target="_blank" rel="noreferrer">
+            <ExternalLink size={17} />
+            <div><span>Reference</span><strong>Open Transport Canada</strong></div>
+          </a>
+        </div>
         <div className="setup-grid">
           <label className="field-card">
             Section
@@ -122,9 +138,9 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
           </label>
           <div className="field-card">
             <span>Mode</span>
-            <button onClick={() => startPractice('practice')}>Practice Mode</button>
-            <button onClick={() => startPractice('exam')}>Exam Mode</button>
-            <button disabled={!data.tcMissedIds.length} onClick={() => startPractice('practice', true)}>Missed Only ({data.tcMissedIds.length})</button>
+            <button className="mode-choice-button" onClick={() => startPractice('practice')}><strong>Practice Mode</strong><small>20 questions from the selected section, with instant feedback.</small></button>
+            <button className="mode-choice-button primary" onClick={() => startPractice('exam')}><strong>Exam Mode</strong><small>50 random questions from all PSTAR areas, scored at the end.</small></button>
+            <button className="mode-choice-button" disabled={!data.tcMissedIds.length} onClick={() => startPractice('practice', true)}><strong>Missed Only ({data.tcMissedIds.length})</strong><small>Drill questions missed in previous attempts.</small></button>
           </div>
         </div>
         <div className="result-box">
@@ -192,7 +208,7 @@ export const PstarView = ({ data, onDataChange }: { data: GroundSchoolData; onDa
         <div className="question-card">
           <div className="practice-header">
             <span>Question {index + 1}/{questions.length}</span>
-            <span>Score: {score}/{mode === 'exam' ? index : index + (selected ? 1 : 0)}</span>
+            <span>{mode === 'exam' ? `Answered: ${index}/${questions.length}` : `Score: ${score}/${index + (selected ? 1 : 0)}`}</span>
           </div>
           <div className="progress"><div className="bar" style={{ width: `${Math.round((index / questions.length) * 100)}%` }} /></div>
           <span>{question.id} / {question.section}</span>
