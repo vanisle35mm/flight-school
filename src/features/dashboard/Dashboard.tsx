@@ -47,7 +47,7 @@ const getDayPart = () => {
 };
 
 const milestoneIcon = (status: MilestoneStatus) => status === 'complete' ? <CheckCircle2 size={17} /> : <span className="roadmap-dot" aria-hidden="true" />;
-const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.booked || progress?.bookedDate || progress?.category || progress?.instructorConfirmed || progress?.instructorName?.trim() || progress?.flightLogs?.length || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
+const hasProgressStarted = (progress?: RoadmapMilestoneProgress) => Boolean(progress?.completed || progress?.completedDate || progress?.booked || progress?.bookedDate || progress?.category || progress?.instructorConfirmed || progress?.instructorName?.trim() || progress?.flightLogs?.length || progress?.kitItems?.length || progress?.notes?.trim() || (typeof progress?.hours === 'number' && progress.hours > 0));
 const manualStatus = (progress?: RoadmapMilestoneProgress, fallback: MilestoneStatus = 'not-started'): MilestoneStatus => {
   if (progress?.completed) return 'complete';
   if (hasProgressStarted(progress)) return 'in-progress';
@@ -69,6 +69,43 @@ const isPhaseComplete = (phase: RoadmapPhase) => {
   const scoredMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
   return Boolean(scoredMilestones.length && scoredMilestones.every((item) => item.status === 'complete'));
 };
+const groundSchoolKitSections = [
+  {
+    title: 'Books',
+    items: [
+      'TP 14371 - Aeronautical Information Manual (AIM)',
+      'Cessna 172S Information Manual',
+      'From the Ground Up',
+      'Flight Training Manual',
+      'Pilot Logbook'
+    ]
+  },
+  {
+    title: 'Charts and navigation tools',
+    items: [
+      'AIR 1901 - Vancouver VFR Terminal Area Chart',
+      'AIR 5004 - Vancouver VFR Navigation Chart',
+      'E6-B Flight Computer',
+      'Douglas Square Protractor',
+      'ICAO Chart Ruler'
+    ]
+  },
+  {
+    title: 'VFC handouts',
+    items: [
+      'Airside Etiquette',
+      'Welcome Letter',
+      'Private Pilot Syllabus',
+      'Cessna 172 Aircraft Checklist - Normal and Emergency',
+      'Victoria Airport Diagram / Radio Procedures',
+      'VFC Safety Precautions',
+      'Private Pilot Licence Requirements',
+      'VFC Member Rules and Regulations / Aircraft Booking Policy',
+      'VFC Study Guide Handout'
+    ]
+  }
+];
+const groundSchoolKitItems = groundSchoolKitSections.flatMap((section) => section.items);
 
 export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; onViewChange: (view: ViewId) => void }) => {
   const activeUser = data.users[data.activeUserId];
@@ -103,6 +140,9 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     : flightInstructionProgress.instructorName?.trim()
       ? `${flightInstructionProgress.instructorName} confirmed`
       : 'Confirm instructor and start lessons';
+  const groundSchoolKitProgress = roadmapProgress['ground-school-kit'] ?? {};
+  const checkedKitItems = groundSchoolKitProgress.kitItems ?? [];
+  const groundSchoolKitComplete = checkedKitItems.length >= groundSchoolKitItems.length;
 
   const updateRoadmap = (milestoneId: string, patch: RoadmapMilestoneProgress, phaseId?: string) => {
     const nextProgress = {
@@ -123,6 +163,16 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   const phases: RoadmapPhase[] = useMemo(() => {
     const foundationMilestones: RoadmapMilestone[] = [
+      {
+        id: 'ground-school-kit',
+        phaseId: 'foundation',
+        title: 'Get ground school kit',
+        status: groundSchoolKitComplete ? 'complete' : checkedKitItems.length ? 'in-progress' : 'not-started',
+        helper: `${checkedKitItems.length} / ${groundSchoolKitItems.length} items`,
+        description: 'Gather the VFC ground school books, charts, navigation tools, and handouts before or early in ground school.',
+        requirements: groundSchoolKitItems,
+        manual: true
+      },
       {
         id: 'ground-school-hours',
         phaseId: 'foundation',
@@ -240,7 +290,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         percent: progressMilestones.length ? clampPct(((completeCount + inProgressCount * 0.35) / progressMilestones.length) * 100) : 0
       };
     });
-  }, [flightInstructionHelper, flightInstructionStatus, groundSchoolHours, medicalComplete, pstarComplete, pstarLabel, pstarStatus, roadmapProgress, rocaComplete, sppComplete, sppReady]);
+  }, [checkedKitItems.length, flightInstructionHelper, flightInstructionStatus, groundSchoolHours, groundSchoolKitComplete, medicalComplete, pstarComplete, pstarLabel, pstarStatus, roadmapProgress, rocaComplete, sppComplete, sppReady]);
 
   const selectedMilestone = phases.flatMap((phase) => phase.milestones).find((milestone) => milestone.id === selectedMilestoneId) ?? phases[0].milestones[1];
   const selectedProgress = roadmapProgress[selectedMilestone.id] ?? {};
@@ -253,6 +303,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     return a.date.localeCompare(b.date);
   });
   const isGroundSchoolDetail = selectedMilestone.id === 'ground-school-hours';
+  const isGroundSchoolKitDetail = selectedMilestone.id === 'ground-school-kit';
   const isMedicalDetail = selectedMilestone.id === 'medical';
   const isFlightInstructionDetail = selectedMilestone.id === 'begin-flight-instruction';
   const isStudyDetail = selectedMilestone.id === 'foundation-study-reminder';
@@ -295,6 +346,17 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
 
   const deleteFlightLog = (logId: string) => {
     updateRoadmap('begin-flight-instruction', { flightLogs: selectedFlightLogs.filter((log) => log.id !== logId) }, 'foundation');
+  };
+  const toggleGroundSchoolKitItem = (item: string) => {
+    const currentItems = selectedProgress.kitItems ?? [];
+    const nextItems = currentItems.includes(item)
+      ? currentItems.filter((kitItem) => kitItem !== item)
+      : [...currentItems, item];
+    updateRoadmap('ground-school-kit', {
+      kitItems: nextItems,
+      completed: nextItems.length >= groundSchoolKitItems.length,
+      completedDate: nextItems.length >= groundSchoolKitItems.length ? selectedProgress.completedDate || new Date().toISOString().slice(0, 10) : ''
+    }, 'foundation');
   };
 
   useEffect(() => {
@@ -411,7 +473,29 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
           <button className="icon-button" onClick={() => setIsDetailOpen(false)} aria-label="Close milestone details"><X size={17} /></button>
         </div>
         <span className={`status-chip ${selectedMilestone.status}`}>{statusLabels[selectedMilestone.status]}</span>
-        {isGroundSchoolDetail ? <div className="groundschool-detail-card">
+        {isGroundSchoolKitDetail ? <div className="groundschool-kit-card">
+          <div className="groundschool-kit-summary">
+            <BookOpen size={24} />
+            <div>
+              <h4>VFC ground school kit</h4>
+              <p>Check off the books, charts, tools, and handouts as you collect them.</p>
+            </div>
+            <strong>{(selectedProgress.kitItems ?? []).length}/{groundSchoolKitItems.length}</strong>
+          </div>
+          {groundSchoolKitSections.map((section) => <div className="groundschool-kit-section" key={section.title}>
+            <h4>{section.title}</h4>
+            <div className="groundschool-kit-list">
+              {section.items.map((item) => {
+                const checked = (selectedProgress.kitItems ?? []).includes(item);
+                return <label className={checked ? 'groundschool-kit-item checked' : 'groundschool-kit-item'} key={item}>
+                  <input type="checkbox" checked={checked} onChange={() => toggleGroundSchoolKitItem(item)} />
+                  <span>{checked ? <CheckCircle2 size={16} /> : null}</span>
+                  <strong>{item}</strong>
+                </label>;
+              })}
+            </div>
+          </div>)}
+        </div> : isGroundSchoolDetail ? <div className="groundschool-detail-card">
           <div className="groundschool-detail-stats">
             <div><strong>{data.classes.length}</strong><span>scheduled</span></div>
             <div><strong>{completedClassCount}</strong><span>complete</span></div>

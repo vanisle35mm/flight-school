@@ -56,6 +56,7 @@ export type RoadmapMilestoneProgress = {
   hours?: number;
   instructorConfirmed?: boolean;
   instructorName?: string;
+  kitItems?: string[];
   notes?: string;
 };
 export type GroundSchoolUser = {

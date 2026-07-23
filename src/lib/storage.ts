@@ -88,6 +88,7 @@ const normalizeRoadmapProgress = (value: unknown): Record<string, RoadmapMilesto
         ...(typeof item.hours === 'number' && Number.isFinite(item.hours) ? { hours: Math.max(0, item.hours) } : {}),
         ...(typeof item.instructorConfirmed === 'boolean' ? { instructorConfirmed: item.instructorConfirmed } : {}),
         ...(typeof item.instructorName === 'string' ? { instructorName: item.instructorName } : {}),
+        ...(Array.isArray(item.kitItems) ? { kitItems: item.kitItems.filter((kitItem): kitItem is string => typeof kitItem === 'string') } : {}),
         ...(typeof item.notes === 'string' ? { notes: item.notes } : {})
       };
     });
