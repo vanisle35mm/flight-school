@@ -310,6 +310,12 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
   const selectedFlightLogs = selectedProgress.flightLogs ?? [];
   const selectedFlightHours = selectedFlightLogs.reduce((sum, log) => sum + log.hours, 0) || selectedProgress.hours || 0;
   const overallPct = clampPct(phases.reduce((sum, phase) => sum + phase.percent, 0) / phases.length);
+  const allMilestones = phases.flatMap((phase) => phase.milestones);
+  const nextMilestone = allMilestones.find((milestone) => milestone.status !== 'complete' && milestone.status !== 'locked')
+    ?? allMilestones.find((milestone) => milestone.status !== 'complete')
+    ?? allMilestones[allMilestones.length - 1];
+  const nextMilestonePhase = phases.find((phase) => phase.id === nextMilestone.phaseId) ?? phases[0];
+  const nextMilestoneAction = nextMilestone.action;
   const nextActions = selectedMilestone.status === 'complete'
     ? ['Review the next milestone in this phase', 'Keep notes current for your instructor or school']
     : selectedMilestone.requirements;
@@ -320,15 +326,19 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     { label: 'Ground School', view: 'notes' as ViewId }
   ].map((tool) => [tool.label, tool])).values());
 
+  const openMilestone = (milestone: RoadmapMilestone) => {
+    setSelectedMilestoneId(milestone.id);
+    setIsDetailOpen(true);
+    touchPhase(milestone.phaseId);
+  };
+
   const selectMilestone = (milestone: RoadmapMilestone) => {
     if (isDetailOpen && selectedMilestoneId === milestone.id) {
       setIsDetailOpen(false);
       touchPhase(milestone.phaseId);
       return;
     }
-    setSelectedMilestoneId(milestone.id);
-    setIsDetailOpen(true);
-    touchPhase(milestone.phaseId);
+    openMilestone(milestone);
   };
 
   const addFlightLog = () => {
@@ -422,6 +432,19 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         <h2>Good {getDayPart()}, Captain {firstName}.</h2>
         <p>Your path from first ground lesson to Private Pilot Licence.</p>
       </div>
+    </section>
+
+    <section className="roadmap-next" aria-label="Recommended next step">
+      <div>
+        <span className="eyebrow">Next Step - {nextMilestonePhase.title}</span>
+        <h3>{nextMilestone.title}</h3>
+        <p>{nextMilestone.status === 'locked' ? nextMilestone.helper : nextMilestone.description}</p>
+      </div>
+      <div className="roadmap-next-actions">
+        <button onClick={() => openMilestone(nextMilestone)}>{nextMilestone.status === 'locked' ? 'Review Dependency' : 'Review Step'}</button>
+        {nextMilestoneAction ? <button onClick={() => onViewChange(nextMilestoneAction.view)}>{nextMilestoneAction.label}</button> : null}
+      </div>
+      {nextMilestone.status === 'locked' ? <div className="roadmap-dependency-note"><ShieldCheck size={15} />Complete the earlier requirements before this milestone can move forward.</div> : null}
     </section>
 
     {visibleTopCards.length ? <section className="roadmap-summary" aria-label="Private pilot progress summary">

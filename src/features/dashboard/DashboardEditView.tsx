@@ -1,5 +1,5 @@
 import { EyeOff, RotateCcw, Undo2 } from 'lucide-react';
-import { DEFAULT_DASHBOARD_TILE_ORDER } from '../../lib/storage';
+import { DEFAULT_DASHBOARD_HIDDEN_TILES, DEFAULT_DASHBOARD_TILE_ORDER } from '../../lib/storage';
 import type { GroundSchoolData } from '../../types';
 
 const tileCatalog: Record<string, { label: string; description: string; group: string }> = {
@@ -32,7 +32,7 @@ export const DashboardEditView = ({ data, onDataChange }: { data: GroundSchoolDa
   };
 
   const resetLayout = () => {
-    onDataChange({ ...data, dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER], dashboardHiddenTiles: [] });
+    onDataChange({ ...data, dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER], dashboardHiddenTiles: [...DEFAULT_DASHBOARD_HIDDEN_TILES] });
   };
 
   return <section className="panel dashboard-edit-panel">

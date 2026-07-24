@@ -7,7 +7,8 @@ export const THEME_KEY = 'flightschool_theme';
 export const RESTORE_KEY = 'groundschool_restore_payload';
 export const DEFAULT_USER_ID = 'user_default';
 export const DEFAULT_DASHBOARD_STAT_ORDER = ['classes', 'cards', 'accuracy', 'tasks'];
-export const DEFAULT_DASHBOARD_TILE_ORDER = ['roadmap', 'foundation', 'preSolo', 'advancedTraining', 'finalTesting', 'groundSchool', 'pstar', 'roca', 'weather'];
+export const DEFAULT_DASHBOARD_TILE_ORDER = ['roadmap', 'foundation', 'groundSchool', 'pstar', 'roca', 'weather', 'preSolo', 'advancedTraining', 'finalTesting'];
+export const DEFAULT_DASHBOARD_HIDDEN_TILES = ['advancedTraining', 'finalTesting'];
 
 const cloneChecklistLibrary = (library: FlightChecklistTemplate[]): FlightChecklistTemplate[] =>
   library.map((template) => ({
@@ -275,7 +276,7 @@ export const createEmptyGroundSchoolData = (): GroundSchoolData => {
     rocaFlashcardSection: 'all',
     dashboardStatOrder: [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: [...DEFAULT_DASHBOARD_TILE_ORDER],
-    dashboardHiddenTiles: [],
+    dashboardHiddenTiles: [...DEFAULT_DASHBOARD_HIDDEN_TILES],
     roadmapProgress: {},
     roadmapTouchedPhases: [],
     flashcardProgress: {},
@@ -338,7 +339,7 @@ export const activateUserData = (data: GroundSchoolData, userId: string): Ground
     flightTraining: nextUser.flightTraining ?? createDefaultFlightTrainingData(),
     dashboardStatOrder: nextUser.dashboardStatOrder?.length ? [...nextUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextUser.dashboardTileOrder?.length ? [...nextUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
-    dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : [],
+    dashboardHiddenTiles: nextUser.dashboardHiddenTiles ? [...nextUser.dashboardHiddenTiles] : [...DEFAULT_DASHBOARD_HIDDEN_TILES],
     roadmapProgress: normalizeRoadmapProgress(nextUser.roadmapProgress),
     roadmapTouchedPhases: normalizeRoadmapTouchedPhases(nextUser.roadmapTouchedPhases)
   };
@@ -409,7 +410,7 @@ export const deleteGroundSchoolUser = (data: GroundSchoolData, userId: string): 
     flightTraining: nextActiveUser.flightTraining ?? createDefaultFlightTrainingData(),
     dashboardStatOrder: nextActiveUser.dashboardStatOrder?.length ? [...nextActiveUser.dashboardStatOrder] : [...DEFAULT_DASHBOARD_STAT_ORDER],
     dashboardTileOrder: nextActiveUser.dashboardTileOrder?.length ? [...nextActiveUser.dashboardTileOrder] : [...DEFAULT_DASHBOARD_TILE_ORDER],
-    dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : [],
+    dashboardHiddenTiles: nextActiveUser.dashboardHiddenTiles ? [...nextActiveUser.dashboardHiddenTiles] : [...DEFAULT_DASHBOARD_HIDDEN_TILES],
     roadmapProgress: normalizeRoadmapProgress(nextActiveUser.roadmapProgress),
     roadmapTouchedPhases: normalizeRoadmapTouchedPhases(nextActiveUser.roadmapTouchedPhases)
   };
@@ -519,7 +520,7 @@ export const normalizeGroundSchoolData = (value: unknown): GroundSchoolData => {
   const legacyTileOrder = [...data.dashboardStatOrder, 'weather', 'progress', 'quickActions'];
   data.dashboardTileOrder = Array.isArray(source.dashboardTileOrder) ? source.dashboardTileOrder.filter((id): id is string => DEFAULT_DASHBOARD_TILE_ORDER.includes(String(id))) : legacyTileOrder;
   DEFAULT_DASHBOARD_TILE_ORDER.forEach((id) => { if (!data.dashboardTileOrder.includes(id)) data.dashboardTileOrder.push(id); });
-  data.dashboardHiddenTiles = Array.isArray(source.dashboardHiddenTiles) ? source.dashboardHiddenTiles.filter((id): id is string => DEFAULT_DASHBOARD_TILE_ORDER.includes(String(id))) : [];
+  data.dashboardHiddenTiles = Array.isArray(source.dashboardHiddenTiles) ? source.dashboardHiddenTiles.filter((id): id is string => DEFAULT_DASHBOARD_TILE_ORDER.includes(String(id))) : [...DEFAULT_DASHBOARD_HIDDEN_TILES];
   data.roadmapProgress = normalizeRoadmapProgress(activeUser.roadmapProgress ?? source.roadmapProgress);
   data.roadmapTouchedPhases = normalizeRoadmapTouchedPhases(activeUser.roadmapTouchedPhases ?? source.roadmapTouchedPhases);
   return data;
