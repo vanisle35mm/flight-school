@@ -1,4 +1,4 @@
-import { CheckCircle2, CircleAlert, ExternalLink, Layers, RadioTower, RotateCcw, ShieldCheck, Shuffle, XCircle } from 'lucide-react';
+import { CheckCircle2, CircleAlert, Eye, ExternalLink, Layers, RadioTower, RotateCcw, ShieldCheck, Shuffle, XCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PSTAR_QUESTIONS, PSTAR_SOURCE_URL } from '../../data/pstarQuestions';
 import { ROCA_QUESTIONS, ROCA_SOURCE_URL } from '../../data/rocaQuestions';
@@ -27,12 +27,39 @@ const reviewModes = modes.filter((item) => !['tc', 'roca'].includes(item.id));
 
 const shuffleCards = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
 const sourceForMode = (mode: StudyMode): StudyCard['source'] | null => mode === 'tc' ? 'tc' : mode === 'roca' ? 'roca' : null;
+const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+const genericAnswerPattern = /\b(all of the above|both|a and b|b and c|c and d|a, b|1 and 2|1, 2|none of the above)\b/i;
+
+const isGenericAnswer = (answer: string) => genericAnswerPattern.test(answer);
+
+const getReferencedOptions = (answer: string, options: string[]) => {
+  const normalizedAnswer = answer.toUpperCase();
+  const letterOptions = optionLetters
+    .map((letter, index) => ({ letter, option: options[index] }))
+    .filter(({ letter, option }) => option && new RegExp(`\\b${letter}\\b`).test(normalizedAnswer))
+    .map(({ option }) => option);
+  const numberOptions = options
+    .map((option, index) => ({ number: String(index + 1), option }))
+    .filter(({ number, option }) => option && new RegExp(`\\b${number}\\b`).test(normalizedAnswer))
+    .map(({ option }) => option);
+  return [...new Set([...letterOptions, ...numberOptions])];
+};
+
+const getActiveRecallAnswer = (card: StudyCard) => {
+  if (!isGenericAnswer(card.answer)) return card.answer;
+  if (/none of the above/i.test(card.answer)) return 'None of the listed statements are correct.';
+  const referencedOptions = getReferencedOptions(card.answer, card.options);
+  const sourceOptions = referencedOptions.length > 0
+    ? referencedOptions
+    : card.options.filter((option) => option !== card.answer && !isGenericAnswer(option));
+  if (sourceOptions.length === 0) return card.answer;
+  return `The specific points to recall are: ${sourceOptions.join('; ')}.`;
+};
 
 export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; search: string }) => {
   const [mode, setMode] = useState<StudyMode>('tc');
   const [cardIndex, setCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState('');
   const [section, setSection] = useState('all');
   const [shuffleToken, setShuffleToken] = useState(0);
   const [isShuffled, setIsShuffled] = useState(false);
@@ -97,14 +124,12 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
     setSection('all');
     setCardIndex(0);
     setShowAnswer(false);
-    setSelectedAnswer('');
   };
 
   const setCardStatus = (status: FlashcardReviewStatus) => {
     if (!card) return;
     onDataChange({ ...data, flashcardProgress: { ...data.flashcardProgress, [card.key]: status } });
     setShowAnswer(false);
-    setSelectedAnswer('');
     setCardIndex(Math.min(filteredCards.length - 1, activeCardIndex + 1));
   };
 
@@ -120,18 +145,11 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
     setShuffleToken((value) => value + 1);
     setCardIndex(0);
     setShowAnswer(false);
-    setSelectedAnswer('');
   };
 
   const moveToCard = (nextIndex: number) => {
     setCardIndex(nextIndex);
     setShowAnswer(false);
-    setSelectedAnswer('');
-  };
-
-  const checkAnswer = () => {
-    if (!selectedAnswer) return;
-    setShowAnswer(true);
   };
 
   return (
@@ -183,7 +201,7 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
       <div className="flashcard-toolbar">
         <label>
           {mode === 'roca' ? 'ROC-A Section' : mode === 'tc' ? 'PSTAR Section' : 'Section'}
-          <select value={section} onChange={(event) => { setSection(event.target.value); setCardIndex(0); setShowAnswer(false); setSelectedAnswer(''); }}>
+          <select value={section} onChange={(event) => { setSection(event.target.value); setCardIndex(0); setShowAnswer(false); }}>
             <option value="all">All sections</option>
             {sections.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
@@ -198,24 +216,18 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
           <div className="flashcard-big">
             <span>{card.source === 'tc' ? 'PSTAR' : 'ROC-A'} / {card.label} / {card.section}</span>
             <strong>{card.question}</strong>
-            <div className="flashcard-options" aria-label="Answer options">
-              {card.options.map((option, index) => <button className={[
-                'flashcard-option',
-                selectedAnswer === option ? 'selected' : '',
-                showAnswer && option === card.answer ? 'correct' : '',
-                showAnswer && selectedAnswer === option && option !== card.answer ? 'incorrect' : ''
-              ].filter(Boolean).join(' ')} disabled={showAnswer} key={`${card.key}-${option}`} onClick={() => setSelectedAnswer(option)} type="button">
-                <span>{String.fromCharCode(65 + index)}</span>
-                <p>{option}</p>
-              </button>)}
-            </div>
-            {showAnswer ? <p className={selectedAnswer === card.answer ? 'flashcard-answer correct' : 'flashcard-answer incorrect'}><span>{selectedAnswer === card.answer ? 'Correct' : 'Review this one'}</span>Correct answer: {card.answer}</p> : <button disabled={!selectedAnswer} onClick={checkAnswer}>Check Answer</button>}
+            <p className="flashcard-recall-prompt">Say the answer out loud or write it down before revealing it. No multiple choice safety net here.</p>
+            {showAnswer
+              ? <div className="flashcard-answer active-recall-answer"><span>Answer</span><p>{getActiveRecallAnswer(card)}</p>{isGenericAnswer(card.answer) && <small>Original exam answer: {card.answer}</small>}</div>
+              : <button className="flashcard-reveal-button" onClick={() => setShowAnswer(true)}><Eye size={17} />Reveal Answer</button>}
           </div>
           <div className="flash-actions flash-study-actions">
             <button onClick={() => moveToCard(Math.max(0, activeCardIndex - 1))}>Prev</button>
-            <button disabled={!selectedAnswer} onClick={checkAnswer}>Reveal</button>
-            <button onClick={() => setCardStatus('known')}><CheckCircle2 size={17} />Known</button>
-            <button onClick={() => setCardStatus('unknown')}><CircleAlert size={17} />Needs Review</button>
+            {!showAnswer && <button onClick={() => setShowAnswer(true)}><Eye size={17} />Reveal</button>}
+            <button onClick={() => setCardStatus('unknown')}><RotateCcw size={17} />Again</button>
+            <button onClick={() => setCardStatus('unknown')}><CircleAlert size={17} />Hard</button>
+            <button onClick={() => setCardStatus('known')}><CheckCircle2 size={17} />Good</button>
+            <button onClick={() => setCardStatus('known')}><CheckCircle2 size={17} />Easy</button>
             <button onClick={clearCurrentStatus}><RotateCcw size={17} />Clear</button>
             <button onClick={() => moveToCard(Math.min(filteredCards.length - 1, activeCardIndex + 1))}>Next</button>
           </div>

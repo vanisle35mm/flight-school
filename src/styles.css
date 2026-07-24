@@ -1224,6 +1224,19 @@ label {
   white-space: pre-wrap;
 }
 
+.flashcard-recall-prompt {
+  max-width: 760px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--amber);
+  color: #c4d8ea !important;
+  background: rgba(224, 177, 88, 0.1);
+  font-weight: 800;
+}
+
+.flashcard-reveal-button {
+  justify-self: start;
+}
+
 .flashcard-options {
   display: grid;
   gap: 8px;
@@ -1322,6 +1335,24 @@ label {
 
 .flashcard-answer.incorrect span {
   color: #ff9f9b;
+}
+
+.active-recall-answer {
+  border-color: rgba(143, 194, 228, 0.62);
+  background: rgba(20, 59, 96, 0.34);
+}
+
+.active-recall-answer p {
+  color: #f6fbff;
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.active-recall-answer small {
+  color: #9fb5c9;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .flash-actions {
