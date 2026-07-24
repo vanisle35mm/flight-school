@@ -23,12 +23,13 @@ const modes: Array<{ id: StudyMode; label: string; hint: string }> = [
   { id: 'unknown', label: 'Needs Review', hint: 'Marked hard' },
   { id: 'known', label: 'Mastered', hint: 'Marked known' }
 ];
+const reviewModes = modes.filter((item) => !['tc', 'roca'].includes(item.id));
 
 const shuffleCards = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
 const sourceForMode = (mode: StudyMode): StudyCard['source'] | null => mode === 'tc' ? 'tc' : mode === 'roca' ? 'roca' : null;
 
 export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSchoolData; onDataChange: (data: GroundSchoolData) => void; search: string }) => {
-  const [mode, setMode] = useState<StudyMode>('all');
+  const [mode, setMode] = useState<StudyMode>('tc');
   const [cardIndex, setCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState('');
@@ -142,18 +143,24 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
         </div>
         <button onClick={shuffleCurrentView}><Shuffle size={17} />Shuffle</button>
       </div>
-      <p className="status">These cards are built from the same question banks used on the Testing page. PSTAR uses the Transport Canada TP 11919 bank; ROC-A is simulated from the official RIC-21 study guide.</p>
-      <div className="source-strip compact" aria-label="Flashcard source details">
-        <a className="source-card verified source-link" href={PSTAR_SOURCE_URL} target="_blank" rel="noreferrer">
-          <ShieldCheck size={18} />
-          <div><span>PSTAR</span><strong>Official-source TP 11919</strong></div>
-          <ExternalLink size={15} />
-        </a>
-        <a className="source-card simulated source-link" href={ROCA_SOURCE_URL} target="_blank" rel="noreferrer">
-          <RadioTower size={18} />
-          <div><span>ROC-A</span><strong>RIC-21 simulation</strong></div>
-          <ExternalLink size={15} />
-        </a>
+      <p className="status">Pick a question bank first. The card deck uses the same material as the Testing page, so studying here should feel like rehearsal for practice tests.</p>
+
+      <div className="flashcard-launch" aria-label="Choose a flashcard bank">
+        <div className="flashcard-launch-copy">
+          <span className="eyebrow">Start Here</span>
+          <h3>What are you studying today?</h3>
+          <p>PSTAR is the main student-permit deck. ROC-A is radio practice built from the RIC-21 guide.</p>
+        </div>
+        <div className="flashcard-launch-actions">
+          <button className={mode === 'tc' ? 'flashcard-launch-button active' : 'flashcard-launch-button'} onClick={() => switchMode('tc')} type="button">
+            <ShieldCheck size={20} />
+            <span><strong>Study PSTAR</strong><small>{pstarCount} TP 11919 questions</small></span>
+          </button>
+          <button className={mode === 'roca' ? 'flashcard-launch-button active secondary' : 'flashcard-launch-button secondary'} onClick={() => switchMode('roca')} type="button">
+            <RadioTower size={20} />
+            <span><strong>Study ROC-A</strong><small>{rocaCount} radio questions</small></span>
+          </button>
+        </div>
       </div>
 
       <div className="deck-summary">
@@ -163,8 +170,14 @@ export const FlashcardsView = ({ data, onDataChange, search }: { data: GroundSch
         <div><strong>{unknownCount}</strong><span>Needs review</span></div>
       </div>
 
-      <div className="mode-tabs" role="tablist" aria-label="Flashcard study modes">
-        {modes.map((item) => <button className={mode === item.id ? 'mode-tab active' : 'mode-tab'} key={item.id} onClick={() => switchMode(item.id)}><span>{item.label}</span><small>{item.hint}</small></button>)}
+      <div className="flashcard-source-notes" aria-label="Flashcard source references">
+        <span>Source references</span>
+        <a href={PSTAR_SOURCE_URL} target="_blank" rel="noreferrer">PSTAR TP 11919 <ExternalLink size={13} /></a>
+        <a href={ROCA_SOURCE_URL} target="_blank" rel="noreferrer">ROC-A RIC-21 <ExternalLink size={13} /></a>
+      </div>
+
+      <div className="mode-tabs review-tabs" role="tablist" aria-label="Flashcard review filters">
+        {reviewModes.map((item) => <button className={mode === item.id ? 'mode-tab active' : 'mode-tab'} key={item.id} onClick={() => switchMode(item.id)}><span>{item.label}</span><small>{item.hint}</small></button>)}
       </div>
 
       <div className="flashcard-toolbar">

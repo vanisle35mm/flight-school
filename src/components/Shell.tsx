@@ -97,7 +97,7 @@ export const Shell = ({ children, activeView, onViewChange, search, onSearchChan
         {adminMenuOpen && <div className="admin-submenu" id="admin-navigation">
           <button className={activeView === 'users' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('users')}><ShieldCheck size={16} /><span>Users</span></button>
           <button className={activeView === 'import' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('import')}><Settings size={16} /><span>Import / Export</span></button>
-          <button className="nav-item" onClick={() => { onShowIntro?.(); setAdminMenuOpen(false); }}><Info size={16} /><span>Training Intro</span></button>
+          <button className="nav-item" onClick={() => { onShowIntro?.(); setAdminMenuOpen(false); }}><Info size={16} /><span>Test Intro</span></button>
         </div>}
       </div>}
       <button className={activeView === 'dashboardEdit' ? 'nav-item active' : 'nav-item'} onClick={() => changeView('dashboardEdit')}><SlidersHorizontal size={19} /><span>Edit Dashboard</span></button>

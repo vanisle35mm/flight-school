@@ -1,5 +1,5 @@
 const configuredAdminPasswordHash = (import.meta.env.VITE_ADMIN_PASSWORD_HASH ?? '').trim().toLowerCase();
-const localAdminPasswordDisabled = import.meta.env.DEV && !configuredAdminPasswordHash;
+const localAdminPasswordDisabled = import.meta.env.DEV;
 
 type AdminPasswordResult = {
   ok: boolean;

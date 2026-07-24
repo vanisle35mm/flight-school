@@ -1027,11 +1027,135 @@ label {
   max-width: 100%;
 }
 
+.flashcard-launch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
+  align-items: stretch;
+  gap: 14px;
+  margin: 18px 0 14px;
+  padding: 16px;
+  border: 1px solid rgba(143, 194, 228, 0.34);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(26, 91, 162, 0.22), rgba(7, 20, 34, 0.42)),
+    var(--sky);
+}
+
+.flashcard-launch-copy {
+  display: grid;
+  align-content: center;
+  gap: 7px;
+}
+
+.flashcard-launch-copy h3 {
+  margin: 0;
+  color: #f6fbff;
+  font-size: 25px;
+  line-height: 1.15;
+}
+
+.flashcard-launch-copy p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.flashcard-launch-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.panel .flashcard-launch-button {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: start !important;
+  gap: 11px;
+  min-height: 92px !important;
+  padding: 14px !important;
+  border-color: rgba(72, 103, 134, 0.66) !important;
+  color: #dce8f2 !important;
+  background: rgba(7, 20, 34, 0.52) !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+
+.panel .flashcard-launch-button.active {
+  border-color: rgba(69, 157, 238, 0.92) !important;
+  background:
+    linear-gradient(180deg, rgba(38, 125, 210, 0.68), rgba(18, 78, 142, 0.74)) !important;
+  box-shadow: 0 16px 32px rgba(37, 123, 205, 0.16), inset 4px 0 0 var(--amber) !important;
+}
+
+.panel .flashcard-launch-button.secondary.active {
+  border-color: rgba(224, 177, 88, 0.88) !important;
+}
+
+.flashcard-launch-button svg {
+  color: var(--amber);
+}
+
+.flashcard-launch-button span {
+  display: grid;
+  gap: 3px;
+}
+
+.flashcard-launch-button strong {
+  color: #f6fbff;
+  font-size: 17px;
+}
+
+.flashcard-launch-button small {
+  color: rgba(220, 232, 242, 0.78);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.flashcard-source-notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.flashcard-source-notes span {
+  color: rgba(220, 232, 242, 0.72);
+}
+
+.flashcard-source-notes a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border: 1px solid rgba(72, 103, 134, 0.5);
+  border-radius: 999px;
+  color: #b7cee4;
+  background: rgba(7, 20, 34, 0.35);
+  text-decoration: none;
+}
+
+.flashcard-source-notes a:hover {
+  border-color: rgba(143, 194, 228, 0.75);
+  color: #f6fbff;
+}
+
 .mode-tabs {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   margin: 16px 0;
+}
+
+.mode-tabs.review-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 12px;
 }
 
 .panel .mode-tabs .mode-tab {
@@ -2261,6 +2385,10 @@ label {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .flashcard-launch {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
@@ -2301,10 +2429,15 @@ label {
   .stat-grid,
   .weather-grid,
   .deck-summary,
+  .flashcard-launch-actions,
   .import-summary,
   .answer-grid,
   .nav-list {
     grid-template-columns: 1fr;
+  }
+
+  .mode-tabs.review-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .task-row {

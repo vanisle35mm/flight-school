@@ -212,6 +212,7 @@ export const App = () => {
 
   useEffect(() => {
     if (!isLoggedIn || needsPasswordSetup || needsAirportSetup || !activeUser) return;
+    if (activeUser.role === 'admin') return;
     if (activeUser.introGuideSeen === true || introPromptedUserId.current === activeUser.id) return;
     introPromptedUserId.current = activeUser.id;
     setIntroGuideOpen(true);
@@ -228,6 +229,7 @@ export const App = () => {
     setData((current) => {
       const currentUser = current.users[current.activeUserId];
       if (!currentUser || currentUser.introGuideSeen === true) return current;
+      if (currentUser.role === 'admin') return current;
       return {
         ...current,
         users: {
