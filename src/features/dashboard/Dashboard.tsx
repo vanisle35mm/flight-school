@@ -71,14 +71,6 @@ const isPhaseComplete = (phase: RoadmapPhase) => {
 };
 const lockMilestone = (milestone: RoadmapMilestone, helper = 'Complete the previous step first'): RoadmapMilestone =>
   milestone.status === 'complete' ? milestone : { ...milestone, status: 'locked', helper };
-const lockMilestonesAfterFirstIncomplete = (milestones: RoadmapMilestone[]): RoadmapMilestone[] => {
-  let previousComplete = true;
-  return milestones.map((milestone, index) => {
-    const nextMilestone = previousComplete ? milestone : lockMilestone(milestone, index === 0 ? 'Complete the previous phase first' : 'Complete the previous step first');
-    previousComplete = previousComplete && milestone.status === 'complete';
-    return nextMilestone;
-  });
-};
 const lockPhase = (phase: Omit<RoadmapPhase, 'percent'>): Omit<RoadmapPhase, 'percent'> => ({
   ...phase,
   milestones: phase.milestones.map((milestone) => lockMilestone(milestone, 'Complete the previous phase first'))
@@ -256,8 +248,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: 'spp',
         phaseId: 'pre-solo',
         title: 'Student Pilot Permit',
-        status: sppComplete ? 'complete' : sppReady ? manualStatus(roadmapProgress.spp, 'in-progress') : 'locked',
-        helper: sppComplete ? roadmapProgress.spp?.completedDate || 'Issued' : sppReady ? 'Ready to confirm with school' : 'Unlocks after medical and PSTAR',
+        status: sppComplete ? 'complete' : manualStatus(roadmapProgress.spp),
+        helper: sppComplete ? roadmapProgress.spp?.completedDate || 'Issued' : sppReady ? 'Ready to confirm with school' : 'Medical and PSTAR are still needed',
         description: 'The SPP is issued through the school when the required pieces are ready.',
         requirements: ['Medical complete', 'PSTAR passed', 'School verifies permit paperwork', 'Record issue date'],
         manual: true
@@ -266,8 +258,8 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
         id: 'first-solo',
         phaseId: 'pre-solo',
         title: 'First solo',
-        status: sppComplete ? manualStatus(roadmapProgress['first-solo']) : 'locked',
-        helper: sppComplete ? 'Instructor authorization and circuit readiness' : 'Locked until SPP is issued',
+        status: manualStatus(roadmapProgress['first-solo']),
+        helper: sppComplete ? 'Instructor authorization and circuit readiness' : 'SPP and instructor authorization are still needed',
         description: 'The first solo is the big pre-solo milestone: instructor steps out, you fly the circuit yourself.',
         requirements: ['SPP issued', 'Circuit checks and emergencies ready', 'Instructor authorizes solo', 'Record first solo date'],
         manual: true
@@ -275,17 +267,17 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     ];
 
     const navigationMilestones: RoadmapMilestone[] = [
-      { id: 'cross-country-planning', phaseId: 'navigation', title: 'Cross-country planning', status: manualStatus(roadmapProgress['cross-country-planning'], 'locked'), helper: 'Charts, tracks, fuel, weather', description: 'Start planning and briefing longer flights away from the circuit.', requirements: ['Route planning', 'Fuel planning', 'Weather and NOTAM review'], manual: true },
-      { id: 'instrument-basics', phaseId: 'navigation', title: 'Instrument flying basics', status: manualStatus(roadmapProgress['instrument-basics'], 'locked'), helper: 'Hood time and recovery skills', description: 'Track the required instrument basics and confidence under the hood.', requirements: ['Basic attitude instrument flying', 'Recovery skills', 'Navigation instrument support'], manual: true },
-      { id: 'solo-150nm-xc', phaseId: 'navigation', title: '150 NM solo XC', status: manualStatus(roadmapProgress['solo-150nm-xc'], 'locked'), helper: 'Two full-stop landings away', description: 'Complete the required solo cross-country distance with landings away from departure.', requirements: ['Minimum 150 NM solo cross-country', 'Two full-stop landings at other aerodromes', 'Debrief and log the flight'], manual: true },
-      { id: 'ground-school-recommendation', phaseId: 'navigation', title: 'Ground school recommendation', status: manualStatus(roadmapProgress['ground-school-recommendation'], 'locked'), helper: 'Written exam readiness', description: 'Record when your school/instructor recommends you for the written exam.', requirements: ['Ground school complete', 'Practice exam readiness', 'Recommendation received'], manual: true }
+      { id: 'cross-country-planning', phaseId: 'navigation', title: 'Cross-country planning', status: manualStatus(roadmapProgress['cross-country-planning']), helper: 'Charts, tracks, fuel, weather', description: 'Start planning and briefing longer flights away from the circuit.', requirements: ['Route planning', 'Fuel planning', 'Weather and NOTAM review'], manual: true },
+      { id: 'instrument-basics', phaseId: 'navigation', title: 'Instrument flying basics', status: manualStatus(roadmapProgress['instrument-basics']), helper: 'Hood time and recovery skills', description: 'Track the required instrument basics and confidence under the hood.', requirements: ['Basic attitude instrument flying', 'Recovery skills', 'Navigation instrument support'], manual: true },
+      { id: 'solo-150nm-xc', phaseId: 'navigation', title: '150 NM solo XC', status: manualStatus(roadmapProgress['solo-150nm-xc']), helper: 'Two full-stop landings away', description: 'Complete the required solo cross-country distance with landings away from departure.', requirements: ['Minimum 150 NM solo cross-country', 'Two full-stop landings at other aerodromes', 'Debrief and log the flight'], manual: true },
+      { id: 'ground-school-recommendation', phaseId: 'navigation', title: 'Ground school recommendation', status: manualStatus(roadmapProgress['ground-school-recommendation']), helper: 'Written exam readiness', description: 'Record when your school/instructor recommends you for the written exam.', requirements: ['Ground school complete', 'Practice exam readiness', 'Recommendation received'], manual: true }
     ];
 
     const finalMilestones: RoadmapMilestone[] = [
-      { id: 'ppaer', phaseId: 'final-licence', title: 'PPAER written exam', status: manualStatus(roadmapProgress.ppaer, 'locked'), helper: '100 questions, 60% pass standard', description: 'The Private Pilot Aeroplane written exam is the major Transport Canada written test.', requirements: ['Written recommendation', 'Book exam', 'Pass overall and required sections'], manual: true },
-      { id: 'flight-test-recommendation', phaseId: 'final-licence', title: 'Flight test recommendation', status: manualStatus(roadmapProgress['flight-test-recommendation'], 'locked'), helper: 'Instructor sign-off', description: 'Your instructor signs off when you are ready for the practical test.', requirements: ['Flight test exercises ready', 'Mock test or prep complete', 'Recommendation signed'], manual: true },
-      { id: 'flight-test', phaseId: 'final-licence', title: 'Flight test', status: manualStatus(roadmapProgress['flight-test'], 'locked'), helper: 'Transport Canada examiner', description: 'Record the practical flight test result and date.', requirements: ['Aircraft and examiner booked', 'Documents ready', 'Flight test completed'], manual: true },
-      { id: 'licence-application', phaseId: 'final-licence', title: 'Licence application', status: manualStatus(roadmapProgress['licence-application'], 'locked'), helper: 'Submit package to Transport Canada', description: 'Final paperwork stage after the written and flight test are complete.', requirements: ['Logbook complete', 'Exam and flight test records ready', 'Application submitted'], manual: true }
+      { id: 'ppaer', phaseId: 'final-licence', title: 'PPAER written exam', status: manualStatus(roadmapProgress.ppaer), helper: '100 questions, 60% pass standard', description: 'The Private Pilot Aeroplane written exam is the major Transport Canada written test.', requirements: ['Written recommendation', 'Book exam', 'Pass overall and required sections'], manual: true },
+      { id: 'flight-test-recommendation', phaseId: 'final-licence', title: 'Flight test recommendation', status: manualStatus(roadmapProgress['flight-test-recommendation']), helper: 'Instructor sign-off', description: 'Your instructor signs off when you are ready for the practical test.', requirements: ['Flight test exercises ready', 'Mock test or prep complete', 'Recommendation signed'], manual: true },
+      { id: 'flight-test', phaseId: 'final-licence', title: 'Flight test', status: manualStatus(roadmapProgress['flight-test']), helper: 'Transport Canada examiner', description: 'Record the practical flight test result and date.', requirements: ['Aircraft and examiner booked', 'Documents ready', 'Flight test completed'], manual: true },
+      { id: 'licence-application', phaseId: 'final-licence', title: 'Licence application', status: manualStatus(roadmapProgress['licence-application']), helper: 'Submit package to Transport Canada', description: 'Final paperwork stage after the written and flight test are complete.', requirements: ['Logbook complete', 'Exam and flight test records ready', 'Application submitted'], manual: true }
     ];
 
     const rawPhases = [
@@ -298,7 +290,7 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
     let previousPhaseComplete = true;
     const sequencedPhases = rawPhases.map((phase) => {
       const sequencedPhase = previousPhaseComplete
-        ? { ...phase, milestones: lockMilestonesAfterFirstIncomplete(phase.milestones) }
+        ? phase
         : lockPhase(phase);
       previousPhaseComplete = previousPhaseComplete && isPhaseComplete(sequencedPhase as RoadmapPhase);
       return sequencedPhase;
