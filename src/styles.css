@@ -3456,7 +3456,7 @@ body {
 
 .roadmap-phase {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: 128px auto 1fr;
   min-height: 520px;
   border: 1px solid rgba(64, 95, 125, 0.76);
   border-radius: 8px;
@@ -3472,10 +3472,21 @@ body {
   filter: saturate(0.55);
 }
 
+.roadmap-phase.locked {
+  opacity: 0.34;
+  filter: grayscale(0.75) saturate(0.4);
+}
+
 .roadmap-phase.quiet:hover,
 .roadmap-phase:focus-within {
   opacity: 1;
   filter: none;
+}
+
+.roadmap-phase.locked:hover,
+.roadmap-phase.locked:focus-within {
+  opacity: 0.34;
+  filter: grayscale(0.75) saturate(0.4);
 }
 
 .roadmap-phase.amber {
@@ -3488,6 +3499,7 @@ body {
   gap: 11px;
   align-items: start;
   padding: 16px;
+  min-height: 128px;
   border-bottom: 1px solid rgba(64, 95, 125, 0.5);
 }
 
@@ -3530,6 +3542,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-height: 106px;
   padding: 15px 16px;
 }
 
@@ -3600,6 +3613,21 @@ body {
 
 .roadmap-milestone:last-child {
   border-bottom: 0;
+}
+
+.roadmap-milestone.locked {
+  cursor: not-allowed;
+  opacity: 0.48;
+  filter: grayscale(0.55);
+}
+
+.roadmap-milestone.locked:hover {
+  background: transparent;
+}
+
+.roadmap-milestone.locked .milestone-copy strong,
+.roadmap-milestone.locked .milestone-copy small {
+  color: rgba(159, 173, 192, 0.76);
 }
 
 .milestone-icon {

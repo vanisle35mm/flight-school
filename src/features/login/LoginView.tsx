@@ -1,7 +1,7 @@
 import { KeyRound, LoaderCircle, LogIn, Mail, UserRound } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { FlightSchoolLogo } from '../../components/FlightSchoolLogo';
-import { isAdminPasswordConfigured, verifyAdminPassword } from '../../lib/adminAuth';
+import { isAdminPasswordConfigured, isAdminPasswordRequired, verifyAdminPassword } from '../../lib/adminAuth';
 import { recoverAdminAccount, requestSecurePasswordReset, signInSecurely, signInWithEmail } from '../../lib/secureAuth';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
 import { verifyStudentPassword } from '../../lib/studentAuth';
@@ -99,7 +99,8 @@ export const LoginView = ({ data, onDataChange, onLogin, onSecureLogin }: { data
 
   const loginLegacy = async () => {
     if (!legacyName.trim()) return setMessage('Enter your first name.');
-    if (!legacyPassword) return setMessage('Enter your password.');
+    if (legacyRole === 'student' && !legacyPassword) return setMessage('Enter your password.');
+    if (legacyRole === 'admin' && isAdminPasswordRequired() && !legacyPassword) return setMessage('Enter your password.');
     setCheckingLegacy(true);
     setMessage('');
 

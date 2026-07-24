@@ -1,4 +1,5 @@
 const configuredAdminPasswordHash = (import.meta.env.VITE_ADMIN_PASSWORD_HASH ?? '').trim().toLowerCase();
+const localAdminPasswordDisabled = import.meta.env.DEV && !configuredAdminPasswordHash;
 
 type AdminPasswordResult = {
   ok: boolean;
@@ -14,8 +15,10 @@ const hashPassword = async (password: string) => {
 };
 
 export const isAdminPasswordConfigured = () => true;
+export const isAdminPasswordRequired = () => !localAdminPasswordDisabled;
 
 export const verifyAdminPassword = async (password: string): Promise<AdminPasswordResult> => {
+  if (localAdminPasswordDisabled) return { ok: true, configured: true };
   if (!password) return { ok: false, configured: true };
 
   try {

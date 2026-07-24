@@ -69,6 +69,20 @@ const isPhaseComplete = (phase: RoadmapPhase) => {
   const scoredMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
   return Boolean(scoredMilestones.length && scoredMilestones.every((item) => item.status === 'complete'));
 };
+const lockMilestone = (milestone: RoadmapMilestone, helper = 'Complete the previous step first'): RoadmapMilestone =>
+  milestone.status === 'complete' ? milestone : { ...milestone, status: 'locked', helper };
+const lockMilestonesAfterFirstIncomplete = (milestones: RoadmapMilestone[]): RoadmapMilestone[] => {
+  let previousComplete = true;
+  return milestones.map((milestone, index) => {
+    const nextMilestone = previousComplete ? milestone : lockMilestone(milestone, index === 0 ? 'Complete the previous phase first' : 'Complete the previous step first');
+    previousComplete = previousComplete && milestone.status === 'complete';
+    return nextMilestone;
+  });
+};
+const lockPhase = (phase: Omit<RoadmapPhase, 'percent'>): Omit<RoadmapPhase, 'percent'> => ({
+  ...phase,
+  milestones: phase.milestones.map((milestone) => lockMilestone(milestone, 'Complete the previous phase first'))
+});
 const groundSchoolKitSections = [
   {
     title: 'Books',
@@ -274,14 +288,23 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       { id: 'licence-application', phaseId: 'final-licence', title: 'Licence application', status: manualStatus(roadmapProgress['licence-application'], 'locked'), helper: 'Submit package to Transport Canada', description: 'Final paperwork stage after the written and flight test are complete.', requirements: ['Logbook complete', 'Exam and flight test records ready', 'Application submitted'], manual: true }
     ];
 
-    const nextPhases = [
+    const rawPhases = [
       { id: 'foundation', number: 1, title: 'Foundation', subtitle: 'Ground school, medical, first lessons', accent: 'amber' as const, milestones: foundationMilestones },
       { id: 'pre-solo', number: 2, title: 'Pre-Solo', subtitle: 'PSTAR, ROC-A, SPP, first solo', accent: 'blue' as const, milestones: preSoloMilestones },
       { id: 'navigation', number: 3, title: 'Advanced Flight Training', subtitle: 'Cross-country, instrument basics, solo XC', accent: 'blue' as const, milestones: navigationMilestones },
       { id: 'final-licence', number: 4, title: 'Final Testing and Licensing', subtitle: 'PPAER, flight test, licence application', accent: 'green' as const, milestones: finalMilestones }
     ];
 
-    return nextPhases.map((phase) => {
+    let previousPhaseComplete = true;
+    const sequencedPhases = rawPhases.map((phase) => {
+      const sequencedPhase = previousPhaseComplete
+        ? { ...phase, milestones: lockMilestonesAfterFirstIncomplete(phase.milestones) }
+        : lockPhase(phase);
+      previousPhaseComplete = previousPhaseComplete && isPhaseComplete(sequencedPhase as RoadmapPhase);
+      return sequencedPhase;
+    });
+
+    return sequencedPhases.map((phase) => {
       const progressMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
       const completeCount = progressMilestones.filter((item) => item.status === 'complete').length;
       const inProgressCount = progressMilestones.filter((item) => item.status === 'in-progress').length;
@@ -463,8 +486,9 @@ export const Dashboard = ({ data, onDataChange, onViewChange }: { data: GroundSc
       <div className="roadmap-board" aria-label="Private pilot phases">
         {visiblePhases.map((phase) => {
           const isQuiet = phase.number > 1 && !touchedPhases.includes(phase.id);
+          const isPhaseLocked = phase.number > 1 && !isPhaseComplete(phases[phase.number - 2]);
           const progressMilestones = phase.milestones.filter((item) => item.countsTowardProgress !== false);
-          return <article className={`roadmap-phase ${phase.accent}${isQuiet ? ' quiet' : ''}`} key={phase.id}>
+          return <article className={`roadmap-phase ${phase.accent}${isQuiet ? ' quiet' : ''}${isPhaseLocked ? ' locked' : ''}`} key={phase.id}>
             <div className="roadmap-phase-head">
               <span className="phase-number">{phase.number}</span>
               <div>
